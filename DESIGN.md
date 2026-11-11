@@ -1,4 +1,6 @@
-# Goal Friends — Design Doc (draft v0.1)
+# Goal Friends — Design Doc (draft v0.2)
+
+_Status: design iteration only. Personal use, Windows laptop. Prototype comes when requested._
 
 A terminal, turn-based creature-collector where **real-life tasks are the only way to progress**.
 You can't grind in-game. You level up, catch, and evolve creatures by getting things done offline,
@@ -42,28 +44,46 @@ then spend that progress in Pokémon-style battles.
 - `Energy = effort tier (S=1, M=2, L=4, XL=8)`, spent on battles
 - `Coins = base(effort) / 5`
 - Streak multiplier: +5% per consecutive active day, capped at +50%.
-- Category affinity: x1.5 XP if the receiving creature's type matches the task category.
+- Category training: each task category also nudges specific stats (see section 4). Types are NOT tied to categories.
 
 ## 4. Creatures
 
 Each creature has:
-- **Type** (tied to a task category, see below)
+- **Type** (elemental, independent of task categories)
 - **Base stats:** HP, Attack, Defense, Speed
+- **Favorite category** (flavor trait, optional small XP bonus, see below)
 - **Level** (1-50), derived from XP
 - **Moves:** 4 slots, learned at level thresholds
 - **Evolution:** 2 or 3 stages, at levels ~16 and ~32
 
-| Task category | Creature type | Flavor |
-|---|---|---|
-| fitness | Blaze | high Attack/Speed |
-| study | Mind | special moves, status effects |
-| chores | Earth | high Defense/HP |
-| creative | Spark | wild-card, random effects |
-| social | Tide | healing and team support |
-| health | Leaf | regen, endurance |
+**Types are elemental and separate from tasks.** Proposed 8 types (original names, Pokémon-like feel):
+Flame, Tide, Leaf, Volt, Stone, Gale, Shade, Lumen. The type chart is a small, readable web
+(each type strong against 2, weak to 2), finalized during balancing.
 
-**Type chart:** a simple cycle plus neutral, kept small for readability, e.g.
-Blaze > Leaf > Earth > Tide > Blaze, Mind and Spark trade advantage. Finalize during balancing.
+**How tasks affect creatures, indirectly:**
+- **Category training:** each task category adds small permanent stat gains to the creature that
+  receives the XP, like training in the games. This is where "do real things, get stronger" shows up
+  without locking you to a type.
+
+  | Task category | Trains |
+  |---|---|
+  | fitness | Attack, HP |
+  | study | Speed, special power |
+  | chores | Defense |
+  | health | HP, regen |
+  | creative | Move variety / crit chance |
+  | social | Support (heal and buff strength) |
+
+- **Favorite category:** each creature has one favorite (e.g. a Stone creature that loves "chores").
+  Tasks in that category give it +25% XP. It is a flavor and team-building hook, not a hard rule,
+  and it's decoupled from type, so any type can love any category.
+- This leaves open a later option: unlock moves or evolutions by a category-specific task count.
+
+**Roster (31 at launch, original designs inspired by Pokémon):**
+- 3 starter lines x 3 stages = 9
+- 8 two-stage lines = 16
+- 6 single-stage creatures (rare/special) = 6
+- Total: 31. Names, types, and stats are TBD in a roster pass.
 
 **XP curve:** `xp_to_next(level) = 20 * level^1.6` — fast early levels, slower later.
 
@@ -111,9 +131,11 @@ and Attack, clearing after your next completed task. No loss of levels or creatu
 
 ## 7. Tech approach (terminal)
 
+- **Scope:** personal use, single user, runs on a Windows laptop. No accounts, no network.
 - **Language:** Python 3. Simple to write, easy to test.
-- **UI:** `Textual` or `rich` for a menu-driven TUI. Plain `curses` is the dependency-free fallback.
-- **Storage:** single JSON save file in `~/.goal_friends/save.json` (versioned schema), so it's easy to back up.
+- **UI:** `Textual` or `rich` for a menu-driven TUI (both work well in Windows Terminal).
+  Python's built-in `curses` doesn't ship on Windows, so it's not an option without extra packages.
+- **Storage:** single JSON save file in `%APPDATA%\GoalFriends\save.json` (versioned schema), easy to back up.
 - **Content as data:** creatures, moves, and the type chart live in JSON/YAML files, separate from code,
   so balancing doesn't need code changes.
 - **Structure (proposed):**
@@ -140,7 +162,8 @@ and Attack, clearing after your next completed task. No loss of levels or creatu
 
 ## 9. Open questions
 
-- How many creatures at launch? (suggest 12 base lines, ~30 with evolutions)
+- Roster pass: names, types, base stats, and evolution lines for the 31 creatures.
+- Type chart: finalize the 8-type web.
 - Should Energy cap or carry over indefinitely? (suggest cap at 20 so it doesn't hoard)
-- Do recurring tasks auto-complete-able via reminders, or always manual?
-- Any desire for sharing/leaderboards later (Goal "Friends")? Would change storage design.
+- Are recurring tasks always manual to complete, or reminded?
+- Prototype scope (to decide when you say go): likely tasks + XP + 1v1 battles with a handful of creatures.
