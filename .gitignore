@@ -1,0 +1,11 @@
+# Build output
+build*/
+out/
+.vs/
+CMakeSettings.json
+CMakeUserPresets.json
+*.exe
+*.obj
+*.pdb
+# Local saves
+*.bad

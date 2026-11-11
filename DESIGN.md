@@ -1,6 +1,6 @@
-# Goal Friends — Design Doc (draft v0.5)
+# Goal Friends — Design Doc (draft v0.6)
 
-_Status: design iteration. Personal use, Windows laptop, native C++. Prototype is built when requested.
+_Status: working prototype built (see section 11). Personal use, Windows laptop, native C++.
 Companion file: [ROSTER.md](ROSTER.md) (31 creatures and their moves)._
 
 A creature-collector that lives as a slim strip along the bottom of your screen. **Real-life tasks are the
@@ -74,6 +74,7 @@ Rewards and streaks:
 
 - `XP = base(effort) * (1 + streak_bonus)`, halved if completed late (grace period)
 - `Energy`: S=1, M=2, L=4, XL=8. Spent on battles. **No cap**: unspent Energy accumulates.
+- **Focus sessions** (timer: 15/25/45 min) also award Energy (1 per 10 min) and XP (1 per minute) to the lead, count as activity for the streak, and **open the battle screen when they finish**.
 - `Coins = base(effort) / 5`
 - No daily XP cap (personal use). An optional "really done?" confirm is a setting, on by default, and easy to switch off.
 
@@ -118,6 +119,10 @@ resolve in order of priority, then SPD (ties random).
 - Buffs and debuffs belong to the individual friend. Statuses and cooldowns reset when a friend leaves the field,
   except cooldowns, which keep ticking on the bench.
 
+**Scuffle:** if every move is on cooldown, a friend uses a basic Light hit so it is never stuck (several evolved friends have no cooldown-free move).
+
+**Fatigue:** after turn 30, everyone loses an increasing amount of max HP each turn, so stalemates always end.
+
 **When a friend faints:** it's removed and a bench friend of your choice takes the slot at the end of the turn.
 If the bench is empty, that slot stays empty and you fight on with fewer.
 
@@ -155,7 +160,7 @@ damage = ((2*level/5 + 2) * power * atk / def / 50 + 2) * random(0.9, 1.0) * mod
 | Stun | Target skips its next action |
 | Taunt N | Target can only use damaging moves for N turns |
 | Doom N | After N turns, target takes 40% max HP damage (survivable, cannot KO outright) |
-| Pivot | After hitting, the user swaps with a bench friend of your choice |
+| Pivot | After hitting, the user swaps with the healthiest bench friend (chosen automatically in the prototype) |
 | Force-switch | Target is swapped with a random bench friend (no effect if its bench is empty) |
 | Cleanse | Remove all debuffs from the user |
 | Once | Usable once per battle |
@@ -201,10 +206,10 @@ window, since it sits on screen all day.
   low FPS when idle to save battery.
 - **UI:** custom-drawn widgets (buttons, lists, text input, health bars) on Direct2D. This is the
   biggest piece of work, so we keep a deliberately small widget set.
-- **Storage:** JSON save in `%APPDATA%\GoalFriends\save.json` (versioned schema, atomic write via
-  temp file + rename). A single-header JSON parser (e.g. nlohmann/json, vendored) is the only third-party code.
-- **Content as data:** creatures, moves, and effect definitions live in JSON, loaded at startup.
-  The battle engine interprets move effects from data, so balancing doesn't need a recompile.
+- **Storage:** JSON save in `%APPDATA%\GoalFriends\save.json` (atomic write via temp file + rename). A small
+  hand-written JSON reader/writer (`src/core/json.cpp`) is used, so there is no third-party code at all.
+- **Content as data:** creatures and moves are declarative tables in `src/core/data.cpp` (effects are plain data
+  interpreted by the battle engine). Moving them to external JSON files is a possible later step.
 - **Art:** generated rough pixel-art placeholder sprites (PNG sheets, 32x32 or 48x48 per frame, a few idle and walk frames). Swapping in real art later is replacing
   image files and adjusting a frame table.
 - **Structure (proposed):**
@@ -262,3 +267,25 @@ window, since it sits on screen all day.
   likely open in a larger popup panel. Decide the exact layout at prototype time.
 - Whether to add a "really done?" confirm by default (currently on, switchable).
 - Wild-encounter difficulty scaling and how many wild friends appear.
+
+## 11. Prototype status (v0.6)
+
+Everything in section 9's prototype scope is implemented in one pass. The logic is covered by `tests/test_main.cpp`
+(339 checks plus 1500 simulated battles), and the Windows build was cross-compiled and smoke-tested under Wine.
+
+**Verified in automated tests:** recurrence rules, streaks, sleepy, late completion, reminders (stages, snooze, quiet
+hours), eggs, evolution, shop, party, save/load, battle engine (all 124 moves used in simulations, no stalls,
+sanitizer-clean), sprite generation.
+
+**Verified by driving the real app under Wine:** starter pick, typing a task, completing it with the confirm step,
+rewards and egg progress, JSON save, and a full wild battle through the battle UI.
+
+**Not yet verified on real Windows:** text rendering (Wine's Direct2D draws no text, so labels could not be checked),
+per-pixel alpha and click-through on the desktop, tray icon and balloon notifications, DPI scaling.
+
+**Known gaps and simplifications:**
+- Pivot picks the replacement automatically.
+- No sound, no animation beyond walking, bobbing, hops and a day/night ground tint.
+- Reminders need the app running (tray). Missed reminders collapse into one balloon.
+- Boss unlock is a 3-day streak; reward is a random unowned rare.
+- Balance is rough: simulated AI-vs-AI win rates range from about 47% to 73% per friend, average battle about 13 turns.
