@@ -1,4 +1,4 @@
-# Goal Friends — Roster Draft (v0.1)
+# Goal Friends — Roster Draft (v0.2)
 
 31 friends, original designs inspired by Pokémon. **No types.** Each has 4 unique moves (no move name is
 reused). Effect keywords (Wound, Daze, Armor, Charge, ...) are defined in [DESIGN.md](DESIGN.md) section 5.
@@ -6,6 +6,10 @@ reused). Effect keywords (Wound, Daze, Armor, Charge, ...) are defined in [DESIG
 Stat pips are relative (1 = low, 5 = high): HP / ATK / DEF / SPD.
 Move format: **Name** (cooldown) — effect. No cooldown listed means 0.
 Power tiers: Light ~40, Medium ~70, Heavy ~110.
+
+Battles are **triples**: 3 friends active per side from a team of 6. Targeting tags:
+**[Ally]** = can be aimed at any active ally (default is self-only for buffs); **Spread** = hits all enemies at
+75% damage; **Random targets** = each hit picks a random enemy.
 
 Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at level 20. Rares don't evolve.
 
@@ -44,7 +48,7 @@ Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at lev
 **5. Zephox** (stage 2) — HP 3 · ATK 3 · DEF 2 · SPD 5
 - **Slipstream Strike** — Medium hit; +30% damage if you moved first this turn.
 - **Afterimage** (CD 3) — Evade; Priority.
-- **Spark Chain** (CD 3) — Two Light hits; each has a 20% chance of Daze 1.
+- **Spark Chain** (CD 3) — Two Light hits at random targets; each has a 20% chance of Daze 1.
 - **Windup Zip** (CD 3) — Haste 2 and Focus on self.
 
 **6. Tempestail** (stage 3) — HP 3 · ATK 4 · DEF 2 · SPD 5
@@ -70,7 +74,7 @@ Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at lev
 **9. Pyrelord** (stage 3) — HP 3 · ATK 5 · DEF 2 · SPD 3
 - **Inferno Crown** (CD 2) — Heavy hit; Wound 2.
 - **Phoenix Pact** (CD 5) — Lose 25% HP; your next two attacks deal +80% damage.
-- **Ember Rain** (CD 2) — Three Light hits; each has a 25% chance of Wound 2.
+- **Ember Rain** (CD 2) — Three Light hits at random targets; each has a 25% chance of Wound 2.
 - **Molten Guard** (CD 3) — Counter: retaliate with a Medium hit plus Wound 2.
 
 ---
@@ -82,7 +86,7 @@ Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at lev
 **10. Pebblet** — HP 3 · ATK 2 · DEF 4 · SPD 1
 - **Rock Toss** — Light hit.
 - **Curl Up** (CD 3) — Armor 2 on self; Counter (1.5x damage taken).
-- **Gravel Spray** (CD 3) — Light hit; Daze 2.
+- **Gravel Spray** (CD 3) — Spread Light hit; Daze 1.
 - **Settle In** (CD 3) — Heal 15% HP and Shield 10% max HP.
 
 **11. Boulderon** — HP 4 · ATK 3 · DEF 5 · SPD 1
@@ -95,15 +99,15 @@ Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at lev
 
 **12. Dewdrip** — HP 3 · ATK 1 · DEF 2 · SPD 3
 - **Bubble Pop** — Light hit.
-- **Mending Mist** (CD 3) — Heal 20% HP.
-- **Rinse** (CD 3) — Cleanse; Regen 2 on self.
+- **Mending Mist** (CD 3) [Ally] — Heal 20% HP.
+- **Rinse** (CD 3) [Ally] — Cleanse; Regen 2.
 - **Slick Skin** (CD 3) — 50% chance to Evade.
 
 **13. Tidalisk** — HP 4 · ATK 2 · DEF 3 · SPD 3
 - **Crashing Wave** (CD 2) — Heavy hit; Cleanse.
-- **Healing Current** (CD 3) — Heal 35% HP.
+- **Healing Current** (CD 3) [Ally] — Heal 35% HP.
 - **Undertow** — Medium hit; Slow 2.
-- **Tidal Barrier** (CD 4) — Shield 25% max HP; Regen 2.
+- **Tidal Barrier** (CD 4) [Ally] — Shield 25% max HP; Regen 2.
 
 ### Line L3 — Debuffer / curse
 
@@ -125,11 +129,11 @@ Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at lev
 - **Feather Cut** — Light hit; Priority.
 - **Wind Hop** (CD 2) — Medium hit; Pivot.
 - **Updraft Dive** (CD 3) — Charge: Evade this turn, Heavy hit next turn.
-- **Tailwind** (CD 4) — Haste 3 on self.
+- **Tailwind** (CD 4) [Ally] — Haste 3.
 
 **17. Cyclonix** — HP 3 · ATK 4 · DEF 2 · SPD 4
 - **Cyclone Strike** — Medium hit; Pivot.
-- **Whirl Away** (CD 3) — Force-switch.
+- **Whirl Away** (CD 3) — Force-switch one enemy.
 - **Razor Gale** (CD 2) — Heavy hit; 25% chance of 1.5x damage.
 - **Eye Dart** (CD 3) — Evade; Focus on self.
 
@@ -137,14 +141,14 @@ Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at lev
 
 **18. Glimmerling** — HP 3 · ATK 1 · DEF 2 · SPD 3
 - **Sparkle Tap** — Light hit.
-- **Prism Shield** (CD 3) — Shield 15% max HP.
-- **Lucky Glint** (CD 3) — Focus on self; your next move cannot miss.
+- **Prism Shield** (CD 3) [Ally] — Shield 15% max HP.
+- **Lucky Glint** (CD 3) [Ally] — Focus; its next move cannot miss.
 - **Dazzle** (CD 3) — Daze 2 on target.
 
 **19. Prismaw** — HP 4 · ATK 2 · DEF 3 · SPD 3
 - **Refract Beam** (CD 2) — Medium hit; ignores Shield and Armor.
-- **Crystal Aegis** (CD 4) — Shield 30% max HP; Thorns 2.
-- **Spectrum Boost** (CD 4) — ATK, DEF and SPD +20% for 3 turns.
+- **Crystal Aegis** (CD 4) [Ally] — Shield 30% max HP; Thorns 2.
+- **Spectrum Boost** (CD 4) [Ally] — ATK, DEF and SPD +20% for 3 turns.
 - **Mirror Shard** (CD 3) — Reflect the next debuff applied to you back at its source.
 
 ### Line L6 — Trapper
@@ -153,12 +157,12 @@ Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at lev
 - **Claw Scratch** — Light hit; 20% chance of Wound 2.
 - **Dig In** (CD 3) — Charge: Evade this turn, Medium hit next turn.
 - **Pitfall** (CD 3) — Trap 2.
-- **Dirt Cloud** (CD 3) — Daze 2.
+- **Dirt Cloud** (CD 3) — Daze 1 on all enemies.
 
 **21. Tunnelord** — HP 4 · ATK 3 · DEF 4 · SPD 2
 - **Cave-In** (CD 2) — Heavy hit; Trap 1.
 - **Spike Pit** (CD 3) — Wound 3 and Trap 2.
-- **Rumble** — Medium hit; Slow 1.
+- **Rumble** (CD 2) — Spread Medium hit; Slow 1.
 - **Fortify Burrow** (CD 4) — Armor 3 and Regen 2 on self.
 
 ### Line L7 — Control
@@ -173,7 +177,7 @@ Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at lev
 - **Glacial Slam** (CD 2) — Heavy hit; Slow 2.
 - **Flash Freeze** (CD 5) — Stun.
 - **Permafrost** (CD 4) — Armor 3 on self; attackers get Slow 1.
-- **Blizzard Veil** (CD 3) — Daze 3 and Slow 1 on target.
+- **Blizzard Veil** (CD 4) — Daze 2 on all enemies.
 
 ### Line L8 — Trickster
 
@@ -227,7 +231,7 @@ Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at lev
 - **Chaos Bolt** — Medium hit; random bonus effect (Wound 2, Slow 1, Daze 1, Mark or Focus).
 - **Wild Card** (CD 3) — Randomly one of: heal 25% HP, a Heavy hit, Haste 2, or Shield 20% max HP.
 - **Prismatic Shatter** (CD 3) — Remove all of the target's buffs; deal +20% damage per buff removed.
-- **Anarchy** (CD 5) — Reset both fighters' cooldowns and clear every status on the field.
+- **Anarchy** (CD 5) — Reset every active friend's cooldowns and clear every status on the field, allies and enemies.
 
 ---
 
@@ -235,5 +239,6 @@ Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at lev
 
 - **Archetypes covered:** tank/stall, tempo, burst/setup, wall/counter, healer, curse/debuff, hit-and-run, support, trapper, control, trickster, plus six oddball rares.
 - **Anti-snowball:** Stun has a long cooldown and Doom can't KO outright, to avoid "win by lock" patterns.
+- **Triples:** support friends (Dewdrip/Tidalisk, Glimmerling/Prismaw) gain a lot of value from [Ally] moves. Spread moves are priced at -25% damage.
 - **To check in balance sims:** Evade-heavy kits (Zephox, Dusklady, Cyclonix), Counter loops (Boulderon vs Molten Guard), and Anarchy resetting everything.
 - **Names and designs are placeholders.** Easy to rename or swap any friend or move.

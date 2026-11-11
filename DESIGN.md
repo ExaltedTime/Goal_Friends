@@ -1,4 +1,4 @@
-# Goal Friends — Design Doc (draft v0.4)
+# Goal Friends — Design Doc (draft v0.5)
 
 _Status: design iteration. Personal use, Windows laptop, native C++. Prototype is built when requested.
 Companion file: [ROSTER.md](ROSTER.md) (31 creatures and their moves)._
@@ -73,7 +73,7 @@ Rewards and streaks:
 ### 3.4 Rewards per completion
 
 - `XP = base(effort) * (1 + streak_bonus)`, halved if completed late (grace period)
-- `Energy`: S=1, M=2, L=4, XL=8 (spent on battles; capped at 20, see open questions)
+- `Energy`: S=1, M=2, L=4, XL=8. Spent on battles. **No cap**: unspent Energy accumulates.
 - `Coins = base(effort) / 5`
 - No daily XP cap (personal use). An optional "really done?" confirm is a setting, on by default, and easy to switch off.
 
@@ -91,6 +91,7 @@ Rewards and streaks:
 - **Eggs:** bought with Coins. An egg hatches after you complete a set number of tasks (e.g. 5), so hatching is tied to real effort.
 - **Catching:** wild encounters can be befriended with a Catch Charm (higher chance at low HP).
 - **Milestone gifts:** streaks and task-count milestones guarantee specific friends.
+- **Party and Box:** you bring a **party of 6** into battle. Every other friend you own lives in the Box and can be swapped in between battles.
 - **Dex:** shows silhouettes of friends not yet found. Duplicates convert to Coins.
 
 > Note: an earlier draft had a "favorite category" per creature (bonus XP for matching tasks).
@@ -100,13 +101,25 @@ Rewards and streaks:
 
 Battles cost **Energy**, which only comes from completed tasks. This is the link between real life and the fun part.
 
-**Format:** 3v3 teams, one active friend each side. Winner is whoever knocks out all three. Your team is
-fully healed after each battle.
+**Format: triple battles.** Each side brings a **team of 6** and has **3 friends active at once**, with
+3 on the bench. A side loses when all 6 of its friends have fainted. Your team is fully healed after each battle.
 
-**Each turn:** both sides pick an action simultaneously, then it resolves by priority, then SPD (ties random).
-- **Fight:** use one of the active friend's 4 moves
-- **Switch:** swap the active friend (resolves before moves)
+**Each turn:** every active friend picks an action (up to 3 per side), all chosen at once. The 6 actions then
+resolve in order of priority, then SPD (ties random).
+- **Fight:** use one of the friend's 4 moves, and pick a target where the move needs one
+- **Switch:** swap that friend with a bench friend (resolves before moves)
 - **Run:** wild battles only
+
+**Targeting:** there are no board positions or adjacency rules. Every enemy is always targetable.
+- Default moves hit **one chosen enemy**.
+- **Spread** moves hit all enemies, at 75% damage (status effects apply in full).
+- **[Ally]** moves can be aimed at any active ally, including the user (heals, shields, buffs, cleanses).
+- Moves with several hits say whether they hit one target or random targets.
+- Buffs and debuffs belong to the individual friend. Statuses and cooldowns reset when a friend leaves the field,
+  except cooldowns, which keep ticking on the bench.
+
+**When a friend faints:** it's removed and a bench friend of your choice takes the slot at the end of the turn.
+If the bench is empty, that slot stays empty and you fight on with fewer.
 
 **Moves:** each move has a power tier, a cooldown, and often an extra effect.
 - Power tiers: **Light** (~40), **Medium** (~70), **Heavy** (~110, usually cooldown 2+), **Utility** (no damage).
@@ -124,7 +137,7 @@ damage = ((2*level/5 + 2) * power * atk / def / 50 + 2) * random(0.9, 1.0) * mod
 | Effect | Meaning |
 |---|---|
 | Wound N | Lose 6% max HP at end of each turn for N turns |
-| Daze N | Target's attacks have a 30% chance to miss for N turns |
+| Daze N | The target's attacks have a 30% chance to miss for N turns |
 | Slow N / Haste N | SPD -30% / +40% for N turns |
 | Armor N | Take 30% less damage for N turns |
 | Shield X | Absorbs the next X damage |
@@ -138,21 +151,23 @@ damage = ((2*level/5 + 2) * power * atk / def / 50 + 2) * random(0.9, 1.0) * mod
 | Charge | Move takes two turns. The hit lands next turn; during the wind-up you are vulnerable unless stated |
 | Drain X% | Heal for X% of damage dealt |
 | Seal | Target's last-used move is unusable for 2 turns |
-| Trap N | Target cannot switch for N turns |
+| Trap N | Target cannot be switched out for N turns |
 | Stun | Target skips its next action |
 | Taunt N | Target can only use damaging moves for N turns |
 | Doom N | After N turns, target takes 40% max HP damage (survivable, cannot KO outright) |
-| Pivot | After hitting, user switches out |
-| Force-switch | Target is forced to swap to a random teammate |
+| Pivot | After hitting, the user swaps with a bench friend of your choice |
+| Force-switch | Target is swapped with a random bench friend (no effect if its bench is empty) |
 | Cleanse | Remove all debuffs from the user |
 | Once | Usable once per battle |
 
 Stacking rule: reapplying a status refreshes its duration. It does not stack, except where stated.
 
 **Battle modes:**
-- **Wild encounter:** 1 Energy, 1v1 against a wild friend near your level. A Catch Charm can be used on it.
-- **Trainer duel:** 2 Energy, 3v3 against a scripted team. Rewards Coins and Eggs.
+- **Wild encounter:** 1 Energy. 1 to 3 wild friends near your level against your 3 active friends. A Catch Charm can be used on a wild friend.
+- **Trainer duel:** 2 Energy. 6 vs 6 against a scripted team. Rewards Coins and Eggs.
 - **Boss battle:** 5 Energy, unlocked by streak milestones. Special scripted AI. Guaranteed rare reward.
+
+**Pacing target:** about 8 to 15 turns for a duel. HP and damage are tuned so triples don't drag, and balancing sims will check this.
 
 **AI:** v1 scores moves by expected damage, status value and cooldown state, with some randomness.
 Bosses follow scripted patterns that you can learn.
@@ -190,7 +205,7 @@ window, since it sits on screen all day.
   temp file + rename). A single-header JSON parser (e.g. nlohmann/json, vendored) is the only third-party code.
 - **Content as data:** creatures, moves, and effect definitions live in JSON, loaded at startup.
   The battle engine interprets move effects from data, so balancing doesn't need a recompile.
-- **Art:** generated placeholder pixel sprites (PNG sheets). Swapping in real art later is replacing
+- **Art:** generated rough pixel-art placeholder sprites (PNG sheets, 32x32 or 48x48 per frame, a few idle and walk frames). Swapping in real art later is replacing
   image files and adjusting a frame table.
 - **Structure (proposed):**
   ```
@@ -228,9 +243,9 @@ window, since it sits on screen all day.
 - XP, levels, evolution, Energy, Coins, sleepy status
 - Shop (Eggs and Catch Charms), egg hatching via tasks, party and dex screens
 - All 31 friends with their 4 unique moves, data-driven
-- Battles: wild, trainer duels and one boss, 3v3 with switching, cooldowns and status effects
+- Battles: triples (6-friend teams, 3 active at once) with switching, cooldowns and status effects; wild encounters, trainer duels and one boss
 - JSON save and load
-- Placeholder art (generated), no sound
+- Rough pixel-art placeholders (generated), no sound
 
 **Order of work:**
 1. **M0 — Window spike:** transparent, always-on-top, click-through bottom strip with one animated placeholder sprite and a tray icon. You validate it on your laptop first.
@@ -242,8 +257,8 @@ window, since it sits on screen all day.
 
 ## 10. Open questions
 
-- Energy: cap at 20, or stack indefinitely? (suggest cap at 20 so it doesn't hoard)
-- Roster review: react to the 31 friends and their moves in ROSTER.md.
-- 3v3 in the prototype: this is a lot of UI work. We can cut to 1v1 first if you'd rather.
-- Placeholder art style: simple coloured blobs vs a pixel-art look.
+- Roster review: react to the 31 friends and their moves in ROSTER.md. Several moves were adjusted for triples (Spread, [Ally]).
+- Triple-battle UI: three friends per side plus targeting is a lot of screen for a 120 to 200 px strip, so battles
+  likely open in a larger popup panel. Decide the exact layout at prototype time.
 - Whether to add a "really done?" confirm by default (currently on, switchable).
+- Wild-encounter difficulty scaling and how many wild friends appear.
