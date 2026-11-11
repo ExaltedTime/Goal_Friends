@@ -1,6 +1,6 @@
-# Goal Friends — Design Doc (draft v0.2)
+# Goal Friends — Design Doc (draft v0.3)
 
-_Status: design iteration only. Personal use, Windows laptop. Prototype comes when requested._
+_Status: design iteration only. Personal use, Windows laptop, native C++. Prototype comes when requested._
 
 A terminal, turn-based creature-collector where **real-life tasks are the only way to progress**.
 You can't grind in-game. You level up, catch, and evolve creatures by getting things done offline,
@@ -129,38 +129,64 @@ and Attack, clearing after your next completed task. No loss of levels or creatu
 | First evolution | ~1 week of regular use |
 | Full dex | months, by design |
 
-## 7. Tech approach (terminal)
+## 7. Tech approach (native C++, no frameworks)
 
-- **Scope:** personal use, single user, runs on a Windows laptop. No accounts, no network.
-- **Language:** Python 3. Simple to write, easy to test.
-- **UI:** `Textual` or `rich` for a menu-driven TUI (both work well in Windows Terminal).
-  Python's built-in `curses` doesn't ship on Windows, so it's not an option without extra packages.
-- **Storage:** single JSON save file in `%APPDATA%\GoalFriends\save.json` (versioned schema), easy to back up.
-- **Content as data:** creatures, moves, and the type chart live in JSON/YAML files, separate from code,
-  so balancing doesn't need code changes.
+**Decision:** a fully native Windows app in C++ using only the Win32 API and Microsoft's built-in
+graphics stack. No SDL, Qt, or UI libraries. Chosen for a tiny footprint (one `.exe`, a few MB of RAM
+idle) and full control over the window, since it sits on screen all day.
+
+- **Scope:** personal use, single user, Windows laptop. No accounts, no network.
+- **Language/toolchain:** C++20, CMake, MSVC (Visual Studio Build Tools).
+- **Window:** a layered, borderless, always-on-top window (`WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TOOLWINDOW`)
+  with per-pixel alpha. Docked as a strip along the bottom of the screen or a corner box.
+  Empty (transparent) pixels are click-through, and clicking a creature or the UI opens panels.
+  Tray icon (`Shell_NotifyIcon`) for show/hide/quit, and optional start-with-Windows.
+- **Rendering:** Direct2D + DirectWrite (text) on a DXGI/WIC surface, drawing placeholder sprite sheets.
+  Fixed-timestep loop, throttled to low FPS (e.g. 10 to 15) when idle to save battery.
+- **UI:** custom-drawn widgets (buttons, lists, text input, health bars) on top of Direct2D.
+  This is the biggest chunk of work, so we keep a deliberately small widget set.
+- **Storage:** JSON save in `%APPDATA%\GoalFriends\save.json` (versioned schema, atomic write via temp+rename).
+  A small single-header JSON parser (e.g. nlohmann/json, vendored as one file) is the only third-party code.
+- **Content as data:** creatures, moves, and the type chart live in JSON files loaded at startup,
+  so balancing doesn't need a recompile.
+- **Art:** generated placeholder pixel sprites (PNG sheets, loaded via WIC). Swapping in real art later
+  is replacing image files and adjusting a frame table.
 - **Structure (proposed):**
   ```
-  goal_friends/
-    models.py      # Task, Creature, Move, Save
-    rewards.py     # XP / coin / energy math
-    battle.py      # battle engine (pure logic, no UI)
-    ai.py          # opponent move selection
-    storage.py     # load/save
-    ui/            # screens: tasks, party, dex, battle, shop
-    data/          # creatures.json, moves.json, types.json
-  tests/
+  src/
+    core/        # platform-free logic: tasks, rewards, creatures, battle, ai, save
+    platform/    # Win32 window, tray, input, timing
+    render/      # Direct2D renderer, sprites, text
+    ui/          # widgets and screens: world, tasks, party, dex, battle, shop
+  data/          # creatures.json, moves.json, types.json
+  assets/        # placeholder sprites
+  tests/         # core logic tests (build and run on any OS)
   ```
-- Keep `battle.py` and `rewards.py` UI-free so they're unit-testable and balanceable via simulation.
+- **Testing strategy:** `core/` has zero Windows or graphics dependencies, so it builds and runs on Linux.
+  That allows unit tests and simulated battles for balancing without a Windows machine.
+  Anything in `platform/` and `render/` is verified on the Windows laptop.
+- **Known risks:** layered-window alpha plus click-through hit testing, Direct2D device-loss handling,
+  and custom text input (IME, clipboard, caret). These are solvable but fiddly, so we validate the
+  window first with a tiny spike before building on it.
 
-## 8. Roadmap
+## 8. Desktop layout: the "small world"
 
-1. **M1 — Task engine:** add/complete tasks, XP, levels, streaks, save file. (CLI only)
-2. **M2 — Creatures and dex:** starter pick, ~12 creatures, Capsules, party screen.
-3. **M3 — Battles:** 1v1 wild encounters, damage formula, simple AI, Energy spending.
-4. **M4 — Depth:** moves and learning, evolutions, trainer duels, catching, 3v3.
-5. **M5 — Polish:** bosses, milestone gifts, balancing sims, TUI styling.
+- A slim strip (about 120 to 200 px tall) along the bottom edge, or a movable corner box.
+- A ground line with a simple background (day/night follows the real clock).
+- Party creatures wander, idle, nap (when "sleepy"), and react when you complete a task.
+- Click the world to open a compact panel for tasks, party, dex, and battles. Click away to collapse.
+- Completing a task triggers a small celebration animation and an XP popup.
 
-## 9. Open questions
+## 9. Roadmap
+
+1. **M0 — Window spike:** transparent, always-on-top, click-through strip with one animated placeholder sprite, tray icon. (Validate on your laptop first.)
+2. **M1 — Task engine:** add/complete tasks, XP, levels, streaks, save file, simple task panel.
+3. **M2 — Creatures and dex:** starter pick, roster data loaded, Capsules, party screen.
+4. **M3 — Battles:** 1v1 wild encounters, damage formula, simple AI, Energy spending.
+5. **M4 — Depth:** moves and learning, evolutions, trainer duels, catching, 3v3.
+6. **M5 — Polish:** bosses, milestone gifts, balancing sims, real art, sound.
+
+## 10. Open questions
 
 - Roster pass: names, types, base stats, and evolution lines for the 31 creatures.
 - Type chart: finalize the 8-type web.
