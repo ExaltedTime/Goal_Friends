@@ -9,3 +9,4 @@ CMakeUserPresets.json
 *.pdb
 # Local saves
 *.bad
+!prebuilt/*.exe

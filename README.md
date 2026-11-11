@@ -53,3 +53,9 @@ the whole roster to catch crashes and degenerate loops.
 
 - `GF_TRACE=<file>`: log renderer errors to a file.
 - `GF_FONT=<family>`: override the UI font (default Segoe UI).
+
+## Prebuilt exe
+
+`prebuilt/GoalFriends.exe` is a statically linked MinGW build of the current source, so you can try the app without
+installing Visual Studio. It is unsigned (SmartScreen may warn: More info > Run anyway) and is rebuilt by hand, so it
+can lag behind the source.
