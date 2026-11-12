@@ -221,7 +221,7 @@ static void testSaveLoad() {
 }
 
 static void testBattleBasics() {
-    // A Light hit does sensible damage, Priority goes first, cooldowns apply.
+    // A weak hit does sensible damage, Priority goes first, cooldowns apply.
     std::vector<Fighter> a = {makeFighter(3, 10), makeFighter(0, 10), makeFighter(6, 10)};
     std::vector<Fighter> b = {makeFighter(9, 10), makeFighter(11, 10), makeFighter(13, 10)};
     Battle bt(a, b, 7);
@@ -493,6 +493,101 @@ static void testAbilities() {
     }
 }
 
+static void testDungeonsAndItems() {
+    // Items change stats and survive a save round trip.
+    const Fighter plain = makeFighter(5, 30), banded = makeFighter(5, 30, false, -1, ItPowerBand), badge = makeFighter(5, 30, false, -1, ItChampionBadge);
+    CHECK(banded.atk > plain.atk && banded.def == plain.def);
+    CHECK(badge.maxHp > plain.maxHp && badge.spe > plain.spe && badge.hp == badge.maxHp);
+    for (int i = 0; i < ItCount; ++i) CHECK(std::string(itemInfo(i).desc).size() > 5 && itemInfo(i).rarity >= 0 && itemInfo(i).rarity <= 2);
+
+    GameState g = fresh(37000);
+    CHECK(!equipItem(g, g.friends[0].id, ItLeftovers).ok);  // not owned
+    g.bag[ItLeftovers] = 1;
+    g.bag[ItLifeOrb] = 1;
+    CHECK(equipItem(g, g.friends[0].id, ItLeftovers).ok && g.friends[0].item == ItLeftovers && g.bag[ItLeftovers] == 0);
+    CHECK(equipItem(g, g.friends[0].id, ItLifeOrb).ok && g.bag[ItLeftovers] == 1 && g.bag[ItLifeOrb] == 0);  // swap returns the old one
+    CHECK(equipItem(g, g.friends[0].id, -1).ok && g.friends[0].item == -1 && g.bag[ItLifeOrb] == 1);
+    equipItem(g, g.friends[0].id, ItFocusSash);  // not owned: no change
+    g.friends[0].item = ItShieldSeed;
+    g.dungeonsCleared = 3;
+    const std::string path = (std::filesystem::temp_directory_path() / "gf_test_save2" / "save.json").string();
+    CHECK(saveToFile(g, path));
+    GameState h;
+    CHECK(loadFromFile(path, h));
+    CHECK(h.friends[0].item == ItShieldSeed && h.bag[ItLeftovers] == 1 && h.dungeonsCleared == 3);
+    std::filesystem::remove_all(std::filesystem::path(path).parent_path());
+
+    // Item battle effects.
+    {
+        Battle b({makeFighter(0, 20, false, -1, ItShieldSeed)}, {makeFighter(1, 20)}, 3);
+        CHECK(b.fighter(0, 0).shield > 0);
+        Battle c({makeFighter(0, 60, false, -1, ItLeftovers)}, {makeFighter(1, 1)}, 3);
+        c.fighter(0, 0).hp = c.fighter(0, 0).maxHp / 2;
+        const int before = c.fighter(0, 0).hp;
+        std::array<Action, 3> acts{};
+        c.resolveTurn(acts);
+        CHECK(c.fighter(0, 0).hp > before || !c.fighter(0, 0).alive());
+        Battle d({makeFighter(0, 60)}, {makeFighter(1, 5, false, -1, ItFocusSash)}, 4);
+        Fighter& foe = d.fighter(1, 0);
+        Move nuke("Nuke", 400);
+        const int dm = d.test_dealHit({0, 0}, {1, 0}, 400, nuke, nullptr);
+        CHECK(dm >= 0 && foe.hp == 1 && foe.abUsed);
+    }
+
+    // Unlocking, costs and full runs against the AI.
+    GameState u = fresh(37001);
+    CHECK(dungeonUnlocked(u, 0) == (u.battlesWon >= dungeon(0).unlockWins));
+    CHECK(!dungeonUnlocked(u, 5));
+    DungeonRun run;
+    std::unique_ptr<Battle> bt;
+    std::string why;
+    u.energy = 0;
+    u.battlesWon = 100;
+    CHECK(!startDungeon(u, 0, T(37001), run, bt, why) && !why.empty());
+    int fullClears = 0, runs = 0, itemsFound = 0;
+    std::string reached;
+    for (int id = 0; id < kDungeonCount; ++id) {
+        for (int rep = 0; rep < 6; ++rep) {
+            GameState s = fresh(37002 + id);
+            s.battlesWon = 100;
+            s.energy = 50;
+            for (int i = 0; i < 5; ++i) addFriend(s, 20 + i * 7, 10 + id * 6);
+            for (auto& f : s.friends) f.level = 10 + id * 6;
+            s.rngSeed = static_cast<uint32_t>(1000 + id * 31 + rep);
+            DungeonRun r;
+            std::unique_ptr<Battle> b;
+            const int e0 = s.energy;
+            CHECK(startDungeon(s, id, T(37002), r, b, why));
+            CHECK(s.energy == e0 - dungeon(id).energy && r.active && r.floor == 1);
+            int floors = 0, guard = 0;
+            while (r.active && guard++ < 20) {
+                b->autoReplacePlayer = true;
+                int g2 = 0;
+                while (!b->over() && g2++ < 150) {
+                    std::array<Action, 3> act{};
+                    for (int k = 0; k < 3; ++k)
+                        if (b->slotFilled(0, k) && b->fighter(0, k).alive()) act[static_cast<size_t>(k)] = b->aiChoose(0, k);
+                    b->resolveTurn(act);
+                }
+                CHECK(b->over());
+                ++floors;
+                std::unique_ptr<Battle> next;
+                const Result res = dungeonFloorOver(s, r, *b, next);
+                CHECK(res.ok && !res.messages.empty());
+                if (r.active) { CHECK(next != nullptr); b = std::move(next); } else CHECK(next == nullptr);
+            }
+            CHECK(!r.active && floors >= 1 && floors <= dungeon(id).floors);
+            ++runs;
+            reached += std::to_string(floors) + "/" + std::to_string(dungeon(id).floors) + " ";
+            if (floors == dungeon(id).floors && s.dungeonsCleared == 1) ++fullClears;
+            for (int n : s.bag) itemsFound += n;
+        }
+    }
+    std::printf("  dungeons: %d runs, %d fully cleared, %d items found, floors reached %s\n", runs, fullClears, itemsFound, reached.c_str());
+    CHECK(fullClears > 0 && fullClears < runs);
+    CHECK(itemsFound > 0);
+}
+
 static void testRosterVariety() {
     std::map<std::string, int> use;
     std::vector<std::vector<std::string>> sigs(allSpecies().size());
@@ -567,7 +662,7 @@ int main() {
         {"data", testData}, {"time", testTime}, {"recurrence", testRecurrence}, {"rewards", testRewards},
         {"streaks+sleepy", testStreaksAndSleepy}, {"late", testLate}, {"reminders", testReminders},
         {"eggs+evolution", testEggsAndEvolution}, {"shop+party", testShopAndParty}, {"save/load", testSaveLoad},
-        {"battle basics", testBattleBasics}, {"abilities", testAbilities}, {"switch+catch", testSwitchAndCatch}, {"battle flow", testBattleFlow},
+        {"battle basics", testBattleBasics}, {"abilities", testAbilities}, {"dungeons+items", testDungeonsAndItems}, {"switch+catch", testSwitchAndCatch}, {"battle flow", testBattleFlow},
         {"areas+events", testAreasAndEvents}, {"roster variety", testRosterVariety}, {"sprites", testSprites}, {"simulation", testSimulation},
     };
     for (auto& t : tests) {

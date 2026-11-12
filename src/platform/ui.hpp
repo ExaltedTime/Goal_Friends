@@ -91,6 +91,9 @@ private:
     void drawShop(const Rect& b);
     void drawFocus(const Rect& b);
     void drawBattle(const Rect& b);
+    void drawDungeonSelect(const Rect& b, float lw);
+    void beginDungeon();
+    void initBattleUi();
     void drawGuide(const Rect& b);
     void drawGround(float gy, float gh);
     void paintGround(float gy, float gh);
@@ -169,6 +172,10 @@ private:
     // battle
     std::unique_ptr<gf::Battle> battle_;
     gf::BattleMode mode_ = gf::BattleMode::Wild;
+    int battleTab_ = 0;  // 0 = areas, 1 = dungeons
+    gf::DungeonRun dungeon_;
+    std::unique_ptr<gf::Battle> dungeonNext_;
+    bool itemPicker_ = false;
     enum class Phase { Choose, Target, CharmTarget, SwitchPick, Replace, Done } phase_ = Phase::Choose;
     std::array<gf::Action, 3> acts_{};
     std::array<bool, 3> chosen_{{false, false, false}};

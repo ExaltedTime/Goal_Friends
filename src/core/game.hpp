@@ -1,6 +1,7 @@
 // Game state and rules: tasks, recurrence, rewards, streaks, reminders, eggs, shop, battles setup, saving.
 // Pure logic with an injected clock, so everything here is unit-testable on any OS.
 #pragma once
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <random>
@@ -10,6 +11,7 @@
 
 #include "battle.hpp"
 #include "data.hpp"
+#include "items.hpp"
 #include "json.hpp"
 #include "timeutil.hpp"
 
@@ -56,7 +58,7 @@ bool occursOn(const Task& t, int day);
 
 struct Completion { int taskId = 0; int day = 0; int minute = 0; bool late = false; };
 
-struct Friend { int id = 0; int species = 0; int level = 1; int xp = 0; };
+struct Friend { int id = 0; int species = 0; int level = 1; int xp = 0; int item = -1; };
 struct Egg { int progress = 0; int needed = 5; };
 
 struct ReminderState { int taskId = 0; int day = 0; int stage = 0; long long snoozeUntil = 0; bool dismissed = false; };
@@ -84,6 +86,9 @@ struct GameState {
     int totalTasksDone = 0;
     int bossesWon = 0, battlesWon = 0, battlesPlayed = 0;
     int lastArea = 0;
+    int lastDungeon = 0;
+    int dungeonsCleared = 0;
+    std::array<int, ItCount> bag{};  // owned, unequipped items by id
     std::vector<ReminderState> reminders;
     Settings settings;
     uint32_t rngSeed = 12345;
@@ -152,6 +157,44 @@ bool startBattle(GameState& g, BattleMode mode, int areaId, tu::Time now, std::u
 Result finishBattle(GameState& g, const Battle& b, BattleMode mode);
 bool useCharm(GameState& g, Battle& b, int foeSlot);
 double catchChance(const Fighter& foe);
+
+// ---- Items ----
+// Equip an item from the bag onto a friend (itemId -1 = take it off). The previous item goes back into the bag.
+Result equipItem(GameState& g, int friendId, int itemId);
+
+// ---- Dungeons ----
+// A dungeon is a run of floors fought back to back with the same party; HP carries over (with a little recovery between
+// floors), and every floor can drop loot. The last floor is a guardian.
+struct DungeonDef {
+    int id;
+    const char* name;
+    const char* desc;
+    int area;        // habitat of the foes
+    int floors;
+    int levelBonus;
+    int unlockWins;  // battles won needed
+    int energy;
+};
+constexpr int kDungeonCount = 6;
+const DungeonDef& dungeon(int id);
+bool dungeonUnlocked(const GameState& g, int id);
+
+struct DungeonRun {
+    bool active = false;
+    int dungeon = 0;
+    int floor = 1;               // current floor, 1-based
+    int coins = 0;               // loot collected so far (paid out when the run ends)
+    std::vector<int> items;
+    int eggs = 0;
+    std::vector<Fighter> team;   // carried between floors
+};
+
+bool startDungeon(GameState& g, int id, tu::Time now, DungeonRun& run, std::unique_ptr<Battle>& out, std::string& why);
+// Call when a floor battle is over. Won: rolls loot into the run, and either builds the next floor (returned in `next`)
+// or ends the run. Lost: ends the run. Messages describe what happened. `run.active` tells whether the run goes on.
+Result dungeonFloorOver(GameState& g, DungeonRun& run, const Battle& b, std::unique_ptr<Battle>& next);
+// Pay out collected loot (called by dungeonFloorOver when the run ends; exposed for leaving early).
+Result dungeonCollect(GameState& g, DungeonRun& run, bool cleared);
 
 // ---- Save / load ----
 json::Value toJson(const GameState& g);

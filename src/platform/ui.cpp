@@ -391,11 +391,18 @@ void Ui::drawWorld(float dt) {
         const float size = 24.f * cell;  // every friend uses the same sprite-pixel size as the ground
         if (!w.init) {
             w.init = true;
-            w.cx = minC + static_cast<int>(next(w) % static_cast<unsigned>(std::max(1, maxC - minC)));
+            // Spread the friends along the strip (each in its own slice, jittered) so none start on top of another,
+            // and give each a random point in its own walk/rest cycle so nobody starts or stops together.
+            const int nW = static_cast<int>(walkers_.size());
+            const int idx = static_cast<int>(&w - walkers_.data());
+            const int span = std::max(1, maxC - minC);
+            const int slice = std::max(1, span / std::max(1, nW));
+            w.cx = minC + idx * slice + static_cast<int>(next(w) % static_cast<unsigned>(std::max(1, slice)));
             w.dir = (next(w) & 1) ? 1 : -1;
             static const float kSpeeds[5] = {4.f, 5.5f, 7.f, 8.5f, 10.f};   // cells per second: steady, differing rhythms
             w.cps = kSpeeds[next(w) % 5];
-            w.walkT = 1.5f + static_cast<float>(next(w) % 30) / 10.f;
+            if (next(w) % 2) { w.pause = 0.5f + static_cast<float>(next(w) % 80) / 10.f; w.walkT = 0; }
+            else { w.pause = 0; w.walkT = 0.5f + static_cast<float>(next(w) % 40) / 10.f; }
             w.animRate = 3.4f + static_cast<float>(next(w) % 25) / 10.f;       // 3.4 to 5.9 walk frames per second
             w.animT = static_cast<float>(next(w) % 400) / 100.f;               // random starting phase
             w.idleRate = 1.1f + static_cast<float>(next(w) % 14) / 10.f;
@@ -832,7 +839,7 @@ void Ui::drawFriends(const Rect& b) {
         gx_->text("Lv " + std::to_string(f.level), x + 82, y + 28, 80, 18, 12, kAccent, TF_BOLD);
         if (f.level < gf::kMaxLevel) bar(x + 82, y + 52, cw - 94, 8, static_cast<double>(f.xp) / gf::xpToNext(f.level), kBlue);
         gx_->text(inParty ? (g_.party[0] == f.id ? "Party (lead)" : "Party") : "Box", x + 82, y + 66, cw - 86, 18, 11, inParty ? kGreen : kDim);
-        if (hover(x, y, cw, ch) && in_->pressed && !consumed_ && !blocked_ && in_->my >= b.y && in_->my < b.y + b.h) { consumed_ = true; selFriend_ = f.id; }
+        if (hover(x, y, cw, ch) && in_->pressed && !consumed_ && !blocked_ && in_->my >= b.y && in_->my < b.y + b.h) { consumed_ = true; selFriend_ = f.id; itemPicker_ = false; }
     }
     gx_->popClip();
 
@@ -863,15 +870,48 @@ void Ui::drawFriends(const Rect& b) {
     // Buttons
     const bool inParty = std::find(g_.party.begin(), g_.party.end(), sf->id) != g_.party.end();
     const float by = b.y + b.h - 62;
-    if (button(dx, by, 130, 30, inParty ? "Move to box" : "Add to party", kBtn, true, 12)) {
+    if (button(dx, by, 118, 30, inParty ? "Move to box" : "Add to party", kBtn, true, 12)) {
         const gf::Result r = gf::setPartyMember(g_, sf->id, !inParty);
         for (const auto& m : r.messages) toast(m);
         dirty_ = true;
     }
-    if (button(dx + 138, by, 100, 30, "Make lead", kBtn, inParty && g_.party[0] != sf->id, 12)) {
+    if (button(dx + 124, by, 90, 30, "Make lead", kBtn, inParty && g_.party[0] != sf->id, 12)) {
         g_.party.erase(std::find(g_.party.begin(), g_.party.end(), sf->id));
         g_.party.insert(g_.party.begin(), sf->id);
         dirty_ = true;
+    }
+    const std::string itemLabel = sf->item >= 0 ? gf::itemInfo(sf->item).name : "No item";
+    if (button(dx + 220, by, dw - 220, 30, itemLabel, sf->item >= 0 ? rgba(120, 90, 40) : kBtn, true, 12)) itemPicker_ = !itemPicker_;
+    if (itemPicker_) {
+        // Item list drawn over the moves: owned items, plus "No item" to take the current one off.
+        const float py = b.y + 108, ph = by - 8 - py;
+        card(dx, py, dw, ph, rgba(30, 36, 54));
+        gx_->strokeRect(dx, py, dw, ph, kAccent, 2, 8);
+        gx_->text("Held item", dx + 10, py + 4, dw - 20, 20, 13, kAccent, TF_BOLD);
+        float ry = py + 28;
+        std::string hoverText = sf->item >= 0 ? std::string(gf::itemInfo(sf->item).name) + ": " + gf::itemInfo(sf->item).desc : "Items come from dungeons. Pick one to give to this friend.";
+        const gfx::Color rc[3] = {rgba(70, 80, 100), rgba(50, 90, 140), rgba(130, 80, 160)};
+        bool any = false;
+        for (int i = 0; i < gf::ItCount; ++i) {
+            if (g_.bag[static_cast<size_t>(i)] <= 0) continue;
+            any = true;
+            const gf::ItemInfo& it = gf::itemInfo(i);
+            if (hover(dx + 10, ry, dw - 20, 22)) hoverText = std::string(it.name) + ": " + it.desc;
+            if (button(dx + 10, ry, dw - 20, 22, std::string(it.name) + "  x" + std::to_string(g_.bag[static_cast<size_t>(i)]) + "  (" + gf::rarityName(it.rarity) + ")", rc[it.rarity], true, 11)) {
+                gf::equipItem(g_, sf->id, i);
+                itemPicker_ = false;
+                dirty_ = true;
+                break;
+            }
+            ry += 25;
+        }
+        if (!any) gx_->text("Your bag is empty. Dungeons drop items.", dx + 10, ry, dw - 20, 22, 12, kDim);
+        if (sf->item >= 0 && button(dx + 10, py + ph - 70, dw - 20, 22, "Take off " + std::string(gf::itemInfo(sf->item).name), kBtn, true, 11)) {
+            gf::equipItem(g_, sf->id, -1);
+            itemPicker_ = false;
+            dirty_ = true;
+        }
+        gx_->text(hoverText, dx + 10, py + ph - 44, dw - 20, 40, 11, kDim, TF_WRAP);
     }
     // Eggs
     float ex = dx;
@@ -1002,10 +1042,10 @@ void Ui::drawFocus(const Rect& b) {
         return;
     }
     gx_->text("Choose a length", b.x, b.y + 100, b.w, 22, 14, kText, TF_CENTER | TF_BOLD);
-    const int mins[] = {1, 15, 25, 45};
-    const char* names[] = {"1 min (test)", "15 min", "25 min", "45 min"};
-    for (int i = 0; i < 4; ++i)
-        if (button(cx - 250 + i * 128, b.y + 134, 120, 44, names[i], focusMinutes_ == mins[i] ? kBlue : kBtn, true, 14)) focusMinutes_ = mins[i];
+    const int mins[] = {15, 25, 45};
+    const char* names[] = {"15 min", "25 min", "45 min"};
+    for (int i = 0; i < 3; ++i)
+        if (button(cx - 192 + i * 130, b.y + 134, 122, 44, names[i], focusMinutes_ == mins[i] ? kBlue : kBtn, true, 14)) focusMinutes_ = mins[i];
     gx_->text("Reward: " + std::to_string(std::max(1, (focusMinutes_ + 9) / 10)) + " Energy and " + std::to_string(focusMinutes_) + " XP", b.x, b.y + 192, b.w, 22, 13, kAccent, TF_CENTER);
     if (button(cx - 90, b.y + 232, 180, 48, "Start focusing", kGreen, true, 16)) {
         focusRunning_ = true;
@@ -1023,9 +1063,25 @@ void Ui::beginBattle(gf::BattleMode m) {
     std::string why;
     std::unique_ptr<gf::Battle> bt;
     if (!gf::startBattle(g_, m, g_.lastArea, now_, bt, why)) { toast(why); return; }
+    dungeon_ = gf::DungeonRun{};
     battle_ = std::move(bt);
-    battle_->recordEvents = true;
     mode_ = m;
+    initBattleUi();
+}
+
+void Ui::beginDungeon() {
+    std::string why;
+    std::unique_ptr<gf::Battle> bt;
+    gf::DungeonRun run;
+    if (!gf::startDungeon(g_, g_.lastDungeon, now_, run, bt, why)) { toast(why); return; }
+    dungeon_ = std::move(run);
+    battle_ = std::move(bt);
+    mode_ = gf::BattleMode::Duel;
+    initBattleUi();
+}
+
+void Ui::initBattleUi() {
+    battle_->recordEvents = true;
     phase_ = Phase::Choose;
     chosen_ = {{false, false, false}};
     curSlot_ = 0;
@@ -1083,6 +1139,15 @@ void Ui::battleAfterTurn() {
 }
 
 void Ui::battleFinish(bool ran) {
+    if (dungeon_.active) {
+        std::unique_ptr<gf::Battle> next;
+        const gf::Result r = gf::dungeonFloorOver(g_, dungeon_, *battle_, next);
+        dungeonNext_ = std::move(next);
+        resultLines_ = r.messages;
+        phase_ = Phase::Done;
+        dirty_ = true;
+        return;
+    }
     const gf::Result r = gf::finishBattle(g_, *battle_, mode_);
     resultLines_.clear();
     if (ran) resultLines_.push_back("You got away safely.");
@@ -1194,6 +1259,39 @@ void Ui::fighterCard(float x, float y, float w, float h, int side, int slot, boo
     gx_->text(statusText(f), x + 84, y + 60, w - 92, 38, 10, rgba(255, 220, 140), TF_WRAP);
 }
 
+void Ui::drawDungeonSelect(const Rect& b, float lw) {
+    auto tint = [](unsigned rgbv, int a) { return rgba(static_cast<int>((rgbv >> 16) & 255), static_cast<int>((rgbv >> 8) & 255), static_cast<int>(rgbv & 255), a); };
+    for (int i = 0; i < gf::kDungeonCount; ++i) {
+        const gf::DungeonDef& d = gf::dungeon(i);
+        const bool unlocked = gf::dungeonUnlocked(g_, i);
+        const float y = b.y + 28 + static_cast<float>(i) * 60;
+        if (g_.lastDungeon == i) gx_->fillRect(b.x - 2, y - 2, lw + 4, 56, kAccent, 9);
+        const std::string label = std::string(d.name) + "\n" + (unlocked ? std::to_string(d.floors) + " floors  ·  " + std::to_string(d.energy) + " Energy" : "Locked: win " + std::to_string(d.unlockWins) + " battles");
+        if (button(b.x, y, lw, 52, label, unlocked ? tint(gf::area(d.area).colorBottom, 255) : rgba(48, 52, 64), unlocked, 12) && unlocked) { g_.lastDungeon = i; dirty_ = true; }
+    }
+    const float rx = b.x + lw + 20, rw = b.w - lw - 20;
+    const gf::DungeonDef& d = gf::dungeon(g_.lastDungeon);
+    const gf::Area& ar = gf::area(d.area);
+    gx_->fillRect(rx, b.y, rw, 110, tint(ar.colorTop, 70), 10);
+    gx_->text(d.name, rx + 14, b.y + 4, rw - 28, 28, 20, kText, TF_BOLD);
+    gx_->text(d.desc, rx + 14, b.y + 34, rw - 28, 20, 12, kDim);
+    gx_->text(std::to_string(d.floors) + " floors  ·  foes from " + ar.name + ", about Lv +" + std::to_string(d.levelBonus) + " and rising  ·  the last floor is a guardian", rx + 14, b.y + 58, rw - 28, 40, 12, kText, TF_WRAP);
+    const float cy = b.y + 122;
+    card(rx, cy, rw, 190);
+    gx_->text("How it works", rx + 14, cy + 8, rw - 28, 20, 14, kAccent, TF_BOLD);
+    gx_->text("Fight every floor back to back with the same party. HP carries over (with a little recovery between floors) and nobody is healed until you leave. "
+              "Each floor pays coins and may drop an item; the guardian always drops a Rare or better. If your party is beaten you keep the items but only half the coins. "
+              "Items can be given to friends from the Friends tab.", rx + 14, cy + 32, rw - 28, 100, 12, kDim, TF_WRAP);
+    int owned = 0;
+    for (int n : g_.bag) owned += n;
+    gx_->text("Bag: " + std::to_string(owned) + " item" + (owned == 1 ? "" : "s") + "   ·   Dungeons cleared: " + std::to_string(g_.dungeonsCleared), rx + 14, cy + 150, rw - 28, 20, 12, kText);
+    const bool unlocked = gf::dungeonUnlocked(g_, g_.lastDungeon);
+    const bool afford = g_.energy >= d.energy;
+    if (unlocked && !afford) gx_->text("Not enough Energy", rx, cy + 196, rw, 18, 11, rgba(230, 140, 140), TF_CENTER);
+    if (button(rx + rw / 2 - 90, cy + 218, 180, 40, "Enter dungeon", kRed, unlocked && afford, 15)) beginDungeon();
+    gx_->text("Energy: " + std::to_string(g_.energy), rx, b.y + b.h - 24, rw, 20, 12, kDim, TF_CENTER);
+}
+
 void Ui::drawBattle(const Rect& b) {
     battleBody_ = b;
     const gf::Area& ar = gf::area(std::clamp(g_.lastArea, 0, gf::kAreaCount - 1));
@@ -1202,11 +1300,13 @@ void Ui::drawBattle(const Rect& b) {
     // ---- No battle running: area and mode selection ----
     if (!battle_) {
         const float lw = 250;
-        gx_->text("Choose an area", b.x, b.y - 4, lw, 22, 14, kAccent, TF_BOLD);
+        if (button(b.x, b.y - 6, lw / 2 - 3, 26, "Areas", battleTab_ == 0 ? kBlue : kBtn, true, 12)) battleTab_ = 0;
+        if (button(b.x + lw / 2 + 3, b.y - 6, lw / 2 - 3, 26, "Dungeons", battleTab_ == 1 ? kBlue : kBtn, true, 12)) battleTab_ = 1;
+        if (battleTab_ == 1) { drawDungeonSelect(b, lw); return; }
         for (int i = 0; i < gf::kAreaCount; ++i) {
             const gf::Area& a = gf::area(i);
             const bool unlocked = gf::areaUnlocked(g_, i);
-            const float y = b.y + 22 + static_cast<float>(i) * 60;
+            const float y = b.y + 28 + static_cast<float>(i) * 60;
             const bool sel = g_.lastArea == i;
             gx_->fillRect(b.x - 2, y - 2, lw + 4, 56, sel ? kAccent : rgba(0, 0, 0, 0), 9);
             std::string label = a.name + "\n" + (unlocked ? "Lv +" + std::to_string(a.levelBonus) + "  ·  coins x" + std::to_string(a.coinMult).substr(0, 3)
@@ -1348,7 +1448,7 @@ void Ui::drawBattle(const Rect& b) {
             battleAdvance();
         }
     }
-    gx_->text("Your bench: " + std::to_string(shownBench(0)) + "   Turn " + std::to_string(battle_->turn + (playing_ ? 0 : 1)) + "   " + ar.name, b.x + b.w - 330, pY + cardH - 18, 326, 16, 10, kDim, TF_RIGHT);
+    gx_->text("Your bench: " + std::to_string(shownBench(0)) + "   Turn " + std::to_string(battle_->turn + (playing_ ? 0 : 1)) + "   " + (dungeon_.active ? gf::dungeon(dungeon_.dungeon).name + std::string(" F") + std::to_string(dungeon_.floor) + "/" + std::to_string(gf::dungeon(dungeon_.dungeon).floors) : ar.name), b.x + b.w - 330, pY + cardH - 18, 326, 16, 10, kDim, TF_RIGHT);
 
     // Floating damage / heal numbers
     for (auto& ft : floats_) {
@@ -1446,10 +1546,22 @@ void Ui::drawBattle(const Rect& b) {
         gx_->strokeRect(mx, my, mw, mh, kAccent, 2, 8);
         if (isDone) {
             const bool won = battle_->winner == 0;
-            gx_->text(won ? "Victory!" : (battle_->over() ? "Defeated" : "Battle over"), mx, my + 10, mw, 34, 24, won ? kGreen : kRed, TF_CENTER | TF_BOLD);
+            gx_->text(won ? (dungeonNext_ ? "Floor cleared!" : "Victory!") : (battle_->over() ? "Defeated" : "Battle over"), mx, my + 10, mw, 34, 24, won ? kGreen : kRed, TF_CENTER | TF_BOLD);
             float ly = my + 56;
             for (const auto& l : resultLines_) { gx_->text(l, mx + 20, ly, mw - 40, 22, 13, kText, TF_CENTER); ly += 24; }
-            if (button(mx + mw / 2 - 70, my + mh - 54, 140, 38, "Close", kBlue, true, 14, true)) { battle_.reset(); phase_ = Phase::Choose; }
+            if (dungeonNext_) {
+                if (button(mx + mw / 2 - 190, my + mh - 54, 180, 38, "Next floor", kGreen, true, 14, true)) {
+                    battle_ = std::move(dungeonNext_);
+                    initBattleUi();
+                } else if (button(mx + mw / 2 + 10, my + mh - 54, 180, 38, "Leave with loot", kBtn, true, 13, true)) {
+                    const gf::Result r = gf::dungeonCollect(g_, dungeon_, false);
+                    for (const auto& m : r.messages) toast(m);
+                    dungeonNext_.reset();
+                    battle_.reset();
+                    phase_ = Phase::Choose;
+                    dirty_ = true;
+                }
+            } else if (button(mx + mw / 2 - 70, my + mh - 54, 140, 38, "Close", kBlue, true, 14, true)) { battle_.reset(); phase_ = Phase::Choose; }
         } else {
             int slot = curSlot_;
             if (phase_ == Phase::Replace) {
@@ -1528,7 +1640,7 @@ const std::vector<GuideSection>& guideSections() {
             "The Dex lists every friend. You can read the moves of every friend you have met or owned."}});
         v.push_back({"Focus sessions", {
             "# How it works",
-            "Pick a length (15, 25 or 45 minutes; a 1-minute test is there for trying things out) and start. When the timer ends you earn 1 Energy per 10 minutes, XP for your lead friend equal to the minutes, and it counts as activity for your streak.",
+            "Pick a length (15, 25 or 45 minutes) and start. When the timer ends you earn 1 Energy per 10 minutes, XP for your lead friend equal to the minutes, and it counts as activity for your streak.",
             "# Staying focused",
             "While a session runs the rest of the app is locked: only the Focus tab works. You can cancel, but you get no reward.",
             "# Afterwards",
@@ -1556,6 +1668,18 @@ const std::vector<GuideSection>& guideSections() {
             }
             v.push_back({"Abilities", ab});
         }
+        v.push_back({"Dungeons and items", {
+            "# Dungeons",
+            "Open the Battle tab and switch to Dungeons. A dungeon is a run of 3 to 6 floors fought back to back with your party. Entering costs 3 to 6 Energy, and each dungeon unlocks after a number of battle wins.",
+            "- HP carries from floor to floor. Between floors your friends recover 20% of their max HP and lose all status effects; cooldowns reset. Fainted friends stay fainted until the run ends.",
+            "- Every floor pays coins and may drop an item. The last floor has a guardian (a slightly tougher team, with a rare friend among them now and then) that always drops a Rare or better item, and sometimes an Egg.",
+            "- If your whole party is beaten, you keep every item you found but only half of the coins. You can also leave between floors to cash in early (half coins, no Egg).",
+            "- Deeper dungeons have stronger foes and better odds of Rare and Epic loot.",
+            "# Held items",
+            "Each friend can hold one item. Open a friend in the Friends tab and use the item button to give, swap or take off an item. Items are never lost.",
+            "- Common: Power Band, Mind Gem, Guard Plate, Ward Charm, Swift Feather (+12% to one stat) and Vital Berry (+10% HP).",
+            "- Rare: Scope Lens (+15% crit chance), Leftovers (heal 6% each turn), Shield Seed (start with a shield).",
+            "- Epic: Focus Sash (survive a lethal hit once), Life Orb (+20% damage, costs 5% HP per attack), Champion Badge (+6% to all stats)."}});
         v.push_back({"Status effects", {
             "# Damage over time and recovery",
             "- Wound: lose 6% of max HP at the end of each turn.",

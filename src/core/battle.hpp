@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "data.hpp"
+#include "items.hpp"
 
 namespace gf {
 
@@ -21,6 +22,7 @@ struct Fighter {
     int maxHp = 1, hp = 1, atk = 1, def = 1, spa = 1, spd = 1, spe = 1;  // spd = special defence, spe = speed
     bool sleepy = false;
     int friendId = -1;  // index in the player's roster, or -1 for foes
+    int item = -1;      // held item (items.hpp), -1 for none
 
     int cd[4] = {0, 0, 0, 0};
     bool used[4] = {false, false, false, false};
@@ -55,7 +57,7 @@ struct Fighter {
     void clearStatuses();  // keeps HP and cooldowns
 };
 
-Fighter makeFighter(int speciesId, int level, bool sleepy = false, int friendId = -1);
+Fighter makeFighter(int speciesId, int level, bool sleepy = false, int friendId = -1, int item = -1);
 
 struct Action {
     enum Type { None, UseMove, Switch } type = None;

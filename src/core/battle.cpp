@@ -50,7 +50,7 @@ void Fighter::clearStatuses() {
     abStack = 0;
 }
 
-Fighter makeFighter(int speciesId, int level, bool sleepy, int friendId) {
+Fighter makeFighter(int speciesId, int level, bool sleepy, int friendId, int item) {
     Fighter f;
     f.speciesId = speciesId;
     f.level = level;
@@ -63,6 +63,13 @@ Fighter makeFighter(int speciesId, int level, bool sleepy, int friendId) {
     f.spe = s.spe;
     f.sleepy = sleepy;
     f.friendId = friendId;
+    if (item >= 0 && item < ItCount) {
+        f.item = item;
+        const ItemInfo& it = itemInfo(item);
+        auto up = [](int& v, int pct) { if (pct) v = v + std::max(1, v * pct / 100); };
+        up(f.maxHp, it.hp); f.hp = f.maxHp;
+        up(f.atk, it.atk); up(f.def, it.def); up(f.spa, it.spa); up(f.spd, it.spd); up(f.spe, it.spe);
+    }
     return f;
 }
 
@@ -153,6 +160,7 @@ void Battle::onEnter(Ref r) {
             break;
         default: break;
     }
+    if (f.item == ItShieldSeed) applyEffect({EK::Shield, 15}, r, r);
 }
 
 std::vector<int> Battle::benchAlive(int side) const {
@@ -356,21 +364,23 @@ int Battle::dealHit(Ref u, Ref t, double power, const Move& m, double mult, int 
             default: break;
         }
     }
+    if (a.item == ItLifeOrb) dmg *= 1.2;
     if (a.focus) { dmg *= 1.5; focusUsed = true; }
     if (a.empowerN > 0) { dmg *= 1.0 + a.empowerPct / 100.0; focusUsed = true; }
     if (d.mark) { dmg *= 1.5; d.mark = false; }
     if (!ign && d.armor > 0) dmg *= 0.7;
     dmg *= 1.0 - 0.06 * d.plates;
-    const int critChance = da == Ab::ShellArmor ? 0 : m.crit + (aa == Ab::KeenEye ? 20 : 0);
+    const int critChance = da == Ab::ShellArmor ? 0 : m.crit + (aa == Ab::KeenEye ? 20 : 0) + (a.item == ItScopeLens ? 15 : 0);
     if (critChance > 0 && rnd(100) < critChance) {
         dmg *= 1.5;
         say("A critical hit!");
     }
     int dm = std::max(1, static_cast<int>(dmg));
-    if (da == Ab::Sturdy && !d.abUsed && d.hp == d.maxHp && dm >= d.hp + (ign ? 0 : d.shield) && d.hp > 1) {
+    const bool sash = d.item == ItFocusSash && da != Ab::Sturdy;
+    if ((da == Ab::Sturdy || sash) && !d.abUsed && d.hp == d.maxHp && dm >= d.hp + (ign ? 0 : d.shield) && d.hp > 1) {
         d.abUsed = true;
         dm = d.hp - 1 + (ign ? 0 : d.shield);
-        abSay(t);
+        if (sash) say(nameOf(t.side, t.slot) + " hangs on with its Focus Sash!"); else abSay(t);
     }
 
     if (d.reflectDamage) {
@@ -730,6 +740,10 @@ void Battle::useMove(Ref user, const Move& m, int /*moveIdx*/, Ref primary, doub
             f.focus = false;
             if (f.empowerN > 0 && --f.empowerN == 0) f.empowerPct = 0;
         }
+        if (f.item == ItLifeOrb && anyHit && f.alive()) {
+            f.hp = std::max(1, f.hp - std::max(1, f.maxHp * 5 / 100));
+            say(nameOf(user.side, user.slot) + " is hurt by its Life Orb.");
+        }
         if (m.recoil > 0 && anyHit && f.alive() && abil(f) != Ab::HardHead) {
             f.hp = std::max(1, f.hp - std::max(1, f.maxHp * m.recoil / 100));
             say(nameOf(user.side, user.slot) + " is hurt by recoil.");
@@ -897,6 +911,7 @@ void Battle::endOfTurn() {
                 applyEffect({EK::Cleanse}, r, r);
             }
             if (fa == Ab::DewSkin) heal(r, std::max(1, f.maxHp * 6 / 100));
+            if (f.item == ItLeftovers) heal(r, std::max(1, f.maxHp * 6 / 100));
             if (hasNegative(f) && foeHas(s, Ab::Nightmare)) {
                 hurt(r, std::max(1, f.maxHp * 4 / 100), true);
                 say(n + " is tormented by nightmares.");

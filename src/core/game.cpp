@@ -460,7 +460,7 @@ bool startBattle(GameState& g, BattleMode mode, int areaId, tu::Time now, std::u
     for (int id : g.party) {
         const Friend* f = findFriend(g, id);
         if (!f) continue;
-        mine.push_back(makeFighter(f->species, f->level, sleepy, f->id));
+        mine.push_back(makeFighter(f->species, f->level, sleepy, f->id, f->item));
         levelSum += f->level;
     }
     if (mine.empty()) { why = "You need at least one friend first."; return false; }
@@ -563,6 +563,175 @@ Result finishBattle(GameState& g, const Battle& b, BattleMode mode) {
 }
 
 // ---------------------------------------------------------------------------
+// Items and dungeons
+// ---------------------------------------------------------------------------
+
+Result equipItem(GameState& g, int friendId, int itemId) {
+    Result r;
+    Friend* f = findFriend(g, friendId);
+    if (!f) return r;
+    if (itemId >= ItCount) return r;
+    if (itemId >= 0 && g.bag[static_cast<size_t>(itemId)] <= 0) { r.messages.push_back("You don't have that item."); return r; }
+    if (f->item >= 0) g.bag[static_cast<size_t>(f->item)]++;
+    f->item = -1;
+    if (itemId >= 0) {
+        g.bag[static_cast<size_t>(itemId)]--;
+        f->item = itemId;
+    }
+    r.ok = true;
+    return r;
+}
+
+const DungeonDef& dungeon(int id) {
+    static const DungeonDef defs[kDungeonCount] = {
+        {0, "Mossy Burrow", "A cosy tangle of roots and tunnels under the meadow.", 0, 3, 0, 2, 3},
+        {1, "Mushroom Hollow", "Spore-filled caves where the damp never lifts.", 1, 4, 1, 6, 4},
+        {2, "Crystal Depths", "Echoing galleries of glittering stone and old machinery.", 2, 4, 2, 12, 4},
+        {3, "Sunken Grotto", "A flooded temple under the shore; watch your footing.", 3, 5, 3, 18, 5},
+        {4, "Frostbound Spire", "A frozen tower that climbs into the storm.", 4, 5, 4, 26, 5},
+        {5, "Ember Vault", "The sealed treasury of the ruins, guarded by time itself.", 5, 6, 6, 36, 6},
+    };
+    return defs[std::clamp(id, 0, kDungeonCount - 1)];
+}
+
+bool dungeonUnlocked(const GameState& g, int id) {
+    return id >= 0 && id < kDungeonCount && g.battlesWon >= dungeon(id).unlockWins;
+}
+
+namespace {
+int rollItem(std::mt19937& rng, int tier, int minRarity) {
+    // Rarer loot becomes more likely in deeper dungeons.
+    const int w[3] = {std::max(5, 60 - 6 * tier), 30 + 2 * tier, 10 + 4 * tier};
+    for (int tries = 0; tries < 20; ++tries) {
+        int roll = pick(rng, w[0] + w[1] + w[2]);
+        int rarity = roll < w[0] ? 0 : roll < w[0] + w[1] ? 1 : 2;
+        if (rarity < minRarity) rarity = minRarity;
+        std::vector<int> pool;
+        for (int i = 0; i < ItCount; ++i) if (itemInfo(i).rarity == rarity) pool.push_back(i);
+        if (!pool.empty()) return pool[static_cast<size_t>(pick(rng, static_cast<int>(pool.size())))];
+    }
+    return 0;
+}
+
+std::unique_ptr<Battle> buildFloor(GameState& g, const DungeonRun& run, std::mt19937& rng) {
+    const DungeonDef& d = dungeon(run.dungeon);
+    const Area& ar = area(d.area);
+    const bool last = run.floor >= d.floors;
+    int levelSum = 0, alive = 0;
+    for (const auto& f : run.team) { levelSum += f.level; if (f.alive()) ++alive; }
+    const int n = std::max(1, static_cast<int>(run.team.size()));
+    const int avg = std::max(1, static_cast<int>(std::lround(static_cast<double>(levelSum) / n)));
+    // Regular floors are 2 to 3 foes (never more than your party); the guardian is a team of 3.
+    int count = last ? std::min(n, 3) : std::min(n, 2 + run.floor / 3);
+    count = std::max(1, count);
+    count = std::min(count, kPartySize);
+    std::vector<Fighter> foes;
+    for (int i = 0; i < count; ++i) {
+        const int level = std::min(kMaxLevel, std::max(1, avg + d.levelBonus + (run.floor - 1) / 2 + (last ? 2 : pick(rng, 3) - 1)));
+        std::vector<int> pool = candidatesFor(level, last || pick(rng, 100) < 10, false, ar.habitat);
+        if (pool.empty()) pool = candidatesFor(level, true, false, 63);
+        const int sid = pool[static_cast<size_t>(pick(rng, static_cast<int>(pool.size())))];
+        foes.push_back(makeFighter(sid, level));
+        g.dexSeen.insert(sid);
+    }
+    auto b = std::make_unique<Battle>(run.team, std::move(foes), static_cast<uint32_t>(rng()), false, last);
+    b->autoReplacePlayer = false;
+    b->areaId = d.area;
+    return b;
+}
+}  // namespace
+
+bool startDungeon(GameState& g, int id, tu::Time now, DungeonRun& run, std::unique_ptr<Battle>& out, std::string& why) {
+    if (!dungeonUnlocked(g, id)) { why = "That dungeon isn't unlocked yet."; return false; }
+    const DungeonDef& d = dungeon(id);
+    if (g.energy < d.energy) { why = "Need " + std::to_string(d.energy) + " Energy (you have " + std::to_string(g.energy) + ")."; return false; }
+    run = DungeonRun{};
+    const bool sleepy = isSleepy(g, now.day);
+    for (int fid : g.party) {
+        const Friend* f = findFriend(g, fid);
+        if (f) run.team.push_back(makeFighter(f->species, f->level, sleepy, f->id, f->item));
+    }
+    if (run.team.empty()) { why = "You need at least one friend first."; return false; }
+    g.energy -= d.energy;
+    g.lastDungeon = id;
+    run.active = true;
+    run.dungeon = id;
+    run.floor = 1;
+    auto rng = makeRng(g);
+    out = buildFloor(g, run, rng);
+    return true;
+}
+
+Result dungeonCollect(GameState& g, DungeonRun& run, bool cleared) {
+    Result r;
+    r.ok = true;
+    int coins = run.coins;
+    if (!cleared) coins /= 2;
+    g.coins += coins;
+    if (coins > 0) r.messages.push_back("Loot: +" + std::to_string(coins) + " coins.");
+    for (int it : run.items) {
+        g.bag[static_cast<size_t>(it)]++;
+        r.messages.push_back(std::string("Loot: ") + itemInfo(it).name + " (" + rarityName(itemInfo(it).rarity) + ")");
+    }
+    if (cleared) for (int i = 0; i < run.eggs; ++i) { g.eggs.push_back(Egg{}); r.messages.push_back("Loot: an Egg!"); }
+    if (cleared) g.dungeonsCleared++;
+    run.active = false;
+    run.coins = 0;
+    run.items.clear();
+    run.eggs = 0;
+    return r;
+}
+
+Result dungeonFloorOver(GameState& g, DungeonRun& run, const Battle& b, std::unique_ptr<Battle>& next) {
+    Result r;
+    r.ok = true;
+    next.reset();
+    g.battlesPlayed++;
+    if (b.winner != 0) {
+        r.messages.push_back("Your party was driven out of the dungeon. Half the coins and all the items you found are kept.");
+        const Result c = dungeonCollect(g, run, false);
+        r.messages.insert(r.messages.end(), c.messages.begin(), c.messages.end());
+        return r;
+    }
+    g.battlesWon++;
+    const DungeonDef& d = dungeon(run.dungeon);
+    auto rng = makeRng(g);
+    const int tier = run.dungeon;
+    const bool last = run.floor >= d.floors;
+    const int coins = static_cast<int>((10 + 5 * run.floor) * (1.0 + 0.35 * tier)) + (last ? 40 + 10 * tier : 0);
+    run.coins += coins;
+    r.messages.push_back("Floor " + std::to_string(run.floor) + " cleared: found " + std::to_string(coins) + " coins.");
+    if (last || pick(rng, 100) < 30 + 5 * tier) {
+        const int it = rollItem(rng, tier, last ? 1 : 0);
+        run.items.push_back(it);
+        r.messages.push_back(std::string("Found: ") + itemInfo(it).name + " (" + rarityName(itemInfo(it).rarity) + ")");
+    }
+    if (last) {
+        if (pick(rng, 100) < 20 + 5 * tier) run.items.push_back(rollItem(rng, tier, 0));
+        if (pick(rng, 100) < 30) run.eggs++;
+        r.messages.push_back("The guardian falls. The dungeon is cleared!");
+        const Result c = dungeonCollect(g, run, true);
+        r.messages.insert(r.messages.end(), c.messages.begin(), c.messages.end());
+        return r;
+    }
+    // Carry the party into the next floor: HP stays, with a little recovery; statuses and cooldowns reset.
+    run.team = b.sides[0].team;
+    for (Fighter& f : run.team) {
+        f.clearStatuses();
+        for (int& c : f.cd) c = 0;
+        for (bool& u : f.used) u = false;
+        f.lastMove = -1;
+        f.lastDamageTaken = 0;
+        f.abUsed = false;
+        if (f.alive()) f.hp = std::min(f.maxHp, f.hp + std::max(1, f.maxHp * 25 / 100));
+    }
+    run.floor++;
+    next = buildFloor(g, run, rng);
+    r.messages.push_back("Your party recovers a little and descends to floor " + std::to_string(run.floor) + ".");
+    return r;
+}
+
+// ---------------------------------------------------------------------------
 // Save / load
 // ---------------------------------------------------------------------------
 
@@ -585,6 +754,13 @@ json::Value toJson(const GameState& g) {
     o["battlesWon"] = g.battlesWon;
     o["battlesPlayed"] = g.battlesPlayed;
     o["lastArea"] = g.lastArea;
+    o["lastDungeon"] = g.lastDungeon;
+    o["dungeonsCleared"] = g.dungeonsCleared;
+    {
+        Value bag = Value::array();
+        for (int n : g.bag) bag.push(n);
+        o["bag"] = bag;
+    }
     o["rngSeed"] = static_cast<long long>(g.rngSeed);
 
     Value st = Value::object();
@@ -629,7 +805,7 @@ json::Value toJson(const GameState& g) {
     Value friends = Value::array();
     for (const auto& f : g.friends) {
         Value v = Value::object();
-        v["id"] = f.id; v["species"] = f.species; v["level"] = f.level; v["xp"] = f.xp;
+        v["id"] = f.id; v["species"] = f.species; v["level"] = f.level; v["xp"] = f.xp; v["item"] = f.item;
         friends.push(v);
     }
     o["friends"] = friends;
@@ -682,6 +858,9 @@ bool fromJson(const json::Value& o, GameState& g) {
     n.battlesWon = o.at("battlesWon").asInt();
     n.battlesPlayed = o.at("battlesPlayed").asInt();
     n.lastArea = std::clamp(o.at("lastArea").asInt(), 0, kAreaCount - 1);
+    n.lastDungeon = std::clamp(o.at("lastDungeon").asInt(), 0, kDungeonCount - 1);
+    n.dungeonsCleared = o.at("dungeonsCleared").asInt();
+    for (size_t i = 0; i < o.at("bag").arr().size() && i < n.bag.size(); ++i) n.bag[i] = std::max(0, o.at("bag").arr()[i].asInt());
     n.rngSeed = static_cast<uint32_t>(o.at("rngSeed").asInt64(12345));
     n.settings.confirmDone = o.at("settings").at("confirmDone").asBool(true);
     n.settings.quietStart = o.at("settings").at("quietStart").asInt(22 * 60);
@@ -719,6 +898,8 @@ bool fromJson(const json::Value& o, GameState& g) {
         f.species = std::clamp(v.at("species").asInt(), 0, kSpeciesCount - 1);
         f.level = std::clamp(v.at("level").asInt(1), 1, kMaxLevel);
         f.xp = v.at("xp").asInt();
+        f.item = v.at("item").asInt(-1);
+        if (f.item < 0 || f.item >= ItCount) f.item = -1;
         n.friends.push_back(f);
     }
     for (const auto& v : o.at("party").arr()) n.party.push_back(v.asInt());

@@ -375,3 +375,16 @@ What mattered:
 - **Animation**: sprites have four frames (two stances plus two leaning frames). Each friend walks at its own speed with a
   4-step walk cycle and a small hop, and idles with its own breathing/blink rhythm and a random phase, so no two friends
   move on the same clock.
+
+## 18. Dungeons and held items (v1.3)
+
+- **Dungeons** (Battle tab, "Dungeons"): six of them, one per area, 3 to 6 floors, 3 to 6 Energy, unlocked by battle wins
+  (`dungeon()` in `game.cpp`). A run fights the floors back to back with the same party; HP carries over, with 25% recovery
+  and cleared statuses/cooldowns between floors. The last floor is a guardian team. Every floor pays coins and may drop an
+  item; the guardian always drops a Rare or better item and sometimes an Egg. Defeat keeps the items and half the coins;
+  leaving between floors does the same, without the Egg.
+- **Held items** (`items.hpp/.cpp`): 12 items in three rarities. Stat items (+12% to one stat, +10% HP), Scope Lens, Leftovers,
+  Shield Seed, Focus Sash, Life Orb and Champion Badge. Each friend holds one, set in the Friends tab; unequipped items live
+  in the bag. Saved in `save.json` (`bag`, per-friend `item`).
+- Walking friends now start spread along the strip, each at a random point in its own walk/rest cycle. The 1-minute test focus
+  option was removed.
