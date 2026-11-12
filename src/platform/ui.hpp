@@ -30,6 +30,12 @@ struct Walker {
     bool phase = false;
     bool init = false;
     float walkT = 3, pause = 0;
+    float cps = 10;        // walking speed in cells per second (each friend has its own)
+    float stepAcc = 0;     // fractional cells carried between frames
+    float animT = 0;       // this friend's own animation clock (never shared with the others)
+    float animRate = 4;    // walk-cycle frames per second
+    float idleT = 0, idleRate = 1.5f;
+    float moveT = 0;       // how long since the last step (so a stopped friend settles into its idle pose)
     float hop = 0, hopV = 0;
     unsigned rng = 1;
 };

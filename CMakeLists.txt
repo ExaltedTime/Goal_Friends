@@ -12,6 +12,7 @@ add_library(gf_core STATIC
     src/core/battle.cpp
     src/core/game.cpp
     src/core/describe.cpp
+    src/core/ability.cpp
     src/core/sprite.cpp)
 target_include_directories(gf_core PUBLIC src/core)
 if(MSVC)

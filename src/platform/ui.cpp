@@ -392,9 +392,15 @@ void Ui::drawWorld(float dt) {
             w.init = true;
             w.cx = minC + static_cast<int>(next(w) % static_cast<unsigned>(std::max(1, maxC - minC)));
             w.dir = (next(w) & 1) ? 1 : -1;
-            w.fast = (next(w) % 3) != 0;
+            static const float kSpeeds[5] = {5.f, 7.5f, 10.f, 12.5f, 15.f};   // cells per second: steady, differing rhythms
+            w.cps = kSpeeds[next(w) % 5];
             w.walkT = 1.5f + static_cast<float>(next(w) % 30) / 10.f;
+            w.animRate = 3.4f + static_cast<float>(next(w) % 25) / 10.f;       // 3.4 to 5.9 walk frames per second
+            w.animT = static_cast<float>(next(w) % 400) / 100.f;               // random starting phase
+            w.idleRate = 1.1f + static_cast<float>(next(w) % 14) / 10.f;
+            w.idleT = static_cast<float>(next(w) % 300) / 100.f;
         }
+        bool stepped = false;
         if (!sleepy && groupWalk_) {
             if (w.pause > 0) {
                 w.pause -= dt;
@@ -404,22 +410,42 @@ void Ui::drawWorld(float dt) {
                 }
             } else {
                 animating_ = true;
-                w.phase = !w.phase;
-                if (w.fast || w.phase) w.cx += w.dir;     // exactly one cell per step: even, jitter-free motion
-                if (w.cx < minC) { w.cx = minC; w.dir = 1; }
-                if (w.cx > maxC) { w.cx = maxC; w.dir = -1; }
+                w.stepAcc += w.cps * dt;                  // each friend advances at its own pace, one whole cell at a time
+                while (w.stepAcc >= 1.f) {
+                    w.stepAcc -= 1.f;
+                    w.cx += w.dir;
+                    stepped = true;
+                    if (w.cx < minC) { w.cx = minC; w.dir = 1; }
+                    if (w.cx > maxC) { w.cx = maxC; w.dir = -1; }
+                }
                 w.walkT -= dt;
                 if (w.walkT <= 0) w.pause = 1.5f + static_cast<float>(next(w) % 30) / 10.f;
             }
         }
+        if (stepped) w.moveT = 0.35f; else w.moveT = std::max(0.f, w.moveT - dt);
         if (w.hop > 0 || w.hopV != 0) {
             animating_ = true;
             w.hopV -= 600 * dt;
             w.hop += w.hopV * dt;
             if (w.hop <= 0) { w.hop = 0; w.hopV = 0; }
         }
-        const int frame = sleepy ? 1 : static_cast<int>(animT_ * 2.5f + static_cast<float>(w.friendId)) % 2;
-        const float bob = sleepy ? 0.f : (frame ? cell : 0.f);
+        // Animation: a four-frame waddle while moving (lean left, stand, lean right, stand, with a hop on the stand frames),
+        // a slow breathing and blinking idle otherwise. Every friend runs on its own clock and rate.
+        int frame;
+        float bob = 0.f;
+        if (sleepy) {
+            frame = 1;
+        } else if (w.moveT > 0.f) {
+            w.animT += dt * w.animRate;
+            static const int kWalk[4] = {2, 0, 3, 1};
+            const int idx = static_cast<int>(w.animT) % 4;
+            frame = kWalk[idx];
+            bob = (idx % 2) ? cell : 0.f;
+        } else {
+            w.idleT += dt * w.idleRate;
+            frame = static_cast<int>(w.idleT) % 5 == 4 ? 1 : 0;   // mostly eyes open, a quick blink and flutter now and then
+            if (static_cast<int>(w.idleT * 0.5f) % 2) bob = 0.f;
+        }
         const float hopSnap = std::round(w.hop / cell) * cell;   // hops land on the grid too
         const float xPx = static_cast<float>(w.cx) * cell;
         const float sx = xPx - size / 2, sy = gy - 20.f * cell - bob - hopSnap;
@@ -810,13 +836,15 @@ void Ui::drawFriends(const Rect& b) {
     card(dx, b.y, dw, b.h - 70);
     gx_->sprite(gfx::SpriteKind::Species, sf->species, static_cast<int>(animT_ * 2) % 2, false, dx + 8, b.y + 8, 96);
     gx_->text(sp.name, dx + 112, b.y + 10, dw - 120, 26, 18, kText, TF_BOLD);
-    gx_->text("Stage " + std::to_string(sp.stage) + (sp.rare ? " · Rare" : "") + " · Lv " + std::to_string(sf->level), dx + 112, b.y + 38, dw - 120, 18, 12, kDim);
-    if (sp.evolvesTo >= 0) gx_->text("Evolves at Lv " + std::to_string(sp.evolveLevel), dx + 112, b.y + 56, dw - 120, 18, 12, kAccent);
-    gx_->text(sp.role, dx + 112, b.y + 74, dw - 120, 18, 12, rgba(130, 200, 255), TF_BOLD);
-    gx_->text(sp.blurb, dx + 10, b.y + 100, dw - 20, 32, 11, kDim, TF_WRAP);
-    gx_->text("HP " + std::to_string(st.hp) + "   ATK " + std::to_string(st.atk) + "   DEF " + std::to_string(st.def), dx + 10, b.y + 134, dw - 20, 18, 12, kText, TF_BOLD);
-    gx_->text("SPA " + std::to_string(st.spa) + "   SPD " + std::to_string(st.spd) + "   SPE " + std::to_string(st.spe), dx + 10, b.y + 152, dw - 20, 18, 12, kText, TF_BOLD);
-    float my = b.y + 176;
+    gx_->text("Stage " + std::to_string(sp.stage) + (sp.rare ? " · Rare" : "") + " · Lv " + std::to_string(sf->level) +
+              (sp.evolvesTo >= 0 ? "  ·  Evolves at Lv " + std::to_string(sp.evolveLevel) : ""), dx + 112, b.y + 38, dw - 120, 18, 12, kDim);
+    gx_->text(sp.role, dx + 112, b.y + 56, dw - 120, 18, 12, rgba(130, 200, 255), TF_BOLD);
+    gx_->text("HP " + std::to_string(st.hp) + "   ATK " + std::to_string(st.atk) + "   DEF " + std::to_string(st.def), dx + 112, b.y + 76, dw - 120, 18, 12, kText, TF_BOLD);
+    gx_->text("SPA " + std::to_string(st.spa) + "   SPD " + std::to_string(st.spd) + "   SPE " + std::to_string(st.spe), dx + 112, b.y + 94, dw - 120, 18, 12, kText, TF_BOLD);
+    gx_->text(sp.blurb, dx + 10, b.y + 110, dw - 20, 32, 11, kDim, TF_WRAP);
+    gx_->text("Ability: " + std::string(gf::abilityInfo(sp.ability).name), dx + 10, b.y + 144, dw - 20, 16, 12, rgba(255, 200, 90), TF_BOLD);
+    gx_->text(gf::abilityInfo(sp.ability).desc, dx + 10, b.y + 160, dw - 20, 28, 11, kDim, TF_WRAP);
+    float my = b.y + 192;
     for (const auto& m : sp.moves) {
         gx_->text(m.name, dx + 10, my, dw - 20, 18, 12, kAccent, TF_BOLD);
         gx_->text(describeMove(m), dx + 10, my + 16, dw - 20, 30, 11, kDim, TF_WRAP);
@@ -888,12 +916,14 @@ void Ui::drawDex(const Rect& b) {
             gx_->sprite(gfx::SpriteKind::Species, selDex_, static_cast<int>(animT_ * 2) % 2, false, dx + 10, b.y + 10, 96);
             gx_->text(sp.name, dx + 112, b.y + 14, dw - 120, 26, 18, kText, TF_BOLD);
             gx_->text("Stage " + std::to_string(sp.stage) + (sp.rare ? " · Rare" : ""), dx + 112, b.y + 42, dw - 120, 18, 12, kDim);
-            gx_->text(sp.role, dx + 112, b.y + 62, dw - 120, 18, 12, rgba(130, 200, 255), TF_BOLD);
-            gx_->text(sp.blurb, dx + 12, b.y + 108, dw - 24, 32, 11, kDim, TF_WRAP);
+            gx_->text(sp.role, dx + 112, b.y + 60, dw - 120, 18, 12, rgba(130, 200, 255), TF_BOLD);
             auto pips = [](int n) { return std::string(static_cast<size_t>(n), '|'); };
-            gx_->text("HP " + pips(sp.hp) + "   ATK " + pips(sp.atk) + "   DEF " + pips(sp.def), dx + 12, b.y + 144, dw - 24, 16, 11, kText, TF_BOLD);
-            gx_->text("SPA " + pips(sp.spa) + "   SPD " + pips(sp.spd) + "   SPE " + pips(sp.spe), dx + 12, b.y + 160, dw - 24, 16, 11, kText, TF_BOLD);
-            float my = b.y + 184;
+            gx_->text("HP " + pips(sp.hp) + "   ATK " + pips(sp.atk) + "   DEF " + pips(sp.def), dx + 112, b.y + 78, dw - 120, 16, 11, kText, TF_BOLD);
+            gx_->text("SPA " + pips(sp.spa) + "   SPD " + pips(sp.spd) + "   SPE " + pips(sp.spe), dx + 112, b.y + 94, dw - 120, 16, 11, kText, TF_BOLD);
+            gx_->text(sp.blurb, dx + 12, b.y + 110, dw - 24, 32, 11, kDim, TF_WRAP);
+            gx_->text("Ability: " + std::string(gf::abilityInfo(sp.ability).name), dx + 12, b.y + 144, dw - 24, 16, 12, rgba(255, 200, 90), TF_BOLD);
+            gx_->text(gf::abilityInfo(sp.ability).desc, dx + 12, b.y + 160, dw - 24, 28, 11, kDim, TF_WRAP);
+            float my = b.y + 192;
             for (const auto& m : sp.moves) {
                 gx_->text(m.name, dx + 12, my, dw - 24, 18, 12, kAccent, TF_BOLD);
                 gx_->text(describeMove(m), dx + 12, my + 16, dw - 24, 30, 11, kDim, TF_WRAP);
@@ -1499,7 +1529,7 @@ const std::vector<GuideSection>& guideSections() {
             "# How a turn plays out",
             "When everyone has chosen, the turn is replayed step by step: the acting friend glows, health bars move, red numbers show damage and green numbers healing, and the log says what happened. Use Skip to jump to the end or Speed to make it faster.",
             "# Turn order",
-            "Switching goes first. Then moves with Priority, then everyone else by speed (SPD). Ties are random.",
+            "Switching goes first. Then moves with Priority, then everyone else by speed (SPE). Ties are random.",
             "# Moves",
             "- Light, Medium and Heavy hits do damage, as Physical (ATK vs DEF) or Special (SPA vs SPD) moves. Utility moves do something else: heal, shield, buff, weaken, trap, and more. Hover over a move to read what it does.",
             "- CD n means the move can't be used for n turns after you use it. If all four moves are cooling down, your friend uses Scuffle, a basic attack.",
@@ -1508,6 +1538,14 @@ const std::vector<GuideSection>& guideSections() {
             "Knock out all of the other team to win. Your friends are fully healed afterwards, so losing costs you nothing but the Energy. After turn 30, fatigue drains everyone more each turn so battles always end.",
             "# Costs",
             "A wild encounter costs 1 Energy, a trainer duel 2, and a boss battle 5 (and needs a 3-day streak)."}});
+        {
+            std::vector<std::string> ab = {"# What abilities are", "Every friend has one passive ability that works on its own during battles, like in the Pokemon games. Evolutions keep their line's ability. Find it on a friend's page in Friends or the Dex.", "# All abilities"};
+            for (int i = 1; i < gf::kAbilityCount; ++i) {
+                const auto& info = gf::abilityInfo(static_cast<gf::Ab>(i));
+                ab.push_back(std::string("- ") + info.name + ": " + info.desc);
+            }
+            v.push_back({"Abilities", ab});
+        }
         v.push_back({"Status effects", {
             "# Damage over time and recovery",
             "- Wound: lose 6% of max HP at the end of each turn.",

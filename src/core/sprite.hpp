@@ -8,7 +8,7 @@
 namespace gf {
 
 constexpr int kSpriteSize = 24;
-constexpr int kSpriteFrames = 2;
+constexpr int kSpriteFrames = 4;   // 0/1 base pose and flutter, 2/3 the same leaning left/right (see makeSprite)
 
 struct Sprite {
     int w = kSpriteSize, h = kSpriteSize;

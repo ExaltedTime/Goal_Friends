@@ -366,3 +366,13 @@ What mattered:
   its content.
 - **Friends walk in whole-cell steps** locked to the frame (15 fps while walking), with shared rest periods for the whole
   party, so the motion is even and the strip drops to 2 fps when everyone rests.
+
+## 17. Abilities and smoother animation (v1.2)
+
+- **Abilities**: every friend line has one passive ability (about 60 exist, `src/core/ability.*`); evolutions keep it.
+  They hook into entering the field, taking and dealing hits, end of turn, switching, status immunities and turn order.
+  Shown on the Friends and Dex pages, in the guide (full list) and in `ROSTER.md`. Line assignments live in
+  `kAbility` (`data.cpp`, lines 0 to 26) and `ABILITY` in `tools/gen_roster.py`.
+- **Animation**: sprites have four frames (two stances plus two leaning frames). Each friend walks at its own speed with a
+  4-step walk cycle and a small hop, and idles with its own breathing/blink rhythm and a random phase, so no two friends
+  move on the same clock.

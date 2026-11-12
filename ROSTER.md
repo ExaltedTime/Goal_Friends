@@ -173,6 +173,8 @@ Variety: 403 distinct move mechanics among 600 moves; every friend has its own s
 
 A sprout-crowned tank that outlasts foes with regrowth, thorns and armor.
 
+**Ability: Rattled** — Being hit raises SPE by 20% for 3 turns.
+
 Evolves into **Thornback** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -194,6 +196,8 @@ Evolves into **Thornback** at level 16.
 
 A sprout-crowned tank that outlasts foes with regrowth, thorns and armor.
 
+**Ability: Rattled** — Being hit raises SPE by 20% for 3 turns.
+
 Evolves from **Mossling** at level 16. Evolves into **Grovewarden** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -214,6 +218,8 @@ Evolves from **Mossling** at level 16. Evolves into **Grovewarden** at level 32.
 *Regrowing tank* · stage 3 of 3 · found in Sunny Meadow, Whispering Woods
 
 A sprout-crowned tank that outlasts foes with regrowth, thorns and armor.
+
+**Ability: Rattled** — Being hit raises SPE by 20% for 3 turns.
 
 Evolves from **Thornback** at level 32.
 
@@ -240,6 +246,8 @@ Evolves from **Thornback** at level 32.
 
 A crackling fox that wins by acting first: priority, haste and dodging.
 
+**Ability: Static** — 30% chance to Daze an attacker for 2 turns.
+
 Evolves into **Zephox** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -261,6 +269,8 @@ Evolves into **Zephox** at level 16.
 
 A crackling fox that wins by acting first: priority, haste and dodging.
 
+**Ability: Static** — 30% chance to Daze an attacker for 2 turns.
+
 Evolves from **Zapling** at level 16. Evolves into **Tempestail** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -281,6 +291,8 @@ Evolves from **Zapling** at level 16. Evolves into **Tempestail** at level 32.
 *Lightning tempo* · stage 3 of 3 · found in Sunny Meadow, Stormcrest Peaks
 
 A crackling fox that wins by acting first: priority, haste and dodging.
+
+**Ability: Static** — 30% chance to Daze an attacker for 2 turns.
 
 Evolves from **Zephox** at level 32.
 
@@ -307,6 +319,8 @@ Evolves from **Zephox** at level 32.
 
 A flame-crested hound that stacks Focus and wounds before a huge burst.
 
+**Ability: Flame Touch** — 30% chance to Wound an attacker for 2 turns.
+
 Evolves into **Ashwolf** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -328,6 +342,8 @@ Evolves into **Ashwolf** at level 16.
 
 A flame-crested hound that stacks Focus and wounds before a huge burst.
 
+**Ability: Flame Touch** — 30% chance to Wound an attacker for 2 turns.
+
 Evolves from **Cindrel** at level 16. Evolves into **Pyrelord** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -348,6 +364,8 @@ Evolves from **Cindrel** at level 16. Evolves into **Pyrelord** at level 32.
 *Burst setup* · stage 3 of 3 · found in Sunny Meadow, Ember Ruins
 
 A flame-crested hound that stacks Focus and wounds before a huge burst.
+
+**Ability: Flame Touch** — 30% chance to Wound an attacker for 2 turns.
 
 Evolves from **Ashwolf** at level 32.
 
@@ -374,6 +392,8 @@ Evolves from **Ashwolf** at level 32.
 
 A cracked-stone wall that shrugs off hits and answers with a counter.
 
+**Ability: Oblivious** — Immune to Daze and Mark.
+
 Evolves into **Boulderon** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -394,6 +414,8 @@ Evolves into **Boulderon** at level 20.
 *Rock wall and counter* · stage 2 of 2 · found in Echo Caverns, Stormcrest Peaks
 
 A cracked-stone wall that shrugs off hits and answers with a counter.
+
+**Ability: Oblivious** — Immune to Daze and Mark.
 
 Evolves from **Pebblet** at level 20.
 
@@ -420,6 +442,8 @@ Evolves from **Pebblet** at level 20.
 
 A gentle water drop that mends, cleanses and slips away from danger.
 
+**Ability: Second Wind** — Heals 12% of its max HP when it enters the field.
+
 Evolves into **Tidalisk** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -440,6 +464,8 @@ Evolves into **Tidalisk** at level 20.
 *Healer* · stage 2 of 2 · found in Sunny Meadow, Sapphire Shore
 
 A gentle water drop that mends, cleanses and slips away from danger.
+
+**Ability: Second Wind** — Heals 12% of its max HP when it enters the field.
 
 Evolves from **Dewdrip** at level 20.
 
@@ -466,6 +492,8 @@ Evolves from **Dewdrip** at level 20.
 
 A patterned moth that marks, slows and eventually dooms its prey.
 
+**Ability: Cursed Body** — 30% chance to Seal the attacker's last-used move.
+
 Evolves into **Dusklady** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -486,6 +514,8 @@ Evolves into **Dusklady** at level 20.
 *Curse and Doom* · stage 2 of 2 · found in Whispering Woods, Ember Ruins
 
 A patterned moth that marks, slows and eventually dooms its prey.
+
+**Ability: Cursed Body** — 30% chance to Seal the attacker's last-used move.
 
 Evolves from **Gloomoth** at level 20.
 
@@ -512,6 +542,8 @@ Evolves from **Gloomoth** at level 20.
 
 A quick bird that pecks then swaps out, diving from the sky with a dodging charge.
 
+**Ability: Speed Boost** — Gains 10% SPE at the end of every turn (up to 50%).
+
 Evolves into **Cyclonix** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -532,6 +564,8 @@ Evolves into **Cyclonix** at level 20.
 *Hit and run* · stage 2 of 2 · found in Sunny Meadow, Stormcrest Peaks
 
 A quick bird that pecks then swaps out, diving from the sky with a dodging charge.
+
+**Ability: Speed Boost** — Gains 10% SPE at the end of every turn (up to 50%).
 
 Evolves from **Gustling** at level 20.
 
@@ -558,6 +592,8 @@ Evolves from **Gustling** at level 20.
 
 A faceted crystal that shields its allies and dazzles foes.
 
+**Ability: Ward Up** — On entry, gains a shield worth 15% of its max HP.
+
 Evolves into **Prismaw** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -578,6 +614,8 @@ Evolves into **Prismaw** at level 20.
 *Crystal support* · stage 2 of 2 · found in Echo Caverns, Ember Ruins
 
 A faceted crystal that shields its allies and dazzles foes.
+
+**Ability: Ward Up** — On entry, gains a shield worth 15% of its max HP.
 
 Evolves from **Glimmerling** at level 20.
 
@@ -604,6 +642,8 @@ Evolves from **Glimmerling** at level 20.
 
 A claw-handed mole that digs in, dodges underground and traps foes.
 
+**Ability: Stamina** — Each hit taken raises DEF and SPD by 10% (up to 50%).
+
 Evolves into **Tunnelord** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -624,6 +664,8 @@ Evolves into **Tunnelord** at level 20.
 *Trapper* · stage 2 of 2 · found in Sunny Meadow, Echo Caverns
 
 A claw-handed mole that digs in, dodges underground and traps foes.
+
+**Ability: Stamina** — Each hit taken raises DEF and SPD by 10% (up to 50%).
 
 Evolves from **Burrowby** at level 20.
 
@@ -650,6 +692,8 @@ Evolves from **Burrowby** at level 20.
 
 A drifting ice spirit that slows, armors up and freezes foes in place.
 
+**Ability: Clear Body** — Foes cannot lower this friend's stats or Slow it.
+
 Evolves into **Glacierra** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -670,6 +714,8 @@ Evolves into **Glacierra** at level 20.
 *Ice control* · stage 2 of 2 · found in Stormcrest Peaks
 
 A drifting ice spirit that slows, armors up and freezes foes in place.
+
+**Ability: Clear Body** — Foes cannot lower this friend's stats or Slow it.
 
 Evolves from **Frostwisp** at level 20.
 
@@ -696,6 +742,8 @@ Evolves from **Frostwisp** at level 20.
 
 A mirror-bellied rat that copies moves, reflects attacks and steals buffs.
 
+**Ability: Magic Bounce** — Reflects the first negative effect aimed at it back at its source.
+
 Evolves into **Reflectrix** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -716,6 +764,8 @@ Evolves into **Reflectrix** at level 20.
 *Mirror trickster* · stage 2 of 2 · found in Sapphire Shore, Ember Ruins
 
 A mirror-bellied rat that copies moves, reflects attacks and steals buffs.
+
+**Ability: Magic Bounce** — Reflects the first negative effect aimed at it back at its source.
 
 Evolves from **Mirrorat** at level 20.
 
@@ -742,6 +792,8 @@ Evolves from **Mirrorat** at level 20.
 
 An owl that rewinds cooldowns, seeds Doom and slows time itself.
 
+**Ability: Quick Reload** — Move cooldowns tick down one extra turn every turn.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 3 (150) | 2 (70) | 2 (70) | 2 (70) | 4 (120) | 4 (120) | 17 |
@@ -764,6 +816,8 @@ An owl that rewinds cooldowns, seeds Doom and slows time itself.
 *Armored bruiser* · stage 1 of 1 · rare (no evolution) · found in Echo Caverns
 
 An armored beetle that stacks plates and crushes with cannonball rolls.
+
+**Ability: Solid Rock** — Takes 25% less damage from Heavy hits.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -788,6 +842,8 @@ An armored beetle that stacks plates and crushes with cannonball rolls.
 
 A bat that drains life, wounds foes and trades its own health for power.
 
+**Ability: Moxie** — Knocking out a foe raises ATK and SPA by 25% for 3 turns.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 3 (150) | 3 (95) | 2 (70) | 1 (45) | 2 (70) | 4 (120) | 15 |
@@ -810,6 +866,8 @@ A bat that drains life, wounds foes and trades its own health for power.
 *Shapeshifting wall* · stage 1 of 1 · rare (no evolution) · found in Sapphire Shore, Ember Ruins
 
 A jelly cube that absorbs hits, copies stat changes and slams back what it took.
+
+**Ability: Contrary** — Stat changes affecting this friend are reversed.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -834,6 +892,8 @@ A jelly cube that absorbs hits, copies stat changes and slams back what it took.
 
 A flame-winged phoenix that revives once and dives for huge damage.
 
+**Ability: Aftermath** — If knocked out by an attack, the attacker loses 25% of its max HP.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 3 (150) | 2 (70) | 2 (70) | 4 (120) | 3 (95) | 3 (95) | 17 |
@@ -856,6 +916,8 @@ A flame-winged phoenix that revives once and dives for huge damage.
 *Chaos prism* · stage 1 of 1 · rare (no evolution) · found in Ember Ruins
 
 A rainbow prism that strips buffs, wipes the field and gambles on random effects.
+
+**Ability: Serene Grace** — Move effect chances are 50% higher.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -880,6 +942,8 @@ A rainbow prism that strips buffs, wipes the field and gambles on random effects
 
 A spotted mushroom that spreads spore clouds, wounds and regrowth.
 
+**Ability: Shed Skin** — 33% chance each turn to shed all negative effects.
+
 Evolves into **Mycelord** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -900,6 +964,8 @@ Evolves into **Mycelord** at level 20.
 *Fungus control* · stage 2 of 2 · found in Whispering Woods
 
 A spotted mushroom that spreads spore clouds, wounds and regrowth.
+
+**Ability: Shed Skin** — 33% chance each turn to shed all negative effects.
 
 Evolves from **Sporeling** at level 20.
 
@@ -926,6 +992,8 @@ Evolves from **Sporeling** at level 20.
 
 A dune pup that kicks sand, slows foes and ambushes from below.
 
+**Ability: Dust Veil** — Attackers are Slowed for 1 turn.
+
 Evolves into **Dunewyrm** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -946,6 +1014,8 @@ Evolves into **Dunewyrm** at level 20.
 *Desert evader* · stage 2 of 2 · found in Sunny Meadow, Echo Caverns
 
 A dune pup that kicks sand, slows foes and ambushes from below.
+
+**Ability: Dust Veil** — Attackers are Slowed for 1 turn.
 
 Evolves from **Sandpup** at level 20.
 
@@ -972,6 +1042,8 @@ Evolves from **Sandpup** at level 20.
 
 A gear-driven hound that speeds itself up and shatters defenses.
 
+**Ability: Technician** — Light hits deal 50% more damage.
+
 Evolves into **Gearhound** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -992,6 +1064,8 @@ Evolves into **Gearhound** at level 20.
 *Clockwork tempo* · stage 2 of 2 · found in Echo Caverns, Ember Ruins
 
 A gear-driven hound that speeds itself up and shatters defenses.
+
+**Ability: Technician** — Light hits deal 50% more damage.
 
 Evolves from **Cogpup** at level 20.
 
@@ -1018,6 +1092,8 @@ Evolves from **Cogpup** at level 20.
 
 A pearl-bearing clam that armors up and heals its allies.
 
+**Ability: Multiscale** — Takes 35% less damage while at full HP.
+
 Evolves into **Pearlarch** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1038,6 +1114,8 @@ Evolves into **Pearlarch** at level 20.
 *Shell support* · stage 2 of 2 · found in Sapphire Shore
 
 A pearl-bearing clam that armors up and heals its allies.
+
+**Ability: Multiscale** — Takes 35% less damage while at full HP.
 
 Evolves from **Pearlclam** at level 20.
 
@@ -1064,6 +1142,8 @@ Evolves from **Pearlclam** at level 20.
 
 A sure-footed goat that charges, locks horns and traps foes.
 
+**Ability: Hard Head** — Takes no recoil damage.
+
 Evolves into **Summitaur** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1084,6 +1164,8 @@ Evolves into **Summitaur** at level 20.
 *Mountain ram* · stage 2 of 2 · found in Stormcrest Peaks
 
 A sure-footed goat that charges, locks horns and traps foes.
+
+**Ability: Hard Head** — Takes no recoil damage.
 
 Evolves from **Cragoat** at level 20.
 
@@ -1110,6 +1192,8 @@ Evolves from **Cragoat** at level 20.
 
 A darting fish that grows into a tide-controlling sea beast.
 
+**Ability: Rattled** — Being hit raises SPE by 20% for 3 turns.
+
 Evolves into **Reefray** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1131,6 +1215,8 @@ Evolves into **Reefray** at level 16.
 
 A darting fish that grows into a tide-controlling sea beast.
 
+**Ability: Rattled** — Being hit raises SPE by 20% for 3 turns.
+
 Evolves from **Finlet** at level 16. Evolves into **Leviathor** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1151,6 +1237,8 @@ Evolves from **Finlet** at level 16. Evolves into **Leviathor** at level 32.
 *Sea tempo* · stage 3 of 3 · found in Sapphire Shore
 
 A darting fish that grows into a tide-controlling sea beast.
+
+**Ability: Rattled** — Being hit raises SPE by 20% for 3 turns.
 
 Evolves from **Reefray** at level 32.
 
@@ -1177,6 +1265,8 @@ Evolves from **Reefray** at level 32.
 
 A moon spirit that hexes foes and vanishes before they can strike.
 
+**Ability: Nightmare** — Foes suffering a negative effect lose 4% of their max HP each turn.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 3 (150) | 1 (45) | 2 (70) | 3 (95) | 4 (120) | 4 (120) | 17 |
@@ -1199,6 +1289,8 @@ A moon spirit that hexes foes and vanishes before they can strike.
 *Regrowing wall* · stage 1 of 1 · rare (no evolution) · found in Whispering Woods, Sapphire Shore
 
 A turtle with a living garden on its shell that heals the whole team.
+
+**Ability: Healing Aura** — On entry, heals all active allies by 10%.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -1223,6 +1315,8 @@ A turtle with a living garden on its shell that heals the whole team.
 
 An ice-winged bird that chills the whole field.
 
+**Ability: Keen Eye** — +20% chance for any attack to be a critical hit (1.5x).
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 3 (150) | 3 (95) | 2 (70) | 3 (95) | 2 (70) | 5 (145) | 18 |
@@ -1245,6 +1339,8 @@ An ice-winged bird that chills the whole field.
 *Lava bruiser* · stage 1 of 1 · rare (no evolution) · found in Echo Caverns, Ember Ruins
 
 A lava-veined beast that wounds everything around it.
+
+**Ability: Rough Skin** — Attackers lose 6% of their max HP when they hit this friend.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -1269,6 +1365,8 @@ A lava-veined beast that wounds everything around it.
 
 A swarm of bees that peck apart foes with random stings and rally allies with their buzz.
 
+**Ability: Skill Link** — Multi-hit moves deal 25% more damage.
+
 Evolves into **Honeybrute** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1290,6 +1388,8 @@ Evolves into **Honeybrute** at level 16.
 
 A swarm of bees that peck apart foes with random stings and rally allies with their buzz.
 
+**Ability: Skill Link** — Multi-hit moves deal 25% more damage.
+
 Evolves from **Bumblet** at level 16. Evolves into **Queenbuzz** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1310,6 +1410,8 @@ Evolves from **Bumblet** at level 16. Evolves into **Queenbuzz** at level 32.
 *Swarm striker* · stage 3 of 3 · found in Sunny Meadow, Whispering Woods
 
 A swarm of bees that peck apart foes with random stings and rally allies with their buzz.
+
+**Ability: Skill Link** — Multi-hit moves deal 25% more damage.
 
 Evolves from **Honeybrute** at level 32.
 
@@ -1336,6 +1438,8 @@ Evolves from **Honeybrute** at level 32.
 
 A bog pup that wallows in healing mud and drags foes down with it.
 
+**Ability: Wound Heal** — Heals 8% of its max HP instead of taking Wound damage.
+
 Evolves into **Bogbark** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1357,6 +1461,8 @@ Evolves into **Bogbark** at level 16.
 
 A bog pup that wallows in healing mud and drags foes down with it.
 
+**Ability: Wound Heal** — Heals 8% of its max HP instead of taking Wound damage.
+
 Evolves from **Mudpup** at level 16. Evolves into **Swampcrown** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1377,6 +1483,8 @@ Evolves from **Mudpup** at level 16. Evolves into **Swampcrown** at level 32.
 *Bog regenerator* · stage 3 of 3 · found in Whispering Woods, Sapphire Shore
 
 A bog pup that wallows in healing mud and drags foes down with it.
+
+**Ability: Wound Heal** — Heals 8% of its max HP instead of taking Wound damage.
 
 Evolves from **Bogbark** at level 32.
 
@@ -1403,6 +1511,8 @@ Evolves from **Bogbark** at level 32.
 
 A snow cub that grows into a blizzard lion who freezes the whole field.
 
+**Ability: Intimidate** — On entry, lowers the ATK and SPA of all foes by 20% for 3 turns.
+
 Evolves into **Snowmane** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1424,6 +1534,8 @@ Evolves into **Snowmane** at level 16.
 
 A snow cub that grows into a blizzard lion who freezes the whole field.
 
+**Ability: Intimidate** — On entry, lowers the ATK and SPA of all foes by 20% for 3 turns.
+
 Evolves from **Flurrcub** at level 16. Evolves into **Blizzarion** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1444,6 +1556,8 @@ Evolves from **Flurrcub** at level 16. Evolves into **Blizzarion** at level 32.
 *Ice controller* · stage 3 of 3 · found in Stormcrest Peaks
 
 A snow cub that grows into a blizzard lion who freezes the whole field.
+
+**Ability: Intimidate** — On entry, lowers the ATK and SPA of all foes by 20% for 3 turns.
 
 Evolves from **Snowmane** at level 32.
 
@@ -1470,6 +1584,8 @@ Evolves from **Snowmane** at level 32.
 
 A rose-bud brawler: every bloom has thorns, and its petals bleed.
 
+**Ability: Reckless** — Moves with recoil deal 25% more damage.
+
 Evolves into **Rosewhip** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1491,6 +1607,8 @@ Evolves into **Rosewhip** at level 16.
 
 A rose-bud brawler: every bloom has thorns, and its petals bleed.
 
+**Ability: Reckless** — Moves with recoil deal 25% more damage.
+
 Evolves from **Thornet** at level 16. Evolves into **Bramblequeen** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1511,6 +1629,8 @@ Evolves from **Thornet** at level 16. Evolves into **Bramblequeen** at level 32.
 *Thorny bruiser* · stage 3 of 3 · found in Sunny Meadow, Whispering Woods
 
 A rose-bud brawler: every bloom has thorns, and its petals bleed.
+
+**Ability: Reckless** — Moves with recoil deal 25% more damage.
 
 Evolves from **Rosewhip** at level 32.
 
@@ -1537,6 +1657,8 @@ Evolves from **Rosewhip** at level 32.
 
 A star-chunk that burns itself up for huge blasts; its supernova form can wipe a whole team.
 
+**Ability: Download** — On entry, raises its own ATK and SPA by 25% for 3 turns.
+
 Evolves into **Starfall** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1558,6 +1680,8 @@ Evolves into **Starfall** at level 16.
 
 A star-chunk that burns itself up for huge blasts; its supernova form can wipe a whole team.
 
+**Ability: Download** — On entry, raises its own ATK and SPA by 25% for 3 turns.
+
 Evolves from **Cometling** at level 16. Evolves into **Novadrake** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1578,6 +1702,8 @@ Evolves from **Cometling** at level 16. Evolves into **Novadrake** at level 32.
 *Starfire bomber* · stage 3 of 3 · found in Stormcrest Peaks, Ember Ruins
 
 A star-chunk that burns itself up for huge blasts; its supernova form can wipe a whole team.
+
+**Ability: Download** — On entry, raises its own ATK and SPA by 25% for 3 turns.
 
 Evolves from **Starfall** at level 32.
 
@@ -1604,6 +1730,8 @@ Evolves from **Starfall** at level 32.
 
 A sea urchin that curls up and punishes anything that touches it.
 
+**Ability: Rough Skin** — Attackers lose 6% of their max HP when they hit this friend.
+
 Evolves into **Spineurchin** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1625,6 +1753,8 @@ Evolves into **Spineurchin** at level 16.
 
 A sea urchin that curls up and punishes anything that touches it.
 
+**Ability: Rough Skin** — Attackers lose 6% of their max HP when they hit this friend.
+
 Evolves from **Urchi** at level 16. Evolves into **Pricklord** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1645,6 +1775,8 @@ Evolves from **Urchi** at level 16. Evolves into **Pricklord** at level 32.
 *Spiny tank* · stage 3 of 3 · found in Sapphire Shore
 
 A sea urchin that curls up and punishes anything that touches it.
+
+**Ability: Rough Skin** — Attackers lose 6% of their max HP when they hit this friend.
 
 Evolves from **Spineurchin** at level 32.
 
@@ -1671,6 +1803,8 @@ Evolves from **Spineurchin** at level 32.
 
 A molten pup that gnaws, wounds and gets hotter the longer it fights.
 
+**Ability: Berserk** — Once, when brought to half HP, raises ATK and SPA by 30% for 3 turns.
+
 Evolves into **Magmahound** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1692,6 +1826,8 @@ Evolves into **Magmahound** at level 16.
 
 A molten pup that gnaws, wounds and gets hotter the longer it fights.
 
+**Ability: Berserk** — Once, when brought to half HP, raises ATK and SPA by 30% for 3 turns.
+
 Evolves from **Lavapup** at level 16. Evolves into **Calderon** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1712,6 +1848,8 @@ Evolves from **Lavapup** at level 16. Evolves into **Calderon** at level 32.
 *Magma bruiser* · stage 3 of 3 · found in Echo Caverns, Ember Ruins
 
 A molten pup that gnaws, wounds and gets hotter the longer it fights.
+
+**Ability: Berserk** — Once, when brought to half HP, raises ATK and SPA by 30% for 3 turns.
 
 Evolves from **Magmahound** at level 32.
 
@@ -1738,6 +1876,8 @@ Evolves from **Magmahound** at level 32.
 
 A wind cub that dodges everything, steals buffs and pushes foes around.
 
+**Ability: Prankster** — Utility moves gain Priority.
+
 Evolves into **Galelynx** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1759,6 +1899,8 @@ Evolves into **Galelynx** at level 16.
 
 A wind cub that dodges everything, steals buffs and pushes foes around.
 
+**Ability: Prankster** — Utility moves gain Priority.
+
 Evolves from **Breezecub** at level 16. Evolves into **Cycloneth** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1779,6 +1921,8 @@ Evolves from **Breezecub** at level 16. Evolves into **Cycloneth** at level 32.
 *Gale trickster* · stage 3 of 3 · found in Sunny Meadow, Stormcrest Peaks
 
 A wind cub that dodges everything, steals buffs and pushes foes around.
+
+**Ability: Prankster** — Utility moves gain Priority.
 
 Evolves from **Galelynx** at level 32.
 
@@ -1805,6 +1949,8 @@ Evolves from **Galelynx** at level 32.
 
 A little bell whose chimes heal, hasten and shield its whole team.
 
+**Ability: Insomnia** — Immune to Stun.
+
 Evolves into **Belltoll** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1826,6 +1972,8 @@ Evolves into **Belltoll** at level 16.
 
 A little bell whose chimes heal, hasten and shield its whole team.
 
+**Ability: Insomnia** — Immune to Stun.
+
 Evolves from **Chimey** at level 16. Evolves into **Carillon** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1846,6 +1994,8 @@ Evolves from **Chimey** at level 16. Evolves into **Carillon** at level 32.
 *Chime support* · stage 3 of 3 · found in Sunny Meadow, Ember Ruins
 
 A little bell whose chimes heal, hasten and shield its whole team.
+
+**Ability: Insomnia** — Immune to Stun.
 
 Evolves from **Belltoll** at level 32.
 
@@ -1872,6 +2022,8 @@ Evolves from **Belltoll** at level 32.
 
 A shadow kitten that marks prey, silences moves and counts down to doom.
 
+**Ability: Pressure** — Foes' moves have +1 cooldown whenever they are used.
+
 Evolves into **Duskpanther** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1893,6 +2045,8 @@ Evolves into **Duskpanther** at level 16.
 
 A shadow kitten that marks prey, silences moves and counts down to doom.
 
+**Ability: Pressure** — Foes' moves have +1 cooldown whenever they are used.
+
 Evolves from **Shadowcub** at level 16. Evolves into **Nightstalker** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1913,6 +2067,8 @@ Evolves from **Shadowcub** at level 16. Evolves into **Nightstalker** at level 3
 *Shadow curser* · stage 3 of 3 · found in Whispering Woods, Ember Ruins
 
 A shadow kitten that marks prey, silences moves and counts down to doom.
+
+**Ability: Pressure** — Foes' moves have +1 cooldown whenever they are used.
 
 Evolves from **Duskpanther** at level 32.
 
@@ -1939,6 +2095,8 @@ Evolves from **Duskpanther** at level 32.
 
 A water horse that dives, charges and binds foes in the current.
 
+**Ability: Regenerator** — Heals 25% of its max HP when it switches out.
+
 Evolves into **Tidemane** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1960,6 +2118,8 @@ Evolves into **Tidemane** at level 16.
 
 A water horse that dives, charges and binds foes in the current.
 
+**Ability: Regenerator** — Heals 25% of its max HP when it switches out.
+
 Evolves from **Kelpie** at level 16. Evolves into **Maelstrider** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -1980,6 +2140,8 @@ Evolves from **Kelpie** at level 16. Evolves into **Maelstrider** at level 32.
 *Tide charger* · stage 3 of 3 · found in Sapphire Shore
 
 A water horse that dives, charges and binds foes in the current.
+
+**Ability: Regenerator** — Heals 25% of its max HP when it switches out.
 
 Evolves from **Tidemane** at level 32.
 
@@ -2006,6 +2168,8 @@ Evolves from **Tidemane** at level 32.
 
 A caterpillar that spins protective silk and grows into a healing butterfly.
 
+**Ability: Oblivious** — Immune to Daze and Mark.
+
 Evolves into **Cocoonix** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2027,6 +2191,8 @@ Evolves into **Cocoonix** at level 16.
 
 A caterpillar that spins protective silk and grows into a healing butterfly.
 
+**Ability: Oblivious** — Immune to Daze and Mark.
+
 Evolves from **Caterpix** at level 16. Evolves into **Papilion** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2047,6 +2213,8 @@ Evolves from **Caterpix** at level 16. Evolves into **Papilion** at level 32.
 *Silk support* · stage 3 of 3 · found in Sunny Meadow, Whispering Woods
 
 A caterpillar that spins protective silk and grows into a healing butterfly.
+
+**Ability: Oblivious** — Immune to Daze and Mark.
 
 Evolves from **Cocoonix** at level 32.
 
@@ -2073,6 +2241,8 @@ Evolves from **Cocoonix** at level 32.
 
 A cactus sprout that stores up spines and retaliates with thousands of needles.
 
+**Ability: Venom Touch** — 25% chance for any hit to also Wound the target.
+
 Evolves into **Saguarock** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2094,6 +2264,8 @@ Evolves into **Saguarock** at level 16.
 
 A cactus sprout that stores up spines and retaliates with thousands of needles.
 
+**Ability: Venom Touch** — 25% chance for any hit to also Wound the target.
+
 Evolves from **Pricklet** at level 16. Evolves into **Cactitan** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2114,6 +2286,8 @@ Evolves from **Pricklet** at level 16. Evolves into **Cactitan** at level 32.
 *Cactus counter* · stage 3 of 3 · found in Sunny Meadow, Echo Caverns
 
 A cactus sprout that stores up spines and retaliates with thousands of needles.
+
+**Ability: Venom Touch** — 25% chance for any hit to also Wound the target.
 
 Evolves from **Saguarock** at level 32.
 
@@ -2140,6 +2314,8 @@ Evolves from **Saguarock** at level 32.
 
 A snail that retreats into a stone shell and slowly heals while foes tire themselves out.
 
+**Ability: Shell Armor** — Cannot be hit by critical hits.
+
 Evolves into **Stoneshell** at level 16.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2161,6 +2337,8 @@ Evolves into **Stoneshell** at level 16.
 
 A snail that retreats into a stone shell and slowly heals while foes tire themselves out.
 
+**Ability: Shell Armor** — Cannot be hit by critical hits.
+
 Evolves from **Snaillet** at level 16. Evolves into **Mountaingast** at level 32.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2181,6 +2359,8 @@ Evolves from **Snaillet** at level 16. Evolves into **Mountaingast** at level 32
 *Shell tank* · stage 3 of 3 · found in Sunny Meadow, Echo Caverns
 
 A snail that retreats into a stone shell and slowly heals while foes tire themselves out.
+
+**Ability: Shell Armor** — Cannot be hit by critical hits.
 
 Evolves from **Stoneshell** at level 32.
 
@@ -2207,6 +2387,8 @@ Evolves from **Stoneshell** at level 32.
 
 A dandelion-maned cub that scatters seeds and wishes across the whole field.
 
+**Ability: Serene Grace** — Move effect chances are 50% higher.
+
 Evolves into **Puffmane** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2227,6 +2409,8 @@ Evolves into **Puffmane** at level 20.
 *Seed spreader* · stage 2 of 2 · found in Sunny Meadow
 
 A dandelion-maned cub that scatters seeds and wishes across the whole field.
+
+**Ability: Serene Grace** — Move effect chances are 50% higher.
 
 Evolves from **Dandycub** at level 20.
 
@@ -2253,6 +2437,8 @@ Evolves from **Dandycub** at level 20.
 
 A hare that hops in and out of danger and leaves foes tangled in bad luck.
 
+**Ability: Run Away** — Cannot be trapped; can always switch out.
+
 Evolves into **Bounderhare** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2273,6 +2459,8 @@ Evolves into **Bounderhare** at level 20.
 *Hop trickster* · stage 2 of 2 · found in Sunny Meadow, Stormcrest Peaks
 
 A hare that hops in and out of danger and leaves foes tangled in bad luck.
+
+**Ability: Run Away** — Cannot be trapped; can always switch out.
 
 Evolves from **Leapkin** at level 20.
 
@@ -2299,6 +2487,8 @@ Evolves from **Leapkin** at level 20.
 
 A ladybug that polishes its shell until it reflects hits back.
 
+**Ability: Fur Coat** — Takes 20% less damage from physical moves.
+
 Evolves into **Rubybeetle** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2319,6 +2509,8 @@ Evolves into **Rubybeetle** at level 20.
 *Shell counter* · stage 2 of 2 · found in Sunny Meadow, Whispering Woods
 
 A ladybug that polishes its shell until it reflects hits back.
+
+**Ability: Fur Coat** — Takes 20% less damage from physical moves.
 
 Evolves from **Spotter** at level 20.
 
@@ -2345,6 +2537,8 @@ Evolves from **Spotter** at level 20.
 
 A fluffy cloud lamb that rains healing on its friends and shelters them from storms.
 
+**Ability: Spirit Ward** — Takes 20% less damage from special moves.
+
 Evolves into **Stormram** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2365,6 +2559,8 @@ Evolves into **Stormram** at level 20.
 *Cloud support* · stage 2 of 2 · found in Sunny Meadow, Stormcrest Peaks
 
 A fluffy cloud lamb that rains healing on its friends and shelters them from storms.
+
+**Ability: Spirit Ward** — Takes 20% less damage from special moves.
 
 Evolves from **Cloudlamb** at level 20.
 
@@ -2391,6 +2587,8 @@ Evolves from **Cloudlamb** at level 20.
 
 An acorn squirrel that grows into a living oak wall.
 
+**Ability: Last Stand** — Deals 30% more damage at or below a third of its HP.
+
 Evolves into **Oakguard** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2411,6 +2609,8 @@ Evolves into **Oakguard** at level 20.
 *Oak tank* · stage 2 of 2 · found in Whispering Woods
 
 An acorn squirrel that grows into a living oak wall.
+
+**Ability: Last Stand** — Deals 30% more damage at or below a third of its HP.
 
 Evolves from **Acornet** at level 20.
 
@@ -2437,6 +2637,8 @@ Evolves from **Acornet** at level 20.
 
 A fox lit by spirit flames that vanishes and reappears behind foes.
 
+**Ability: Flame Touch** — 30% chance to Wound an attacker for 2 turns.
+
 Evolves into **Kitsunar** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2457,6 +2659,8 @@ Evolves into **Kitsunar** at level 20.
 *Spirit trickster* · stage 2 of 2 · found in Whispering Woods, Ember Ruins
 
 A fox lit by spirit flames that vanishes and reappears behind foes.
+
+**Ability: Flame Touch** — 30% chance to Wound an attacker for 2 turns.
 
 Evolves from **Foxfire** at level 20.
 
@@ -2483,6 +2687,8 @@ Evolves from **Foxfire** at level 20.
 
 A firefly with a lantern that lights the way for its allies.
 
+**Ability: Healing Aura** — On entry, heals all active allies by 10%.
+
 Evolves into **Lanternoth** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2503,6 +2709,8 @@ Evolves into **Lanternoth** at level 20.
 *Lantern support* · stage 2 of 2 · found in Whispering Woods
 
 A firefly with a lantern that lights the way for its allies.
+
+**Ability: Healing Aura** — On entry, heals all active allies by 10%.
 
 Evolves from **Fireflit** at level 20.
 
@@ -2529,6 +2737,8 @@ Evolves from **Fireflit** at level 20.
 
 A crystal-backed digger that crushes foes with mineral fists.
 
+**Ability: Heavy Hitter** — Heavy hits deal 20% more damage.
+
 Evolves into **Geodrake** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2549,6 +2759,8 @@ Evolves into **Geodrake** at level 20.
 *Geode bruiser* · stage 2 of 2 · found in Echo Caverns
 
 A crystal-backed digger that crushes foes with mineral fists.
+
+**Ability: Heavy Hitter** — Heavy hits deal 20% more damage.
 
 Evolves from **Geodot** at level 20.
 
@@ -2575,6 +2787,8 @@ Evolves from **Geodot** at level 20.
 
 A glow-worm whose light helps allies take aim and hide in the dark.
 
+**Ability: Steady Aim** — Attacks never miss because of Daze.
+
 Evolves into **Lumenwyrm** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2595,6 +2809,8 @@ Evolves into **Lumenwyrm** at level 20.
 *Glow support* · stage 2 of 2 · found in Echo Caverns
 
 A glow-worm whose light helps allies take aim and hide in the dark.
+
+**Ability: Steady Aim** — Attacks never miss because of Daze.
 
 Evolves from **Glowworm** at level 20.
 
@@ -2621,6 +2837,8 @@ Evolves from **Glowworm** at level 20.
 
 A toad that pulls foes in with magnetism and locks them down.
 
+**Ability: Shadow Tag** — Foes cannot switch out voluntarily while this friend is on the field.
+
 Evolves into **Ferrofrog** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2641,6 +2859,8 @@ Evolves into **Ferrofrog** at level 20.
 *Magnet controller* · stage 2 of 2 · found in Echo Caverns, Ember Ruins
 
 A toad that pulls foes in with magnetism and locks them down.
+
+**Ability: Shadow Tag** — Foes cannot switch out voluntarily while this friend is on the field.
 
 Evolves from **Magnetoad** at level 20.
 
@@ -2667,6 +2887,8 @@ Evolves from **Magnetoad** at level 20.
 
 A tadpole that sips rain, heals and siphons strength from foes.
 
+**Ability: Dew Skin** — Heals 6% of its max HP at the end of every turn.
+
 Evolves into **Rainfrog** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2687,6 +2909,8 @@ Evolves into **Rainfrog** at level 20.
 *Rain regenerator* · stage 2 of 2 · found in Sapphire Shore
 
 A tadpole that sips rain, heals and siphons strength from foes.
+
+**Ability: Dew Skin** — Heals 6% of its max HP at the end of every turn.
 
 Evolves from **Tadwink** at level 20.
 
@@ -2713,6 +2937,8 @@ Evolves from **Tadwink** at level 20.
 
 A drifting jelly whose stings and fog slow the whole field.
 
+**Ability: Effect Spore** — 30% chance to Wound, Daze or Slow an attacker.
+
 Evolves into **Medusar** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2733,6 +2959,8 @@ Evolves into **Medusar** at level 20.
 *Venom curser* · stage 2 of 2 · found in Sapphire Shore
 
 A drifting jelly whose stings and fog slow the whole field.
+
+**Ability: Effect Spore** — 30% chance to Wound, Daze or Slow an attacker.
 
 Evolves from **Jellybloom** at level 20.
 
@@ -2759,6 +2987,8 @@ Evolves from **Jellybloom** at level 20.
 
 A crab that pinches, drains and shrugs off hits with a hard shell.
 
+**Ability: Brawn Power** — Physical moves deal 20% more damage.
+
 Evolves into **Scarabrute** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2779,6 +3009,8 @@ Evolves into **Scarabrute** at level 20.
 *Pincer bruiser* · stage 2 of 2 · found in Echo Caverns, Sapphire Shore
 
 A crab that pinches, drains and shrugs off hits with a hard shell.
+
+**Ability: Brawn Power** — Physical moves deal 20% more damage.
 
 Evolves from **Scuttler** at level 20.
 
@@ -2805,6 +3037,8 @@ Evolves from **Scuttler** at level 20.
 
 A young yeti with a snowy temper and a frostbitten bite.
 
+**Ability: Guts** — Deals 30% more damage while suffering a negative effect.
+
 Evolves into **Frostbrute** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2825,6 +3059,8 @@ Evolves into **Frostbrute** at level 20.
 *Snow bruiser* · stage 2 of 2 · found in Stormcrest Peaks
 
 A young yeti with a snowy temper and a frostbitten bite.
+
+**Ability: Guts** — Deals 30% more damage while suffering a negative effect.
 
 Evolves from **Yetilet** at level 20.
 
@@ -2851,6 +3087,8 @@ Evolves from **Yetilet** at level 20.
 
 A young eagle that dives out of the sky to snare its prey.
 
+**Ability: Spotter's Eye** — On entry, marks the foe with the highest attack.
+
 Evolves into **Thunderhawk** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2871,6 +3109,8 @@ Evolves into **Thunderhawk** at level 20.
 *Sky charger* · stage 2 of 2 · found in Stormcrest Peaks
 
 A young eagle that dives out of the sky to snare its prey.
+
+**Ability: Spotter's Eye** — On entry, marks the foe with the highest attack.
 
 Evolves from **Eaglet** at level 20.
 
@@ -2897,6 +3137,8 @@ Evolves from **Eaglet** at level 20.
 
 A guardian pup etched with sealing runes.
 
+**Ability: Keen Mind** — Immune to Seal and Taunt.
+
 Evolves into **Runewarden** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2917,6 +3159,8 @@ Evolves into **Runewarden** at level 20.
 *Rune tank* · stage 2 of 2 · found in Ember Ruins
 
 A guardian pup etched with sealing runes.
+
+**Ability: Keen Mind** — Immune to Seal and Taunt.
 
 Evolves from **Runepup** at level 20.
 
@@ -2943,6 +3187,8 @@ Evolves from **Runepup** at level 20.
 
 A bandaged wanderer who curses foes from beyond the tomb.
 
+**Ability: Magic Guard** — Immune to Wound, Doom and leech effects from foes.
+
 Evolves into **Pharoth** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -2963,6 +3209,8 @@ Evolves into **Pharoth** at level 20.
 *Tomb curser* · stage 2 of 2 · found in Ember Ruins
 
 A bandaged wanderer who curses foes from beyond the tomb.
+
+**Ability: Magic Guard** — Immune to Wound, Doom and leech effects from foes.
 
 Evolves from **Wrapling** at level 20.
 
@@ -2989,6 +3237,8 @@ Evolves from **Wrapling** at level 20.
 
 A ghost wisp that phases through attacks and chills what it touches.
 
+**Ability: Slippery** — 15% chance to dodge each attack.
+
 Evolves into **Spectrael** at level 20.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
@@ -3009,6 +3259,8 @@ Evolves into **Spectrael** at level 20.
 *Ghost trickster* · stage 2 of 2 · found in Whispering Woods, Ember Ruins
 
 A ghost wisp that phases through attacks and chills what it touches.
+
+**Ability: Slippery** — 15% chance to dodge each attack.
 
 Evolves from **Wisplet** at level 20.
 
@@ -3035,6 +3287,8 @@ Evolves from **Wisplet** at level 20.
 
 A living mosaic whose shards split light into beams and mend its allies.
 
+**Ability: Multiscale** — Takes 35% less damage while at full HP.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 3 (150) | 1 (45) | 4 (120) | 3 (95) | 4 (120) | 3 (95) | 18 |
@@ -3057,6 +3311,8 @@ A living mosaic whose shards split light into beams and mend its allies.
 *Time warper* · stage 1 of 1 · rare (no evolution) · found in Ember Ruins
 
 A time loop in creature form: it rewinds cooldowns and turns buffs against their owners.
+
+**Ability: Contrary** — Stat changes affecting this friend are reversed.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3081,6 +3337,8 @@ A time loop in creature form: it rewinds cooldowns and turns buffs against their
 
 A storm-cloud dinosaur that shakes the field with thunder and speeds up its team.
 
+**Ability: Mind Over Matter** — Special moves deal 20% more damage.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 4 (175) | 3 (95) | 3 (95) | 3 (95) | 3 (95) | 2 (70) | 18 |
@@ -3103,6 +3361,8 @@ A storm-cloud dinosaur that shakes the field with thunder and speeds up its team
 *Rust ghost* · stage 1 of 1 · rare (no evolution) · found in Echo Caverns, Ember Ruins
 
 A rusted knight's ghost that corrodes armor and retaliates with flaking steel.
+
+**Ability: Aftermath** — If knocked out by an attack, the attacker loses 25% of its max HP.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3127,6 +3387,8 @@ A rusted knight's ghost that corrodes armor and retaliates with flaking steel.
 
 A hungry void that devours buffs, shatters shields and ends with a slow collapse.
 
+**Ability: Moxie** — Knocking out a foe raises ATK and SPA by 25% for 3 turns.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 4 (175) | 4 (120) | 1 (45) | 4 (120) | 3 (95) | 3 (95) | 19 |
@@ -3149,6 +3411,8 @@ A hungry void that devours buffs, shatters shields and ends with a slow collapse
 *Dawn support* · stage 1 of 1 · rare (no evolution) · found in Sunny Meadow, Stormcrest Peaks
 
 A sun-crowned guide that heals and hastens the whole team.
+
+**Ability: Second Wind** — Heals 12% of its max HP when it enters the field.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3173,6 +3437,8 @@ A sun-crowned guide that heals and hastens the whole team.
 
 A scythe-wielder that tallies souls and ends fights with a final toll.
 
+**Ability: Pressure** — Foes' moves have +1 cooldown whenever they are used.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 3 (150) | 5 (145) | 1 (45) | 3 (95) | 3 (95) | 4 (120) | 19 |
@@ -3195,6 +3461,8 @@ A scythe-wielder that tallies souls and ends fights with a final toll.
 *Angler trapper* · stage 1 of 1 · rare (no evolution) · found in Sapphire Shore
 
 A deep-sea angler whose glowing lure draws foes into a crushing trap.
+
+**Ability: Analytic** — Deals 30% more damage to foes that have already moved this turn.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3219,6 +3487,8 @@ A deep-sea angler whose glowing lure draws foes into a crushing trap.
 
 A plated pangolin golem that stacks armor until it can roll over anything.
 
+**Ability: Solid Rock** — Takes 25% less damage from Heavy hits.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 4 (175) | 2 (70) | 5 (145) | 1 (45) | 5 (145) | 2 (70) | 19 |
@@ -3241,6 +3511,8 @@ A plated pangolin golem that stacks armor until it can roll over anything.
 *Wind spirit* · stage 1 of 1 · rare (no evolution) · found in Sunny Meadow, Stormcrest Peaks
 
 A wind spirit who gives her team evasion and speed.
+
+**Ability: Speed Boost** — Gains 10% SPE at the end of every turn (up to 50%).
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3265,6 +3537,8 @@ A wind spirit who gives her team evasion and speed.
 
 A fire queen with a crown of cinders and a retort for everything.
 
+**Ability: Last Stand** — Deals 30% more damage at or below a third of its HP.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 3 (150) | 3 (95) | 1 (45) | 5 (145) | 3 (95) | 3 (95) | 18 |
@@ -3287,6 +3561,8 @@ A fire queen with a crown of cinders and a retort for everything.
 *Echo fox* · stage 1 of 1 · rare (no evolution) · found in Sunny Meadow, Echo Caverns
 
 A big-eared fox who repeats whatever the last foe tried.
+
+**Ability: Quick Reload** — Move cooldowns tick down one extra turn every turn.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3311,6 +3587,8 @@ A big-eared fox who repeats whatever the last foe tried.
 
 A fortress wyrm that shelters allies behind stone scales.
 
+**Ability: Sturdy** — Once per battle, survives a lethal hit from full HP with 1 HP.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 4 (175) | 4 (120) | 5 (145) | 1 (45) | 4 (120) | 1 (45) | 19 |
@@ -3333,6 +3611,8 @@ A fortress wyrm that shelters allies behind stone scales.
 *Sleep siren* · stage 1 of 1 · rare (no evolution) · found in Whispering Woods, Sapphire Shore
 
 A siren of the deep whose lullaby puts foes to sleep.
+
+**Ability: Nightmare** — Foes suffering a negative effect lose 4% of their max HP each turn.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3357,6 +3637,8 @@ A siren of the deep whose lullaby puts foes to sleep.
 
 A jester whose tricks are never the same twice.
 
+**Ability: Hustle** — Deals 20% more damage, but 10% of attacks miss.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 3 (150) | 3 (95) | 2 (70) | 3 (95) | 2 (70) | 4 (120) | 17 |
@@ -3379,6 +3661,8 @@ A jester whose tricks are never the same twice.
 *Garden matriarch* · stage 1 of 1 · rare (no evolution) · found in Sunny Meadow, Whispering Woods
 
 A matriarch of thorns that nurtures allies and snares foes in roots.
+
+**Ability: Regenerator** — Heals 25% of its max HP when it switches out.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3403,6 +3687,8 @@ A matriarch of thorns that nurtures allies and snares foes in roots.
 
 A rainbow moth whose scales dazzle foes and sharpen allies.
 
+**Ability: Download** — On entry, raises its own ATK and SPA by 25% for 3 turns.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 3 (150) | 1 (45) | 1 (45) | 3 (95) | 3 (95) | 5 (145) | 16 |
@@ -3425,6 +3711,8 @@ A rainbow moth whose scales dazzle foes and sharpen allies.
 *Clock relic* · stage 1 of 1 · rare (no evolution) · found in Ember Ruins
 
 A clockwork relic that freezes moments and resets its own cooldowns.
+
+**Ability: Stall** — Always acts last in a turn.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3449,6 +3737,8 @@ A clockwork relic that freezes moments and resets its own cooldowns.
 
 A magnet crab that yanks foes around and crushes them in an iron grip.
 
+**Ability: Mold Breaker** — Attacks ignore the target's Armor and Shield.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 4 (175) | 4 (120) | 5 (145) | 2 (70) | 3 (95) | 2 (70) | 20 |
@@ -3471,6 +3761,8 @@ A magnet crab that yanks foes around and crushes them in an iron grip.
 *Frost serpent* · stage 1 of 1 · rare (no evolution) · found in Stormcrest Peaks
 
 A frost serpent whose stare freezes foes solid.
+
+**Ability: Clear Body** — Foes cannot lower this friend's stats or Slow it.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3495,6 +3787,8 @@ A frost serpent whose stare freezes foes solid.
 
 A desert djinn that blurs reality, hiding and healing its team.
 
+**Ability: Magic Bounce** — Reflects the first negative effect aimed at it back at its source.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 2 (125) | 1 (45) | 1 (45) | 3 (95) | 3 (95) | 5 (145) | 15 |
@@ -3517,6 +3811,8 @@ A desert djinn that blurs reality, hiding and healing its team.
 *Bone sorcerer* · stage 1 of 1 · rare (no evolution) · found in Whispering Woods, Ember Ruins
 
 A bone sorcerer that walls itself in ribs and hexes foes with rattling doom.
+
+**Ability: Cursed Body** — 30% chance to Seal the attacker's last-used move.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3541,6 +3837,8 @@ A bone sorcerer that walls itself in ribs and hexes foes with rattling doom.
 
 A radiant angel that mends and wards the whole team.
 
+**Ability: Magic Guard** — Immune to Wound, Doom and leech effects from foes.
+
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
 | 4 (175) | 1 (45) | 2 (70) | 2 (70) | 4 (120) | 4 (120) | 17 |
@@ -3563,6 +3861,8 @@ A radiant angel that mends and wards the whole team.
 *Chess tactician* · stage 1 of 1 · rare (no evolution) · found in Ember Ruins
 
 A chess knight that sacrifices tempo for a decisive fork.
+
+**Ability: Reckless** — Moves with recoil deal 25% more damage.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|

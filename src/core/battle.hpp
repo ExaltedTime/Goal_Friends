@@ -46,6 +46,8 @@ struct Fighter {
     int chargeMove = -1;
     Ref chargeTarget;
     bool actedThisTurn = false;
+    bool abUsed = false;   // once-per-battle ability already triggered (survives switching)
+    int abStack = 0;       // Stamina stacks
 
     bool alive() const { return hp > 0; }
     double hpPct() const { return maxHp > 0 ? static_cast<double>(hp) / maxHp : 0.0; }
@@ -127,6 +129,10 @@ public:
 
     int rnd(int n);  // uniform in [0, n)
 
+    // Test hooks: drive single internals without a full turn.
+    int test_dealHit(Ref u, Ref t, double power, const Move& m, bool* focus) { bool f = focus ? *focus : false; return dealHit(u, t, power, m, 1.0, 0, f); }
+    void test_apply(const Effect& e, Ref target, Ref source) { applyEffect(e, target, source); }
+
 private:
     std::mt19937 rng_;
     struct Entry { Ref who; Action act; int prio; double spe; uint32_t tie; int teamIdx; };
@@ -149,6 +155,11 @@ private:
     void endOfTurn();
     void checkWinner();
     void say(const std::string& text, Ref actor = Ref{-1, -1});
+    void onEnter(Ref r);
+    void abSay(Ref r);
+    static Ab abil(const Fighter& f) { return f.sp().ability; }
+    static bool hasNegative(const Fighter& f);
+    bool foeHas(int side, Ab a) const;
     int countBuffs(const Fighter& f) const;
     void clearBuffs(Fighter& f);
     Ref randomEnemy(int side);

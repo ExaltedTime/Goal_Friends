@@ -65,6 +65,7 @@ int main() {
         std::printf("\n### %d. %s\n\n", s.id + 1, s.name.c_str());
         std::printf("*%s* · stage %d of %d%s · found in %s\n\n", s.role.c_str(), s.stage, total, s.rare ? " · rare (no evolution)" : "", areas(s.habitats).c_str());
         std::printf("%s\n\n", s.blurb.c_str());
+        std::printf("**Ability: %s** — %s\n\n", abilityInfo(s.ability).name, abilityInfo(s.ability).desc);
         const int f = from[static_cast<size_t>(s.id)];
         if (f >= 0) std::printf("Evolves from **%s** at level %d.%s", all[static_cast<size_t>(f)].name.c_str(), all[static_cast<size_t>(f)].evolveLevel, s.evolvesTo >= 0 ? " " : "\n\n");
         if (s.evolvesTo >= 0) std::printf("Evolves into **%s** at level %d.\n\n", all[static_cast<size_t>(s.evolvesTo)].name.c_str(), s.evolveLevel);

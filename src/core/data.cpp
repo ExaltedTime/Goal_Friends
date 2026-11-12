@@ -382,7 +382,11 @@ std::vector<Species> build() {
         "A turtle with a living garden on its shell that heals the whole team.",
         "An ice-winged bird that chills the whole field.",
         "A lava-veined beast that wounds everything around it."};
-    for (auto& sp : v) if (sp.line < 27) { sp.role = kRole[sp.line]; sp.blurb = kBlurb[sp.line]; }
+    // Abilities of the original 27 lines (the generated roster assigns its own).
+    static const Ab kAbility[27] = {Ab::Rattled, Ab::Static, Ab::FlameTouch, Ab::Oblivious, Ab::SecondWind, Ab::CursedBody, Ab::SpeedBoost, Ab::WardUp, Ab::Stamina,
+        Ab::ClearBody, Ab::MagicBounce, Ab::QuickReload, Ab::SolidRock, Ab::Moxie, Ab::Contrary, Ab::Aftermath, Ab::SereneGrace, Ab::ShedSkin, Ab::DustVeil,
+        Ab::Technician, Ab::Multiscale, Ab::HardHead, Ab::Rattled, Ab::Nightmare, Ab::HealingAura, Ab::KeenEye, Ab::RoughSkin};
+    for (auto& sp : v) if (sp.line < 27) { sp.role = kRole[sp.line]; sp.blurb = kBlurb[sp.line]; sp.ability = kAbility[sp.line]; }
 
     // Habitats: where each line can be found (bit 0 Meadow, 1 Woods, 2 Caverns, 3 Shore, 4 Peaks, 5 Ruins).
     const int hab[27] = {3, 17, 33, 20, 9, 34, 17, 36, 5, 16, 40, 32, 4, 6, 40, 48, 32, 2, 5, 36, 8, 16, 8, 34, 10, 16, 36};

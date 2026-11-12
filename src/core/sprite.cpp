@@ -574,7 +574,11 @@ const LineInfo& lineInfo(int line) {
 
 #include "sprite_gen.inc"
 
-Sprite makeSprite(int speciesId, int frame) {
+Sprite makeSprite(int speciesId, int frameIn) {
+    // Frames 0 and 1 are the base pose (1 flutters tails, wings and flames and blinks); frames 2 and 3 are the same two
+    // poses with the upper body leaning left (2) or right (3), which gives walking a waddle.
+    const int frame = frameIn & 1;
+    const int lean = frameIn >= 2 ? (frameIn == 2 ? -1 : 1) : 0;
     const Species& sp = species(speciesId);
     Cv c;
     int eyeY = 12, eyeA = 8;
@@ -609,6 +613,19 @@ Sprite makeSprite(int speciesId, int frame) {
 
     Sprite s;
     s.px = c.p;  // opaque or fully transparent, so premultiplication is a no-op
+    if (lean != 0) {
+        // Shift everything above the feet line one pixel sideways; the lower rows stay planted.
+        const int split = 17;
+        std::vector<u32> leaned(s.px.size(), 0);
+        for (int y = 0; y < N; ++y)
+            for (int x = 0; x < N; ++x) {
+                const u32 v = s.px[static_cast<size_t>(y * N + x)];
+                if (!v) continue;
+                const int nx = (y < split) ? x + lean : x;
+                if (nx >= 0 && nx < N) leaned[static_cast<size_t>(y * N + nx)] = v;
+            }
+        s.px = leaned;
+    }
     return s;
 }
 

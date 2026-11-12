@@ -47,6 +47,7 @@ void Fighter::clearStatuses() {
     charging = false;
     chargeMove = -1;
     actedThisTurn = false;
+    abStack = 0;
 }
 
 Fighter makeFighter(int speciesId, int level, bool sleepy, int friendId) {
@@ -80,6 +81,9 @@ Battle::Battle(std::vector<Fighter> player, std::vector<Fighter> enemy, uint32_t
             if (side.team[i].alive()) side.active[static_cast<size_t>(slot++)] = static_cast<int>(i);
     }
     say(wild ? "A wild encounter!" : "Battle start!");
+    for (int s = 0; s < 2; ++s)
+        for (int k = 0; k < kActiveSlots; ++k)
+            if (slotFilled(s, k)) onEnter({s, k});
     checkWinner();
 }
 
@@ -100,6 +104,55 @@ void Battle::say(const std::string& text, Ref actor) {
 int Battle::rnd(int n) {
     if (n <= 1) return 0;
     return static_cast<int>(rng_() % static_cast<uint32_t>(n));
+}
+
+bool Battle::hasNegative(const Fighter& f) {
+    return f.wound > 0 || f.daze > 0 || f.slow > 0 || f.doom > 0 || f.seal > 0 || f.stun > 0 || f.trap > 0 || f.mark || f.taunt > 0;
+}
+
+bool Battle::foeHas(int side, Ab a) const {
+    const Side& o = sides[1 - side];
+    for (int k = 0; k < kActiveSlots; ++k) {
+        const int i = o.active[static_cast<size_t>(k)];
+        if (i >= 0 && o.team[static_cast<size_t>(i)].alive() && abil(o.team[static_cast<size_t>(i)]) == a) return true;
+    }
+    return false;
+}
+
+void Battle::abSay(Ref r) {
+    say(nameOf(r.side, r.slot) + "'s " + abilityInfo(abil(at(r))).name + "!");
+}
+
+// Abilities that fire when a friend takes the field.
+void Battle::onEnter(Ref r) {
+    Fighter& f = at(r);
+    if (!f.alive()) return;
+    switch (abil(f)) {
+        case Ab::Intimidate:
+            abSay(r);
+            for (const Ref& t : livingEnemies(r.side)) applyEffect({EK::AtkMod, -20, 3}, t, r);
+            break;
+        case Ab::SpottersEye: {
+            Ref best{-1, -1};
+            double bv = -1;
+            for (const Ref& t : livingEnemies(r.side)) {
+                const double v = std::max(at(t).atk, at(t).spa);
+                if (v > bv) { bv = v; best = t; }
+            }
+            if (best.side >= 0) { abSay(r); applyEffect({EK::Mark}, best, r); }
+            break;
+        }
+        case Ab::Download: abSay(r); applyEffect({EK::AtkMod, 25, 3}, r, r); break;
+        case Ab::HealingAura:
+            abSay(r);
+            for (const Ref& t : livingAllies(r.side)) heal(t, std::max(1, at(t).maxHp * 10 / 100));
+            break;
+        case Ab::WardUp: abSay(r); applyEffect({EK::Shield, 15}, r, r); break;
+        case Ab::SecondWind:
+            if (f.hp < f.maxHp) { abSay(r); heal(r, std::max(1, f.maxHp * 12 / 100)); }
+            break;
+        default: break;
+    }
 }
 
 std::vector<int> Battle::benchAlive(int side) const {
@@ -188,7 +241,8 @@ std::vector<Ref> Battle::validTargets(int side, int slot, int mi) const {
 }
 
 bool Battle::canSwitch(int side, int slot) const {
-    return slotFilled(side, slot) && fighter(side, slot).trap == 0 && !benchAlive(side).empty();
+    if (!slotFilled(side, slot) || fighter(side, slot).trap != 0 || benchAlive(side).empty()) return false;
+    return abil(fighter(side, slot)) == Ab::RunAway || !foeHas(side, Ab::ShadowTag);
 }
 
 int Battle::countBuffs(const Fighter& f) const {
@@ -255,7 +309,17 @@ int Battle::dealHit(Ref u, Ref t, double power, const Move& m, double mult, int 
             return -1;
         }
     }
-    if (a.daze > 0 && !a.noMiss && rnd(100) < 30) {
+    const Ab aa = abil(a), da = abil(d);
+    if (da == Ab::Slippery && rnd(100) < 15) {
+        abSay(t);
+        say(nameOf(u.side, u.slot) + "'s attack misses!");
+        return -1;
+    }
+    if (aa == Ab::Hustle && rnd(100) < 10) {
+        say(nameOf(u.side, u.slot) + "'s attack misses!");
+        return -1;
+    }
+    if (a.daze > 0 && !a.noMiss && aa != Ab::SteadyAim && rnd(100) < 30) {
         say(nameOf(u.side, u.slot) + "'s attack misses!");
         return -1;
     }
@@ -268,16 +332,46 @@ int Battle::dealHit(Ref u, Ref t, double power, const Move& m, double mult, int 
         dmg = ((2.0 * a.level / 5 + 2) * power * atk / std::max(1.0, def) / 50 + 2) * (0.9 + 0.1 * (rnd(1001) / 1000.0));
     }
     dmg *= mult;
+    const bool ign = m.ignoreDefenses || aa == Ab::MoldBreaker;
+    {
+        const bool light = power <= 45 && power > 0, heavy = power > 80;
+        switch (aa) {
+            case Ab::Technician: if (light) dmg *= 1.5; break;
+            case Ab::HeavyHitter: if (heavy) dmg *= 1.2; break;
+            case Ab::Guts: if (hasNegative(a)) dmg *= 1.3; break;
+            case Ab::Hustle: dmg *= 1.2; break;
+            case Ab::SkillLink: if (m.hits.size() > 1) dmg *= 1.25; break;
+            case Ab::Reckless: if (m.recoil > 0) dmg *= 1.25; break;
+            case Ab::Analytic: if (d.actedThisTurn) dmg *= 1.3; break;
+            case Ab::LastStand: if (a.hp * 3 <= a.maxHp) dmg *= 1.3; break;
+            case Ab::MindOverMatter: if (m.special) dmg *= 1.2; break;
+            case Ab::BrawnPower: if (!m.special) dmg *= 1.2; break;
+            default: break;
+        }
+        switch (da) {
+            case Ab::FurCoat: if (!m.special) dmg *= 0.8; break;
+            case Ab::SpiritWard: if (m.special) dmg *= 0.8; break;
+            case Ab::Multiscale: if (d.hp == d.maxHp) dmg *= 0.65; break;
+            case Ab::SolidRock: if (heavy) dmg *= 0.75; break;
+            default: break;
+        }
+    }
     if (a.focus) { dmg *= 1.5; focusUsed = true; }
     if (a.empowerN > 0) { dmg *= 1.0 + a.empowerPct / 100.0; focusUsed = true; }
     if (d.mark) { dmg *= 1.5; d.mark = false; }
-    if (!m.ignoreDefenses && d.armor > 0) dmg *= 0.7;
+    if (!ign && d.armor > 0) dmg *= 0.7;
     dmg *= 1.0 - 0.06 * d.plates;
-    if (m.crit > 0 && rnd(100) < m.crit) {
+    const int critChance = da == Ab::ShellArmor ? 0 : m.crit + (aa == Ab::KeenEye ? 20 : 0);
+    if (critChance > 0 && rnd(100) < critChance) {
         dmg *= 1.5;
         say("A critical hit!");
     }
-    const int dm = std::max(1, static_cast<int>(dmg));
+    int dm = std::max(1, static_cast<int>(dmg));
+    if (da == Ab::Sturdy && !d.abUsed && d.hp == d.maxHp && dm >= d.hp + (ign ? 0 : d.shield) && d.hp > 1) {
+        d.abUsed = true;
+        dm = d.hp - 1 + (ign ? 0 : d.shield);
+        abSay(t);
+    }
 
     if (d.reflectDamage) {
         d.reflectDamage = false;
@@ -292,7 +386,7 @@ int Battle::dealHit(Ref u, Ref t, double power, const Move& m, double mult, int 
         return 0;
     }
 
-    hurt(t, dm, m.ignoreDefenses);
+    hurt(t, dm, ign);
     say(nameOf(t.side, t.slot) + " takes " + std::to_string(dm) + " damage.");
 
     if (d.alive()) {
@@ -311,6 +405,40 @@ int Battle::dealHit(Ref u, Ref t, double power, const Move& m, double mult, int 
             if (a.alive() && w > 0) a.wound = std::max(a.wound, w);
         }
     }
+    // Reactive abilities of the defender.
+    if (da == Ab::RoughSkin && a.alive()) {
+        hurt(u, std::max(1, a.maxHp * 6 / 100), true);
+        abSay(t);
+    }
+    if (da == Ab::Aftermath && !d.alive() && a.alive()) {
+        hurt(u, std::max(1, a.maxHp * 25 / 100), true);
+        abSay(t);
+    }
+    if (d.alive()) {
+        switch (da) {
+            case Ab::Static: if (a.alive() && rnd(100) < 30) { abSay(t); applyEffect({EK::Daze, 2}, u, t); } break;
+            case Ab::FlameTouch: if (a.alive() && rnd(100) < 30) { abSay(t); applyEffect({EK::Wound, 2}, u, t); } break;
+            case Ab::CursedBody: if (a.alive() && a.lastMove >= 0 && rnd(100) < 30) { abSay(t); applyEffect({EK::Seal}, u, t); } break;
+            case Ab::EffectSpore:
+                if (a.alive() && rnd(100) < 30) {
+                    abSay(t);
+                    const int r = rnd(3);
+                    applyEffect(r == 0 ? Effect{EK::Wound, 2} : r == 1 ? Effect{EK::Daze, 2} : Effect{EK::Slow, 1}, u, t);
+                }
+                break;
+            case Ab::DustVeil: if (a.alive()) applyEffect({EK::Slow, 1}, u, t); break;
+            case Ab::Berserk:
+                if (!d.abUsed && d.hp * 2 <= d.maxHp) { d.abUsed = true; abSay(t); applyEffect({EK::AtkMod, 30, 3}, t, t); }
+                break;
+            case Ab::Stamina:
+                if (d.abStack < 5 && d.defMod >= 0) { ++d.abStack; d.defMod = 10 * d.abStack; d.defModT = 3; }
+                break;
+            case Ab::Rattled: applyEffect({EK::SpeMod, 20, 3}, t, t); break;
+            default: break;
+        }
+    }
+    if (aa == Ab::VenomTouch && d.alive() && rnd(100) < 25) applyEffect({EK::Wound, 2}, t, u);
+    if (aa == Ab::Moxie && !d.alive() && d.hp == 0 && a.alive()) { abSay(u); applyEffect({EK::AtkMod, 25, 3}, u, u); }
     if (d.thorns > 0 && a.alive()) {
         hurt(u, std::max(1, dm * 25 / 100), false);
         say(nameOf(u.side, u.slot) + " is pricked by thorns.");
@@ -323,12 +451,41 @@ int Battle::dealHit(Ref u, Ref t, double power, const Move& m, double mult, int 
     return dm;
 }
 
-void Battle::applyEffect(const Effect& e, Ref target, Ref source) {
-    if (e.k != EK::Evade && e.chance < 100 && rnd(100) >= e.chance) return;
+void Battle::applyEffect(const Effect& e0, Ref target, Ref source) {
+    int chance = e0.chance;
+    if (chance < 100 && abil(at(source)) == Ab::SereneGrace && e0.k != EK::Evade) chance = std::min(100, chance * 3 / 2);
+    if (e0.k != EK::Evade && chance < 100 && rnd(100) >= chance) return;
     Fighter* t = &at(target);
-    if (!t->alive() && e.k != EK::Heal) return;
+    if (!t->alive() && e0.k != EK::Heal) return;
 
-    if (isDebuff(e) && target.side != source.side && t->reflectDebuff) {
+    Effect e = e0;
+    const Ab ta = abil(*t);
+    const bool foe = target.side != source.side;
+    if (ta == Ab::Contrary && (e.k == EK::AtkMod || e.k == EK::DefMod || e.k == EK::SpeMod)) e.a = -e.a;
+    if (foe) {
+        bool blocked = false;
+        switch (e.k) {
+            case EK::Daze: case EK::Mark: blocked = ta == Ab::Oblivious; break;
+            case EK::Stun: blocked = ta == Ab::Insomnia; break;
+            case EK::Seal: case EK::Taunt: blocked = ta == Ab::KeenMind; break;
+            case EK::Slow: blocked = ta == Ab::ClearBody; break;
+            case EK::Trap: blocked = ta == Ab::RunAway; break;
+            case EK::Wound: case EK::Doom: case EK::Leech: blocked = ta == Ab::MagicGuard; break;
+            case EK::AtkMod: case EK::DefMod: case EK::SpeMod: blocked = ta == Ab::ClearBody && e.a < 0; break;
+            default: break;
+        }
+        if (blocked) {
+            say(nameOf(target.side, target.slot) + "'s " + abilityInfo(ta).name + " blocks it!");
+            return;
+        }
+        if (ta == Ab::MagicBounce && !t->abUsed && isDebuff(e)) {
+            t->abUsed = true;
+            abSay(target);
+            target = source;
+            t = &at(target);
+        }
+    }
+    if (isDebuff(e) && foe && t->reflectDebuff) {
         t->reflectDebuff = false;
         say(nameOf(target.side, target.slot) + " reflects the effect!");
         target = source;
@@ -414,9 +571,11 @@ void Battle::doSwitch(Ref who, int benchIdx) {
         return;
     }
     const std::string oldName = nameOf(who.side, who.slot);
+    if (old.alive() && abil(old) == Ab::Regenerator) heal(who, std::max(1, old.maxHp * 25 / 100));
     old.clearStatuses();
     s.active[static_cast<size_t>(who.slot)] = benchIdx;
     say(oldName + " swaps out for " + nameOf(who.side, who.slot) + ".");
+    onEnter(who);
 }
 
 bool Battle::forceSwitch(Ref t) {
@@ -571,7 +730,7 @@ void Battle::useMove(Ref user, const Move& m, int /*moveIdx*/, Ref primary, doub
             f.focus = false;
             if (f.empowerN > 0 && --f.empowerN == 0) f.empowerPct = 0;
         }
-        if (m.recoil > 0 && anyHit && f.alive()) {
+        if (m.recoil > 0 && anyHit && f.alive() && abil(f) != Ab::HardHead) {
             f.hp = std::max(1, f.hp - std::max(1, f.maxHp * m.recoil / 100));
             say(nameOf(user.side, user.slot) + " is hurt by recoil.");
         }
@@ -675,6 +834,10 @@ void Battle::execute(const Entry& e) {
     Fighter& f = at(e.who);
     if (!f.alive()) return;
     if (e.act.type == Action::Switch) {
+        if (abil(f) != Ab::RunAway && foeHas(e.who.side, Ab::ShadowTag)) {
+            say(nameOf(e.who.side, e.who.slot) + " is held by Shadow Tag!");
+            return;
+        }
         doSwitch(e.who, e.act.bench);
         return;
     }
@@ -716,7 +879,7 @@ void Battle::execute(const Entry& e) {
     useMove(e.who, m, mi, target, 1.0);
     // The user may have been swapped out by a pivot; cooldowns belong to the fighter, so look it up by team slot.
     f.lastMove = mi;
-    f.cd[mi] = m.cd > 0 ? m.cd + 1 : 0;
+    f.cd[mi] = m.cd > 0 ? m.cd + 1 + (foeHas(e.who.side, Ab::Pressure) ? 1 : 0) : 0;
     if (m.once) f.used[mi] = true;
 }
 
@@ -728,10 +891,26 @@ void Battle::endOfTurn() {
             if (!f.alive()) continue;
             const Ref r{s, k};
             const std::string n = nameOf(s, k);
+            const Ab fa = abil(f);
+            if (fa == Ab::ShedSkin && hasNegative(f) && rnd(100) < 33) {
+                abSay(r);
+                applyEffect({EK::Cleanse}, r, r);
+            }
+            if (fa == Ab::DewSkin) heal(r, std::max(1, f.maxHp * 6 / 100));
+            if (hasNegative(f) && foeHas(s, Ab::Nightmare)) {
+                hurt(r, std::max(1, f.maxHp * 4 / 100), true);
+                say(n + " is tormented by nightmares.");
+                if (!f.alive()) continue;
+            }
             if (f.wound > 0) {
                 const int d = std::max(1, f.maxHp * 6 / 100);
-                hurt(r, d, true);
-                say(n + " suffers " + std::to_string(d) + " from its wound.");
+                if (fa == Ab::WoundHeal) {
+                    heal(r, std::max(1, f.maxHp * 8 / 100));
+                    say(n + " mends its wound.");
+                } else {
+                    hurt(r, d, true);
+                    say(n + " suffers " + std::to_string(d) + " from its wound.");
+                }
                 if (!f.alive()) continue;
             }
             if (f.regen > 0) {
@@ -763,6 +942,10 @@ void Battle::endOfTurn() {
             if (f.defModT > 0 && --f.defModT == 0) f.defMod = 0;
             if (f.speModT > 0 && --f.speModT == 0) f.speMod = 0;
             if (f.slowAttackers > 0) f.slowAttackers--;
+            if (fa == Ab::SpeedBoost) {
+                f.speMod = std::min(50, (f.speModT > 0 ? f.speMod : 0) + 10);
+                f.speModT = 2;
+            }
             f.evade = false;
             f.counterMult = f.counterHitPower = f.counterWound = 0;
             f.counterAbsorb = false;
@@ -781,8 +964,10 @@ void Battle::endOfTurn() {
     }
     for (auto& side : sides)
         for (auto& f : side.team)
-            for (int& c : f.cd)
+            for (int& c : f.cd) {
                 if (c > 0) --c;
+                if (c > 0 && f.alive() && abil(f) == Ab::QuickReload) --c;
+            }
 
     // Remove the fainted from the field.
     for (int s = 0; s < 2; ++s)
@@ -822,6 +1007,7 @@ void Battle::replace(int side, int slot, int benchIdx) {
     if (std::find(bench.begin(), bench.end(), benchIdx) == bench.end()) return;
     s.active[static_cast<size_t>(slot)] = benchIdx;
     say(nameOf(side, slot) + " joins the battle!");
+    onEnter({side, slot});
 }
 
 void Battle::autoReplace(int side) {
@@ -878,6 +1064,8 @@ void Battle::resolveTurn(const std::array<Action, 3>& playerActions) {
                 int mi = f.charging ? f.chargeMove : a.move;
                 e.prio = (mi >= 0 && mi <= 3) ? f.sp().moves[static_cast<size_t>(mi)].prio : 0;
                 if (f.prioNext && !f.charging) { e.prio += 1; f.prioNext = false; }
+                if (abil(f) == Ab::Prankster && mi >= 0 && mi <= 3 && !f.sp().moves[static_cast<size_t>(mi)].damaging()) e.prio += 1;
+                if (abil(f) == Ab::Stall) e.prio = -50;
             }
             entries.push_back(e);
         }

@@ -73,7 +73,7 @@ draw and present time per frame every 10 seconds.
 ## Roster and stats
 
 Every friend has the six Pokémon stats: HP, ATK, DEF, SPA (special attack), SPD (special defence) and SPE (speed).
-Moves are Physical (ATK vs DEF), Special (SPA vs SPD) or Utility. `ROSTER.md` lists every friend with stats, role,
+Every friend also has a passive ability (see the guide's Abilities page). Moves are Physical (ATK vs DEF), Special (SPA vs SPD) or Utility. `ROSTER.md` lists every friend with stats, role,
 concept, areas, evolution chain, full move details and which moves are unique to them. It is generated from the game
 data, so it always matches the game:
 

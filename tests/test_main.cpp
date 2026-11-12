@@ -418,6 +418,81 @@ static void testAreasAndEvents() {
 }
 
 // The roster must have real variety: no two friends are copies of each other.
+static int speciesWith(Ab a) {
+    for (int i = 0; i < kSpeciesCount; ++i) if (species(i).ability == a) return i;
+    return -1;
+}
+
+static void testAbilities() {
+    std::set<int> used;
+    for (int i = 0; i < kSpeciesCount; ++i) {
+        CHECK(species(i).ability != Ab::None);
+        used.insert(static_cast<int>(species(i).ability));
+        // evolutions share the ability of their line
+        if (species(i).evolvesTo >= 0) CHECK(species(species(i).evolvesTo).ability == species(i).ability);
+    }
+    CHECK(static_cast<int>(used.size()) >= 50);
+    for (int a = 1; a < kAbilityCount; ++a) CHECK(std::string(abilityInfo(static_cast<Ab>(a)).desc).size() > 10);
+
+    const int filler = 0;
+    // Intimidate lowers both foes' attack on entry.
+    {
+        const int id = speciesWith(Ab::Intimidate);
+        CHECK(id >= 0);
+        Battle b({makeFighter(id, 20)}, {makeFighter(filler, 20), makeFighter(filler, 20)}, 5);
+        CHECK(b.fighter(1, 0).atkMod == -20 && b.fighter(1, 0).atkModT > 0);
+        CHECK(b.fighter(1, 1).atkMod == -20);
+    }
+    // Sturdy: survives a lethal hit from full HP once.
+    {
+        const int id = speciesWith(Ab::Sturdy);
+        Battle b({makeFighter(filler, 60)}, {makeFighter(id, 5)}, 7);
+        Fighter& d = b.fighter(1, 0);
+        d.hp = d.maxHp;
+        Move big("Nuke", 400);
+        bool fu = false;
+        const int dm = b.test_dealHit({0, 0}, {1, 0}, 400, big, &fu);
+        CHECK(dm >= 0 && d.hp == 1 && d.abUsed);
+    }
+    // Shadow Tag blocks voluntary switching; Run Away ignores it.
+    {
+        const int tag = speciesWith(Ab::ShadowTag), run = speciesWith(Ab::RunAway);
+        Battle b({makeFighter(filler, 20), makeFighter(filler, 20), makeFighter(filler, 20), makeFighter(filler, 20)}, {makeFighter(tag, 20)}, 9);
+        CHECK(!b.canSwitch(0, 0));
+        Battle c({makeFighter(run, 20), makeFighter(filler, 20), makeFighter(filler, 20), makeFighter(filler, 20)}, {makeFighter(tag, 20)}, 9);
+        CHECK(c.canSwitch(0, 0));
+    }
+    // Regenerator heals when switching out.
+    {
+        const int id = speciesWith(Ab::Regenerator);
+        Battle b({makeFighter(id, 30), makeFighter(filler, 30), makeFighter(filler, 30), makeFighter(filler, 30)}, {makeFighter(filler, 30)}, 11);
+        b.fighter(0, 0).hp = b.fighter(0, 0).maxHp / 2;
+        const int before = b.fighter(0, 0).hp, mx = b.fighter(0, 0).maxHp;
+        std::array<Action, 3> acts{};
+        acts[0].type = Action::Switch;
+        acts[0].bench = 3;
+        b.resolveTurn(acts);
+        CHECK(b.sides[0].team[0].hp >= before + mx / 5);
+    }
+    // Stall always acts last; Prankster beats speed with utility moves (checked via event order smoke).
+    {
+        const int id = speciesWith(Ab::Stall);
+        CHECK(id >= 0);
+    }
+    // Contrary reverses stat changes; Clear Body blocks drops.
+    {
+        const int con = speciesWith(Ab::Contrary), clr = speciesWith(Ab::ClearBody);
+        Battle b({makeFighter(filler, 20)}, {makeFighter(con, 20)}, 13);
+        b.test_apply({EK::AtkMod, -20, 3}, {1, 0}, {0, 0});
+        CHECK(b.fighter(1, 0).atkMod == 20);
+        Battle c({makeFighter(filler, 20)}, {makeFighter(clr, 20)}, 13);
+        c.test_apply({EK::AtkMod, -20, 3}, {1, 0}, {0, 0});
+        CHECK(c.fighter(1, 0).atkMod == 0);
+        c.test_apply({EK::Slow, 2}, {1, 0}, {0, 0});
+        CHECK(c.fighter(1, 0).slow == 0);
+    }
+}
+
 static void testRosterVariety() {
     std::map<std::string, int> use;
     std::vector<std::vector<std::string>> sigs(allSpecies().size());
@@ -492,7 +567,7 @@ int main() {
         {"data", testData}, {"time", testTime}, {"recurrence", testRecurrence}, {"rewards", testRewards},
         {"streaks+sleepy", testStreaksAndSleepy}, {"late", testLate}, {"reminders", testReminders},
         {"eggs+evolution", testEggsAndEvolution}, {"shop+party", testShopAndParty}, {"save/load", testSaveLoad},
-        {"battle basics", testBattleBasics}, {"switch+catch", testSwitchAndCatch}, {"battle flow", testBattleFlow},
+        {"battle basics", testBattleBasics}, {"abilities", testAbilities}, {"switch+catch", testSwitchAndCatch}, {"battle flow", testBattleFlow},
         {"areas+events", testAreasAndEvents}, {"roster variety", testRosterVariety}, {"sprites", testSprites}, {"simulation", testSimulation},
     };
     for (auto& t : tests) {

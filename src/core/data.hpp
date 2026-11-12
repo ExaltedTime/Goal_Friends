@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "ability.hpp"
+
 namespace gf {
 
 // ---- Moves ----------------------------------------------------------------
@@ -111,6 +113,7 @@ struct Species {
     int habitats = 0;   // bitmask of areas where this friend can be found
     // Base stats as pips 1..5 (same six stats as the Pokémon games): HP, attack, defence, special attack, special defence, speed.
     int hp = 3, atk = 3, def = 3, spa = 3, spd = 3, spe = 3;
+    Ab ability = Ab::None;   // passive ability (see ability.hpp)
     std::string role;    // short role description
     std::string blurb;   // one-line concept
     std::array<Move, 4> moves;
