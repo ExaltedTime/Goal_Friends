@@ -364,8 +364,7 @@ What mattered:
 - **Roster document** (`ROSTER.md`) is generated from the game data by `gf_roster_doc`.
 - **Scrolling** is clamped before drawing using the last frame's content height, so nothing is ever drawn scrolled past
   its content.
-- **Friends walk in whole-cell steps** locked to the frame (15 fps while walking), with shared rest periods for the whole
-  party, so the motion is even and the strip drops to 2 fps when everyone rests.
+- **Friends walk in whole-cell steps** at 10 fps while anyone walks (speeds 4 to 10 cells/s, so a step is at most about one cell per frame). Each friend strolls and rests on its own schedule with eased starts and stops, resting about twice as long as it walks, so the strip often drops to 2 fps without anyone moving in sync.
 
 ## 17. Abilities and smoother animation (v1.2)
 

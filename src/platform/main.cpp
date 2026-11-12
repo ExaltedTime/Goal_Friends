@@ -237,7 +237,7 @@ void renderFrame(App& a) {
     UINT want;
     if (recent) want = open ? 33 : 66;
     else if (open) want = a.ui->effectsActive() ? 50 : 100;       // static panels barely need redrawing
-    else want = a.ui->animating() ? 66 : 500;                     // walking friends: a steady 15 fps; sitting still: 2 fps
+    else want = a.ui->animating() ? 100 : 500;                    // walking friends: 10 fps (steps stay under one cell per frame); sitting still: 2 fps
     setFrameInterval(a, want);
 }
 

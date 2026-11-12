@@ -393,7 +393,7 @@ void Ui::drawWorld(float dt) {
             w.init = true;
             w.cx = minC + static_cast<int>(next(w) % static_cast<unsigned>(std::max(1, maxC - minC)));
             w.dir = (next(w) & 1) ? 1 : -1;
-            static const float kSpeeds[5] = {5.f, 7.5f, 10.f, 12.5f, 15.f};   // cells per second: steady, differing rhythms
+            static const float kSpeeds[5] = {4.f, 5.5f, 7.f, 8.5f, 10.f};   // cells per second: steady, differing rhythms
             w.cps = kSpeeds[next(w) % 5];
             w.walkT = 1.5f + static_cast<float>(next(w) % 30) / 10.f;
             w.animRate = 3.4f + static_cast<float>(next(w) % 25) / 10.f;       // 3.4 to 5.9 walk frames per second
@@ -412,13 +412,13 @@ void Ui::drawWorld(float dt) {
                 w.pause -= dt;
                 if (w.pause <= 0) {
                     if (next(w) % 3 == 0) w.dir = -w.dir;
-                    w.walkT = 2.5f + static_cast<float>(next(w) % 40) / 10.f;
+                    w.walkT = 2.f + static_cast<float>(next(w) % 30) / 10.f;
                 }
             } else if (w.walkT > 0) {
                 w.walkT -= dt;
             } else if (w.vel < 0.5f) {                             // slowed to a halt: now rest
                 w.vel = 0;
-                w.pause = 1.5f + static_cast<float>(next(w) % 40) / 10.f;
+                w.pause = 3.f + static_cast<float>(next(w) % 60) / 10.f;
             }
             if (w.vel > 0.f) {
                 animating_ = true;
