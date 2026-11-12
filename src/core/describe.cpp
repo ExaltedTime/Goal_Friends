@@ -71,14 +71,19 @@ std::string describeMove(const Move& m) {
     std::string s;
     auto add = [&](const std::string& p) { if (!p.empty()) { if (!s.empty()) s += " · "; s += p; } };
     if (m.damaging() || m.sp == Sp::ShapeshiftSlam) {
+        std::string pw;
         if (m.multiHit()) {
-            std::string h = std::to_string(m.hits.size()) + " hits";
-            if (m.randomTargets) h += " (random foes)";
-            add(h);
+            bool same = true;
+            for (int h : m.hits) if (h != m.hits[0]) same = false;
+            if (same) pw = "Power " + std::to_string(m.hits[0]) + " x" + std::to_string(m.hits.size());
+            else { pw = "Power "; for (size_t i = 0; i < m.hits.size(); ++i) pw += (i ? "/" : "") + std::to_string(m.hits[i]); }
+            if (m.randomTargets) pw += " (random foes)";
         } else {
-            const int p = m.hits.empty() ? m.power : m.hits[0];
-            add(std::string(p <= 45 ? "Light" : p <= 80 ? "Medium" : p > 0 ? "Heavy" : "Fixed") + (m.special ? " special hit" : " physical hit"));
+            const int p = m.sp == Sp::ShapeshiftSlam ? 70 : (m.hits.empty() ? m.power : m.hits[0]);
+            pw = "Power " + std::to_string(p);
         }
+        add(pw);
+        add(m.special ? "Special" : "Physical");
     } else {
         add("Utility");
     }

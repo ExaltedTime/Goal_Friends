@@ -17,6 +17,13 @@ using gfx::TF_WRAP;
 
 namespace ui {
 namespace {
+// Calm breathing/blink used wherever a friend just stands: mostly the open frame, a short blink now and then,
+// each friend on its own phase so a row of them never flickers in sync.
+int idleFrame(float t, int k) {
+    const int s = static_cast<int>(t * 0.8f + static_cast<float>(k) * 1.7f);
+    return (s % 7 == 6) ? 1 : 0;
+}
+
 
 using gf::describeMove;
 
@@ -378,12 +385,6 @@ void Ui::drawWorld(float dt) {
     const float cell = groundCell(*gx_);
     const int minC = 14, maxC = std::max(minC + 4, static_cast<int>(W_ / cell) - 14);
     auto next = [](Walker& w) { w.rng = w.rng * 1664525u + 1013904223u; return (w.rng >> 8) & 0xFFFF; };
-    groupT_ -= dt;
-    if (groupT_ <= 0) {
-        groupRng_ = groupRng_ * 1664525u + 1013904223u;
-        groupWalk_ = !groupWalk_;
-        groupT_ = groupWalk_ ? 4.f + static_cast<float>((groupRng_ >> 8) % 40) / 10.f : 3.f + static_cast<float>((groupRng_ >> 8) % 30) / 10.f;
-    }
     for (auto& w : walkers_) {
         const gf::Friend* f = gf::findFriend(g_, w.friendId);
         if (!f) continue;
@@ -401,16 +402,27 @@ void Ui::drawWorld(float dt) {
             w.idleT = static_cast<float>(next(w) % 300) / 100.f;
         }
         bool stepped = false;
-        if (!sleepy && groupWalk_) {
+        if (!sleepy) {
+            // Each friend strolls and rests on its own schedule, easing into and out of its pace so nothing starts or stops abruptly.
+            const bool walking = w.pause <= 0 && w.walkT > 0;
+            const float target = walking ? w.cps : 0.f;
+            const float accel = w.cps * 2.5f * dt;                 // about 0.4 s to reach full pace
+            w.vel += std::clamp(target - w.vel, -accel, accel);
             if (w.pause > 0) {
                 w.pause -= dt;
-                if (w.pause <= 0) {                       // rest is over: maybe turn around, then walk for a while
+                if (w.pause <= 0) {
                     if (next(w) % 3 == 0) w.dir = -w.dir;
-                    w.walkT = 2.5f + static_cast<float>(next(w) % 25) / 10.f;
+                    w.walkT = 2.5f + static_cast<float>(next(w) % 40) / 10.f;
                 }
-            } else {
+            } else if (w.walkT > 0) {
+                w.walkT -= dt;
+            } else if (w.vel < 0.5f) {                             // slowed to a halt: now rest
+                w.vel = 0;
+                w.pause = 1.5f + static_cast<float>(next(w) % 40) / 10.f;
+            }
+            if (w.vel > 0.f) {
                 animating_ = true;
-                w.stepAcc += w.cps * dt;                  // each friend advances at its own pace, one whole cell at a time
+                w.stepAcc += w.vel * dt;
                 while (w.stepAcc >= 1.f) {
                     w.stepAcc -= 1.f;
                     w.cx += w.dir;
@@ -418,11 +430,9 @@ void Ui::drawWorld(float dt) {
                     if (w.cx < minC) { w.cx = minC; w.dir = 1; }
                     if (w.cx > maxC) { w.cx = maxC; w.dir = -1; }
                 }
-                w.walkT -= dt;
-                if (w.walkT <= 0) w.pause = 1.5f + static_cast<float>(next(w) % 30) / 10.f;
             }
         }
-        if (stepped) w.moveT = 0.35f; else w.moveT = std::max(0.f, w.moveT - dt);
+        if (w.vel > 0.f || stepped) w.moveT = 0.35f; else w.moveT = std::max(0.f, w.moveT - dt);
         if (w.hop > 0 || w.hopV != 0) {
             animating_ = true;
             w.hopV -= 600 * dt;
@@ -436,7 +446,7 @@ void Ui::drawWorld(float dt) {
         if (sleepy) {
             frame = 1;
         } else if (w.moveT > 0.f) {
-            w.animT += dt * w.animRate;
+            w.animT += dt * w.animRate * std::max(0.35f, w.vel / w.cps);
             static const int kWalk[4] = {2, 0, 3, 1};
             const int idx = static_cast<int>(w.animT) % 4;
             frame = kWalk[idx];
@@ -573,7 +583,7 @@ void Ui::drawStart(const Rect& b) {
     float x = b.x + (b.w - total) / 2;
     for (int id : gf::starterSpecies()) {
         card(x, 110, cw, 300);
-        gx_->sprite(gfx::SpriteKind::Species, id, static_cast<int>(animT_ * 2) % 2, false, x + (cw - 120) / 2, 130, 120);
+        gx_->sprite(gfx::SpriteKind::Species, id, idleFrame(animT_, id), false, x + (cw - 120) / 2, 130, 120);
         gx_->text(gf::species(id).name, x, 262, cw, 26, 18, kText, TF_CENTER | TF_BOLD);
         gx_->text(roleText(id), x + 14, 292, cw - 28, 56, 12, kDim, TF_CENTER | TF_WRAP);
         if (button(x + 50, 358, cw - 100, 38, "Choose " + gf::species(id).name, kGreen, true, 13)) {
@@ -817,7 +827,7 @@ void Ui::drawFriends(const Rect& b) {
         card(x, y, cw, ch, sel ? kCard2 : kCard);
         if (sel) gx_->strokeRect(x, y, cw, ch, kAccent, 2, 8);
         const gf::Species& sp = gf::species(f.species);
-        gx_->sprite(gfx::SpriteKind::Species, f.species, static_cast<int>(animT_ * 2 + static_cast<float>(i)) % 2, false, x + 6, y + 14, 72);
+        gx_->sprite(gfx::SpriteKind::Species, f.species, idleFrame(animT_, static_cast<int>(i)), false, x + 6, y + 14, 72);
         gx_->text(sp.name, x + 82, y + 6, cw - 84, 20, 13, kText, TF_BOLD);
         gx_->text("Lv " + std::to_string(f.level), x + 82, y + 28, 80, 18, 12, kAccent, TF_BOLD);
         if (f.level < gf::kMaxLevel) bar(x + 82, y + 52, cw - 94, 8, static_cast<double>(f.xp) / gf::xpToNext(f.level), kBlue);
@@ -834,7 +844,7 @@ void Ui::drawFriends(const Rect& b) {
     const gf::Species& sp = gf::species(sf->species);
     const gf::Stats st = gf::statsFor(sp, sf->level);
     card(dx, b.y, dw, b.h - 70);
-    gx_->sprite(gfx::SpriteKind::Species, sf->species, static_cast<int>(animT_ * 2) % 2, false, dx + 8, b.y + 8, 96);
+    gx_->sprite(gfx::SpriteKind::Species, sf->species, idleFrame(animT_, 0), false, dx + 8, b.y + 8, 96);
     gx_->text(sp.name, dx + 112, b.y + 10, dw - 120, 26, 18, kText, TF_BOLD);
     gx_->text("Stage " + std::to_string(sp.stage) + (sp.rare ? " · Rare" : "") + " · Lv " + std::to_string(sf->level) +
               (sp.evolvesTo >= 0 ? "  ·  Evolves at Lv " + std::to_string(sp.evolveLevel) : ""), dx + 112, b.y + 38, dw - 120, 18, 12, kDim);
@@ -913,7 +923,7 @@ void Ui::drawDex(const Rect& b) {
             gx_->text("Find this friend by hatching eggs, battling, or catching wild ones.", dx + 12, b.y + 110, dw - 24, 60, 12, kDim, TF_WRAP);
         } else {
             const gf::Species& sp = gf::species(selDex_);
-            gx_->sprite(gfx::SpriteKind::Species, selDex_, static_cast<int>(animT_ * 2) % 2, false, dx + 10, b.y + 10, 96);
+            gx_->sprite(gfx::SpriteKind::Species, selDex_, idleFrame(animT_, 0), false, dx + 10, b.y + 10, 96);
             gx_->text(sp.name, dx + 112, b.y + 14, dw - 120, 26, 18, kText, TF_BOLD);
             gx_->text("Stage " + std::to_string(sp.stage) + (sp.rare ? " · Rare" : ""), dx + 112, b.y + 42, dw - 120, 18, 12, kDim);
             gx_->text(sp.role, dx + 112, b.y + 60, dw - 120, 18, 12, rgba(130, 200, 255), TF_BOLD);
@@ -1177,7 +1187,7 @@ void Ui::fighterCard(float x, float y, float w, float h, int side, int slot, boo
     }
     const float shake = flash_[side][slot] > 0 ? std::sin(animT_ * 70.f) * 3.f * flash_[side][slot] / 0.4f : 0.f;
     const float lunge = glow_[side][slot] > 0.5f ? (side == 1 ? 6.f : -6.f) * (glow_[side][slot] - 0.5f) * 2.f : 0.f;
-    gx_->sprite(gfx::SpriteKind::Species, f.speciesId, static_cast<int>(animT_ * 2 + static_cast<float>(slot)) % 2, side == 1, x + 6 + shake, y + 14 + lunge, 72, dead ? 0.25f : 1.f);
+    gx_->sprite(gfx::SpriteKind::Species, f.speciesId, idleFrame(animT_, slot + 3 * side), side == 1, x + 6 + shake, y + 14 + lunge, 72, dead ? 0.25f : 1.f);
     gx_->text(std::string(side == 1 ? "Foe " : "") + f.sp().name + "  Lv " + std::to_string(f.level), x + 84, y + 6, w - 90, 20, 13, kText, TF_BOLD);
     bar(x + 84, y + 30, w - 96, 10, anim, anim > 0.5 ? kGreen : anim > 0.2 ? rgba(220, 170, 40) : kRed);
     gx_->text(std::to_string(f.hp) + " / " + std::to_string(f.maxHp), x + 84, y + 42, w - 96, 16, 11, kDim);
@@ -1531,7 +1541,7 @@ const std::vector<GuideSection>& guideSections() {
             "# Turn order",
             "Switching goes first. Then moves with Priority, then everyone else by speed (SPE). Ties are random.",
             "# Moves",
-            "- Light, Medium and Heavy hits do damage, as Physical (ATK vs DEF) or Special (SPA vs SPD) moves. Utility moves do something else: heal, shield, buff, weaken, trap, and more. Hover over a move to read what it does.",
+            "- Damaging moves show their Power (like in Pokemon: higher hits harder) and are Physical (ATK vs DEF) or Special (SPA vs SPD). Utility moves do something else: heal, shield, buff, weaken, trap, and more. Hover over a move to read what it does.",
             "- CD n means the move can't be used for n turns after you use it. If all four moves are cooling down, your friend uses Scuffle, a basic attack.",
             "- Most moves hit one foe. Spread moves hit all foes at 75% damage. Some moves hit random foes, and some can target an ally or yourself.",
             "# Winning",

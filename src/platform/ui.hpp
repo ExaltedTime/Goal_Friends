@@ -31,6 +31,7 @@ struct Walker {
     bool init = false;
     float walkT = 3, pause = 0;
     float cps = 10;        // walking speed in cells per second (each friend has its own)
+    float vel = 0;         // current walking speed in cells per second (eased)
     float stepAcc = 0;     // fractional cells carried between frames
     float animT = 0;       // this friend's own animation clock (never shared with the others)
     float animRate = 4;    // walk-cycle frames per second
@@ -134,9 +135,6 @@ private:
     std::vector<Walker> walkers_;
     float animT_ = 0;
     float dt_ = 0;
-    bool groupWalk_ = true;      // the whole party alternates between a stroll and a shared rest, so the strip is often idle
-    float groupT_ = 4.f;
-    unsigned groupRng_ = 7;
     bool animating_ = false;
     int dueTab_ = 0, dueNow_ = 0;   // cached once a second: tasks still to do today / already due
     float dueTimer_ = 0;

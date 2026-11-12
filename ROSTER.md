@@ -183,7 +183,7 @@ Evolves into **Thornback** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Leaf Slap** | Physical | Light physical hit |
+| **Leaf Slap** | Physical | Power 40 · Physical |
 | **Sap Root** | Utility |  Regen 3 [self] · CD 3 |
 | **Bramble Coat** | Utility |  Thorns 3 [self] · CD 3 |
 | **Sprout Nap** ★ | Utility |  Heal 30% [self] · Slow 1 [self] · CD 4 |
@@ -206,9 +206,9 @@ Evolves from **Mossling** at level 16. Evolves into **Grovewarden** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Spike Roll** | Physical | Medium physical hit · Wound 2 (30%) |
+| **Spike Roll** | Physical | Power 70 · Physical · Wound 2 (30%) |
 | **Ironbark** ★ | Utility |  Armor 3 [self] · CD 3 |
-| **Barbed Embrace** | Physical | Medium physical hit · Trap 2 · CD 3 |
+| **Barbed Embrace** | Physical | Power 70 · Physical · Trap 2 · CD 3 |
 | **Photosynth** ★ | Utility |  Heal 30% [self] · CD 4 |
 
 2 of 4 moves are unique to this friend.
@@ -229,10 +229,10 @@ Evolves from **Thornback** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Ancient Crush** ★ | Physical | Heavy physical hit · Slow 1 [self] · CD 2 |
+| **Ancient Crush** ★ | Physical | Power 110 · Physical · Slow 1 [self] · CD 2 |
 | **Verdant Bulwark** ★ | Utility |  Shield 20% [self] · Thorns 2 [self] · CD 3 |
 | **Overgrowth** ★ | Utility |  Regen 4 [self] · Cleanse [self] · CD 4 |
-| **Warden's Judgment** ★ | Physical | Medium physical hit · +50% with Armor/Shield/Thorns · CD 3 |
+| **Warden's Judgment** ★ | Physical | Power 70 · Physical · +50% with Armor/Shield/Thorns · CD 3 |
 
 4 of 4 moves are unique to this friend.
 
@@ -256,9 +256,9 @@ Evolves into **Zephox** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Static Nip** | Special | Light special hit · Priority |
+| **Static Nip** | Special | Power 40 · Special · Priority |
 | **Hyper Dash** ★ | Utility |  Haste 3 [self] · CD 3 |
-| **Jolt Rattle** ★ | Special | Light special hit · Daze 2 · CD 3 |
+| **Jolt Rattle** ★ | Special | Power 40 · Special · Daze 2 · CD 3 |
 | **Quick Charge** ★ | Utility |  Priority · Focus [self] · CD 3 |
 
 3 of 4 moves are unique to this friend.
@@ -279,9 +279,9 @@ Evolves from **Zapling** at level 16. Evolves into **Tempestail** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Slipstream Strike** ★ | Physical | Medium physical hit · +30% if you move first |
+| **Slipstream Strike** ★ | Physical | Power 70 · Physical · +30% if you move first |
 | **Afterimage** ★ | Utility |  Priority · Evade [self] · CD 3 |
-| **Spark Chain** ★ | Special | 2 hits (random foes) · Daze 1 (20%) · CD 3 |
+| **Spark Chain** ★ | Special | Power 40 x2 (random foes) · Special · Daze 1 (20%) · CD 3 |
 | **Windup Zip** ★ | Utility |  Haste 2 [self] · Focus [self] · CD 3 |
 
 4 of 4 moves are unique to this friend.
@@ -302,9 +302,9 @@ Evolves from **Zephox** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Thunder Lash** ★ | Special | Heavy special hit · ignores 30% DEF · CD 2 |
+| **Thunder Lash** ★ | Special | Power 110 · Special · ignores 30% DEF · CD 2 |
 | **Eye of the Storm** ★ | Utility |  Evade [self] · Next 1 atk +60% [self] · CD 4 |
-| **Rolling Thunder** ★ | Special | 3 hits · CD 2 |
+| **Rolling Thunder** ★ | Special | Power 30/50/70 · Special · CD 2 |
 | **Gale Veil** ★ | Utility |  Haste 3 [self] · Cleanse [self] · CD 3 |
 
 4 of 4 moves are unique to this friend.
@@ -329,9 +329,9 @@ Evolves into **Ashwolf** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Ember Snap** ★ | Special | Light special hit · Wound 2 (25%) |
+| **Ember Snap** ★ | Special | Power 40 · Special · Wound 2 (25%) |
 | **Kindle** ★ | Utility |  Focus [self] · CD 3 |
-| **Flare Burst** ★ | Special | Heavy special hit · recoil 10% · CD 2 |
+| **Flare Burst** ★ | Special | Power 110 · Special · recoil 10% · CD 2 |
 | **Smolder Aura** ★ | Utility |  Wound 3 · Mark · CD 4 |
 
 4 of 4 moves are unique to this friend.
@@ -352,10 +352,10 @@ Evolves from **Cindrel** at level 16. Evolves into **Pyrelord** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Cinder Fang** | Physical | Medium physical hit · Wound 2 (30%) |
+| **Cinder Fang** | Physical | Power 70 · Physical · Wound 2 (30%) |
 | **Ashen Howl** ★ | Utility |  ATK +30% 3t [self] · CD 3 |
 | **Scorched Earth** ★ | Utility |  Wound 3 · Slow 2 · CD 4 |
-| **Backdraft** ★ | Special | Heavy special hit · +50% vs Wounded · CD 2 |
+| **Backdraft** ★ | Special | Power 110 · Special · +50% vs Wounded · CD 2 |
 
 3 of 4 moves are unique to this friend.
 
@@ -375,9 +375,9 @@ Evolves from **Ashwolf** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Inferno Crown** | Special | Heavy special hit · Wound 2 · CD 2 |
+| **Inferno Crown** | Special | Power 110 · Special · Wound 2 · CD 2 |
 | **Phoenix Pact** ★ | Utility |  Lose 25% HP [self] · Next 2 atk +80% [self] · CD 5 |
-| **Ember Rain** ★ | Special | 3 hits (random foes) · Wound 2 (25%) · CD 2 |
+| **Ember Rain** ★ | Special | Power 40 x3 (random foes) · Special · Wound 2 (25%) · CD 2 |
 | **Molten Guard** | Utility |  Counter hit [self] · CD 3 |
 
 2 of 4 moves are unique to this friend.
@@ -402,9 +402,9 @@ Evolves into **Boulderon** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Rock Toss** | Physical | Light physical hit |
+| **Rock Toss** | Physical | Power 40 · Physical |
 | **Curl Up** ★ | Utility |  Armor 2 [self] · Counter x1.5 [self] · CD 3 |
-| **Gravel Spray** ★ | Physical | Light physical hit · all foes · Daze 1 · CD 3 |
+| **Gravel Spray** ★ | Physical | Power 40 · Physical · all foes · Daze 1 · CD 3 |
 | **Settle In** ★ | Utility |  Heal 15% [self] · Shield 10% [self] · CD 3 |
 
 3 of 4 moves are unique to this friend.
@@ -425,9 +425,9 @@ Evolves from **Pebblet** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Landslide** | Physical | Heavy physical hit · Slow 2 · CD 2 |
+| **Landslide** | Physical | Power 110 · Physical · Slow 2 · CD 2 |
 | **Stonewall Stance** ★ | Utility |  Counter x2.0 [self] · CD 3 |
-| **Tremor Step** ★ | Physical | Medium physical hit · Seal · CD 3 |
+| **Tremor Step** ★ | Physical | Power 70 · Physical · Seal · CD 3 |
 | **Bedrock Resolve** ★ | Utility |  Shield 30% [self] · Slow 1 [self] · CD 4 |
 
 3 of 4 moves are unique to this friend.
@@ -452,7 +452,7 @@ Evolves into **Tidalisk** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Bubble Pop** | Special | Light special hit |
+| **Bubble Pop** | Special | Power 40 · Special |
 | **Mending Mist** | Utility |  ally or self · Heal 20% · CD 3 |
 | **Rinse** | Utility |  ally or self · Cleanse · Regen 2 · CD 3 |
 | **Slick Skin** ★ | Utility |  Evade (50%) [self] · CD 3 |
@@ -475,9 +475,9 @@ Evolves from **Dewdrip** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Crashing Wave** ★ | Special | Heavy special hit · Cleanse [self] · CD 2 |
+| **Crashing Wave** ★ | Special | Power 110 · Special · Cleanse [self] · CD 2 |
 | **Healing Current** ★ | Utility |  ally or self · Heal 35% · CD 3 |
-| **Undertow** ★ | Special | Medium special hit · Slow 2 |
+| **Undertow** ★ | Special | Power 70 · Special · Slow 2 |
 | **Tidal Barrier** ★ | Utility |  ally or self · Shield 25% · Regen 2 · CD 4 |
 
 4 of 4 moves are unique to this friend.
@@ -502,9 +502,9 @@ Evolves into **Dusklady** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Dust Flutter** | Special | Light special hit · Daze 1 |
+| **Dust Flutter** | Special | Power 40 · Special · Daze 1 |
 | **Hex Mark** ★ | Utility |  Mark · CD 3 |
-| **Sap Scales** ★ | Special | Medium special hit · drain 50% · CD 3 |
+| **Sap Scales** ★ | Special | Power 70 · Special · drain 50% · CD 3 |
 | **Lullaby Wings** ★ | Utility |  Slow 3 · CD 4 |
 
 3 of 4 moves are unique to this friend.
@@ -527,7 +527,7 @@ Evolves from **Gloomoth** at level 20.
 |---|---|---|
 | **Doom Whisper** | Utility |  Doom 3 · CD 4 |
 | **Silken Seal** | Utility |  Seal · CD 3 |
-| **Nightfall Wings** ★ | Special | Medium special hit · Mark · Daze 1 · CD 3 |
+| **Nightfall Wings** ★ | Special | Power 70 · Special · Mark · Daze 1 · CD 3 |
 | **Dark Veil** | Utility |  Evade [self] · Haste 1 [self] · CD 3 |
 
 1 of 4 moves are unique to this friend. Closest relative: Duskpanther (2 shared moves).
@@ -552,9 +552,9 @@ Evolves into **Cyclonix** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Feather Cut** | Physical | Light physical hit · Priority |
-| **Wind Hop** | Physical | Medium physical hit · then swap out · CD 2 |
-| **Updraft Dive** | Physical | Heavy physical hit · 2 turns (dodges) · CD 3 |
+| **Feather Cut** | Physical | Power 40 · Physical · Priority |
+| **Wind Hop** | Physical | Power 70 · Physical · then swap out · CD 2 |
+| **Updraft Dive** | Physical | Power 110 · Physical · 2 turns (dodges) · CD 3 |
 | **Tailwind** ★ | Utility |  ally or self · Haste 3 · CD 4 |
 
 1 of 4 moves are unique to this friend.
@@ -575,9 +575,9 @@ Evolves from **Gustling** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Cyclone Strike** | Physical | Medium physical hit · then swap out |
+| **Cyclone Strike** | Physical | Power 70 · Physical · then swap out |
 | **Whirl Away** | Utility |  Force switch · CD 3 |
-| **Razor Gale** ★ | Special | Heavy special hit · 25% crit · CD 2 |
+| **Razor Gale** ★ | Special | Power 110 · Special · 25% crit · CD 2 |
 | **Eye Dart** ★ | Utility |  Evade [self] · Focus [self] · CD 3 |
 
 2 of 4 moves are unique to this friend.
@@ -602,7 +602,7 @@ Evolves into **Prismaw** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Sparkle Tap** | Special | Light special hit |
+| **Sparkle Tap** | Special | Power 40 · Special |
 | **Prism Shield** ★ | Utility |  ally or self · Shield 15% · CD 3 |
 | **Lucky Glint** ★ | Utility |  ally or self · Focus · Can't miss · CD 3 |
 | **Dazzle** ★ | Utility |  Daze 2 · CD 3 |
@@ -625,7 +625,7 @@ Evolves from **Glimmerling** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Refract Beam** ★ | Special | Medium special hit · ignores Shield/Armor · CD 2 |
+| **Refract Beam** ★ | Special | Power 70 · Special · ignores Shield/Armor · CD 2 |
 | **Crystal Aegis** ★ | Utility |  ally or self · Shield 30% · Thorns 2 · CD 4 |
 | **Spectrum Boost** ★ | Utility |  ally or self · ATK +20% 3t · DEF +20% 3t · SPE +20% 3t · CD 4 |
 | **Mirror Shard** ★ | Utility |  Reflect debuff [self] · CD 3 |
@@ -652,8 +652,8 @@ Evolves into **Tunnelord** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Claw Scratch** ★ | Physical | Light physical hit · Wound 2 (20%) |
-| **Dig In** | Physical | Medium physical hit · 2 turns (dodges) · CD 3 |
+| **Claw Scratch** ★ | Physical | Power 40 · Physical · Wound 2 (20%) |
+| **Dig In** | Physical | Power 70 · Physical · 2 turns (dodges) · CD 3 |
 | **Pitfall** | Utility |  Trap 2 · CD 3 |
 | **Dirt Cloud** | Utility |  all foes · Daze 1 · CD 3 |
 
@@ -675,9 +675,9 @@ Evolves from **Burrowby** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Cave-In** ★ | Physical | Heavy physical hit · Trap 1 · CD 2 |
+| **Cave-In** ★ | Physical | Power 110 · Physical · Trap 1 · CD 2 |
 | **Spike Pit** ★ | Utility |  Wound 3 · Trap 2 · CD 3 |
-| **Rumble** ★ | Physical | Medium physical hit · all foes · Slow 1 · CD 2 |
+| **Rumble** ★ | Physical | Power 70 · Physical · all foes · Slow 1 · CD 2 |
 | **Fortify Burrow** ★ | Utility |  Armor 3 [self] · Regen 2 [self] · CD 4 |
 
 4 of 4 moves are unique to this friend.
@@ -702,9 +702,9 @@ Evolves into **Glacierra** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Chill Breath** ★ | Special | Light special hit · Slow 1 |
+| **Chill Breath** ★ | Special | Power 40 · Special · Slow 1 |
 | **Frost Veil** | Utility |  Armor 2 [self] · CD 3 |
-| **Icicle Prick** ★ | Special | Medium special hit · Slow 2 (40%) · CD 3 |
+| **Icicle Prick** ★ | Special | Power 70 · Special · Slow 2 (40%) · CD 3 |
 | **Snow Drift** | Utility |  Stun · CD 5 |
 
 2 of 4 moves are unique to this friend.
@@ -725,7 +725,7 @@ Evolves from **Frostwisp** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Glacial Slam** | Physical | Heavy physical hit · Slow 2 · CD 2 |
+| **Glacial Slam** | Physical | Power 110 · Physical · Slow 2 · CD 2 |
 | **Flash Freeze** | Utility |  Stun · CD 5 |
 | **Permafrost** | Utility |  Armor 3 [self] · Slows attackers [self] · CD 4 |
 | **Blizzard Veil** ★ | Utility |  all foes · Daze 2 · CD 4 |
@@ -752,7 +752,7 @@ Evolves into **Reflectrix** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Cheeky Bite** | Physical | Light physical hit |
+| **Cheeky Bite** | Physical | Power 40 · Physical |
 | **Mimic Move** | Utility |  Copy foe's last move · CD 2 |
 | **Decoy** ★ | Utility |  Shield 15% [self] · Evade [self] · CD 3 |
 | **Pilfer** ★ | Utility |  Steal a buff · CD 3 |
@@ -778,7 +778,7 @@ Evolves from **Mirrorat** at level 20.
 | **Hall of Mirrors** | Utility |  Reflect hit [self] · CD 4 |
 | **Copycat Strike** | Utility |  Copy foe's last move · CD 2 |
 | **Inversion** ★ | Utility |  Foe's buffs become debuffs · CD 5 |
-| **Trick Step** ★ | Physical | Medium physical hit · Priority · Daze 1 · CD 3 |
+| **Trick Step** ★ | Physical | Power 70 · Physical · Priority · Daze 1 · CD 3 |
 
 2 of 4 moves are unique to this friend.
 
@@ -817,7 +817,7 @@ An owl that rewinds cooldowns, seeds Doom and slows time itself.
 
 An armored beetle that stacks plates and crushes with cannonball rolls.
 
-**Ability: Solid Rock** — Takes 25% less damage from Heavy hits.
+**Ability: Solid Rock** — Takes 25% less damage from hits with power over 80.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -825,10 +825,10 @@ An armored beetle that stacks plates and crushes with cannonball rolls.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Rivet Bite** | Physical | Medium physical hit |
+| **Rivet Bite** | Physical | Power 70 · Physical |
 | **Plate Up** ★ | Utility |  +1 Plate [self] |
 | **Rust Cloud** ★ | Utility |  DEF -30% 3t · CD 3 |
-| **Cannonball Roll** ★ | Physical | Heavy physical hit · +10% per Plate · CD 3 |
+| **Cannonball Roll** ★ | Physical | Power 110 · Physical · +10% per Plate · CD 3 |
 
 3 of 4 moves are unique to this friend.
 
@@ -850,7 +850,7 @@ A bat that drains life, wounds foes and trades its own health for power.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Fang Sip** ★ | Physical | Medium physical hit · drain 50% |
+| **Fang Sip** ★ | Physical | Power 70 · Physical · drain 50% |
 | **Blood Pact** ★ | Utility |  Lose 20% HP [self] · ATK +50% 3t [self] · CD 4 |
 | **Crimson Mist** | Utility |  Wound 3 · Leech [self] · CD 3 |
 | **Night Flit** ★ | Utility |  Evade [self] · Heal 10% [self] · CD 3 |
@@ -875,10 +875,10 @@ A jelly cube that absorbs hits, copies stat changes and slams back what it took.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Cubic Bump** | Physical | Light physical hit |
+| **Cubic Bump** | Physical | Power 40 · Physical |
 | **Disguise** | Utility |  Copy foe's stat changes · CD 4 |
 | **Gelatinous Absorb** | Utility |  Absorb & heal [self] · CD 3 |
-| **Shapeshift Slam** ★ | Physical | Light physical hit · 1.2x damage you last took · CD 3 |
+| **Shapeshift Slam** ★ | Physical | Power 70 · Physical · 1.2x damage you last took · CD 3 |
 
 1 of 4 moves are unique to this friend. Closest relative: Spotter (2 shared moves).
 
@@ -900,10 +900,10 @@ A flame-winged phoenix that revives once and dives for huge damage.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Cinder Wing** | Special | Medium special hit |
+| **Cinder Wing** | Special | Power 70 · Special |
 | **Rebirth Pyre** ★ | Utility |  Revive once when KO'd · once per battle |
 | **Ash Veil** ★ | Utility |  Shield 15% [self] · Cleanse [self] · CD 3 |
-| **Solar Dive** ★ | Special | Heavy special hit · 2 turns · ignores Shield/Armor · CD 3 |
+| **Solar Dive** ★ | Special | Power 110 · Special · 2 turns · ignores Shield/Armor · CD 3 |
 
 3 of 4 moves are unique to this friend.
 
@@ -925,9 +925,9 @@ A rainbow prism that strips buffs, wipes the field and gambles on random effects
 
 | Move | Kind | Details |
 |---|---|---|
-| **Chaos Bolt** ★ | Special | Medium special hit · Random bonus effect |
+| **Chaos Bolt** ★ | Special | Power 70 · Special · Random bonus effect |
 | **Wild Card** | Utility |  Random effect · CD 3 |
-| **Prismatic Shatter** | Special | Medium special hit · Strip buffs, +20% each · CD 3 |
+| **Prismatic Shatter** | Special | Power 70 · Special · Strip buffs, +20% each · CD 3 |
 | **Anarchy** ★ | Utility |  Reset all statuses & cooldowns · CD 5 |
 
 2 of 4 moves are unique to this friend.
@@ -952,7 +952,7 @@ Evolves into **Mycelord** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Cap Bonk** | Physical | Light physical hit |
+| **Cap Bonk** | Physical | Power 40 · Physical |
 | **Spore Puff** | Utility |  all foes · Daze 1 · CD 3 |
 | **Rot Touch** ★ | Utility |  Wound 3 · CD 3 |
 | **Mulch Meal** ★ | Utility |  Heal 20% [self] · Regen 2 [self] · CD 4 |
@@ -975,7 +975,7 @@ Evolves from **Sporeling** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Toadstool Slam** | Physical | Medium physical hit · Wound 2 (30%) |
+| **Toadstool Slam** | Physical | Power 70 · Physical · Wound 2 (30%) |
 | **Choking Cloud** ★ | Utility |  all foes · Wound 2 · CD 4 |
 | **Fungal Network** | Utility |  ally or self · Regen 3 · Shield 10% · CD 4 |
 | **Parasite Bloom** | Utility |  Wound 3 · Leech [self] · CD 3 |
@@ -1002,10 +1002,10 @@ Evolves into **Dunewyrm** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Sand Kick** ★ | Physical | Light physical hit · Daze 1 (40%) |
+| **Sand Kick** ★ | Physical | Power 40 · Physical · Daze 1 (40%) |
 | **Dust Devil** | Utility |  Evade [self] · Haste 1 [self] · CD 3 |
-| **Quicksand Snap** ★ | Special | Medium special hit · Slow 2 · CD 3 |
-| **Sinkhole Ambush** | Physical | Medium physical hit · 2 turns (dodges) · CD 3 |
+| **Quicksand Snap** ★ | Special | Power 70 · Special · Slow 2 · CD 3 |
+| **Sinkhole Ambush** | Physical | Power 70 · Physical · 2 turns (dodges) · CD 3 |
 
 2 of 4 moves are unique to this friend.
 
@@ -1025,9 +1025,9 @@ Evolves from **Sandpup** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Sandstorm** | Special | Light special hit · all foes · Daze 2 · CD 3 |
+| **Sandstorm** | Special | Power 40 · Special · all foes · Daze 2 · CD 3 |
 | **Mirage Coil** | Utility |  Evade [self] · Armor 2 [self] · CD 4 |
-| **Constrict** | Physical | Medium physical hit · Trap 2 · CD 3 |
+| **Constrict** | Physical | Power 70 · Physical · Trap 2 · CD 3 |
 | **Serpent Dance** ★ | Utility |  ally or self · Haste 2 · Focus · CD 4 |
 
 1 of 4 moves are unique to this friend.
@@ -1042,7 +1042,7 @@ Evolves from **Sandpup** at level 20.
 
 A gear-driven hound that speeds itself up and shatters defenses.
 
-**Ability: Technician** — Light hits deal 50% more damage.
+**Ability: Technician** — Hits with power 45 or less deal 50% more damage.
 
 Evolves into **Gearhound** at level 20.
 
@@ -1052,10 +1052,10 @@ Evolves into **Gearhound** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Wrench Whack** | Physical | Light physical hit |
+| **Wrench Whack** | Physical | Power 40 · Physical |
 | **Oil Slick** ★ | Utility |  Slow 2 · Haste 1 [self] · CD 3 |
 | **Tighten Bolts** ★ | Utility |  Armor 2 [self] · Focus [self] · CD 3 |
-| **Spring Dash** ★ | Physical | Medium physical hit · Priority · CD 2 |
+| **Spring Dash** ★ | Physical | Power 70 · Physical · Priority · CD 2 |
 
 3 of 4 moves are unique to this friend.
 
@@ -1065,7 +1065,7 @@ Evolves into **Gearhound** at level 20.
 
 A gear-driven hound that speeds itself up and shatters defenses.
 
-**Ability: Technician** — Light hits deal 50% more damage.
+**Ability: Technician** — Hits with power 45 or less deal 50% more damage.
 
 Evolves from **Cogpup** at level 20.
 
@@ -1075,9 +1075,9 @@ Evolves from **Cogpup** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Piston Punch** | Physical | Heavy physical hit · ignores 20% DEF · CD 2 |
+| **Piston Punch** | Physical | Power 110 · Physical · ignores 20% DEF · CD 2 |
 | **Overclock** ★ | Utility |  ATK +40% 3t [self] · SPE +20% 3t [self] · CD 4 |
-| **Gear Grind** ★ | Physical | Medium physical hit · DEF -20% 2t |
+| **Gear Grind** ★ | Physical | Power 70 · Physical · DEF -20% 2t |
 | **Safety Shell** ★ | Utility |  Shield 25% [self] · Cleanse [self] · CD 4 |
 
 3 of 4 moves are unique to this friend.
@@ -1102,9 +1102,9 @@ Evolves into **Pearlarch** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Shell Tap** | Physical | Light physical hit |
+| **Shell Tap** | Physical | Power 40 · Physical |
 | **Clam Up** ★ | Utility |  Armor 2 [self] · Shield 10% [self] · CD 3 |
-| **Pearl Shot** ★ | Special | Medium special hit · Daze 1 · CD 2 |
+| **Pearl Shot** ★ | Special | Power 70 · Special · Daze 1 · CD 2 |
 | **Tide Pool** ★ | Utility |  ally or self · Heal 15% · Regen 2 · CD 4 |
 
 3 of 4 moves are unique to this friend.
@@ -1125,9 +1125,9 @@ Evolves from **Pearlclam** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Pearl Barrage** | Special | 3 hits (random foes) · CD 2 |
+| **Pearl Barrage** | Special | Power 40 x3 (random foes) · Special · CD 2 |
 | **Iron Shell** | Utility |  Armor 3 [self] · Thorns 3 [self] · CD 4 |
-| **Riptide Slam** ★ | Special | Medium special hit · Force switch · CD 3 |
+| **Riptide Slam** ★ | Special | Power 70 · Special · Force switch · CD 3 |
 | **Lustrous Veil** ★ | Utility |  ally or self · Shield 30% · Cleanse · CD 4 |
 
 2 of 4 moves are unique to this friend.
@@ -1152,9 +1152,9 @@ Evolves into **Summitaur** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Head Butt** ★ | Physical | Medium physical hit · recoil 5% |
-| **Mountain Leap** ★ | Physical | Medium physical hit · 2 turns (dodges) · Daze 1 · CD 3 |
-| **Horn Lock** | Physical | Medium physical hit · Trap 2 · CD 3 |
+| **Head Butt** ★ | Physical | Power 70 · Physical · recoil 5% |
+| **Mountain Leap** ★ | Physical | Power 70 · Physical · 2 turns (dodges) · Daze 1 · CD 3 |
+| **Horn Lock** | Physical | Power 70 · Physical · Trap 2 · CD 3 |
 | **Steady Footing** ★ | Utility |  Armor 2 [self] · Cleanse [self] · CD 3 |
 
 3 of 4 moves are unique to this friend.
@@ -1175,8 +1175,8 @@ Evolves from **Cragoat** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Avalanche Charge** ★ | Physical | Heavy physical hit · recoil 8% · Slow 1 · CD 2 |
-| **Thunderhoof** ★ | Physical | Medium physical hit · all foes · Daze 1 · CD 3 |
+| **Avalanche Charge** ★ | Physical | Power 110 · Physical · recoil 8% · Slow 1 · CD 2 |
+| **Thunderhoof** ★ | Physical | Power 70 · Physical · all foes · Daze 1 · CD 3 |
 | **Cliffside Stance** | Utility |  Counter x2.5 [self] · CD 3 |
 | **Summit Roar** ★ | Utility |  all foes · Slow 1 · ATK +25% 3t [self] · CD 4 |
 
@@ -1202,8 +1202,8 @@ Evolves into **Reefray** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Flick Splash** | Special | Light special hit |
-| **Tidal Dart** ★ | Special | Light special hit · Priority · CD 3 |
+| **Flick Splash** | Special | Power 40 · Special |
+| **Tidal Dart** ★ | Special | Power 40 · Special · Priority · CD 3 |
 | **Bubble Net** | Utility |  Trap 2 · CD 3 |
 | **Schooling** ★ | Utility |  ally or self · Haste 2 · Regen 2 · CD 4 |
 
@@ -1225,9 +1225,9 @@ Evolves from **Finlet** at level 16. Evolves into **Leviathor** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Stingray Lash** ★ | Physical | Medium physical hit · Wound 2 (35%) |
+| **Stingray Lash** ★ | Physical | Power 70 · Physical · Wound 2 (35%) |
 | **Glide Away** | Utility |  Evade [self] · Haste 2 [self] · CD 3 |
-| **Electro Pulse** ★ | Special | Medium special hit · all foes · Daze 1 · CD 3 |
+| **Electro Pulse** ★ | Special | Power 70 · Special · all foes · Daze 1 · CD 3 |
 | **Coral Wall** ★ | Utility |  ally or self · Armor 3 · Shield 15% · CD 4 |
 
 3 of 4 moves are unique to this friend.
@@ -1248,10 +1248,10 @@ Evolves from **Reefray** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Abyssal Crush** | Physical | Heavy physical hit · Slow 2 · CD 2 |
-| **Maelstrom** ★ | Special | Medium special hit · all foes · Force switch · CD 4 |
+| **Abyssal Crush** | Physical | Power 110 · Physical · Slow 2 · CD 2 |
+| **Maelstrom** ★ | Special | Power 70 · Special · all foes · Force switch · CD 4 |
 | **Deep Current** ★ | Utility |  ally or self · Regen 4 · Cleanse · CD 4 |
-| **Kraken's Grasp** ★ | Physical | Medium physical hit · Trap 3 · Wound 2 · CD 3 |
+| **Kraken's Grasp** ★ | Physical | Power 70 · Physical · Trap 3 · Wound 2 · CD 3 |
 
 3 of 4 moves are unique to this friend.
 
@@ -1273,7 +1273,7 @@ A moon spirit that hexes foes and vanishes before they can strike.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Crescent Slash** | Special | Medium special hit · Mark |
+| **Crescent Slash** | Special | Power 70 · Special · Mark |
 | **Lunar Eclipse** ★ | Utility |  all foes · Daze 2 · Slow 1 · CD 5 |
 | **Dusk Step** ★ | Utility |  Evade [self] · Haste 1 [self] · Next move Priority [self] · CD 3 |
 | **Starlit Hex** | Utility |  Doom 2 · Mark · CD 4 |
@@ -1298,7 +1298,7 @@ A turtle with a living garden on its shell that heals the whole team.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Shell Bash** | Physical | Medium physical hit |
+| **Shell Bash** | Physical | Power 70 · Physical |
 | **Garden Grows** ★ | Utility |  ally or self · Regen 4 · Shield 15% · CD 4 |
 | **Root Snare** ★ | Utility |  Trap 2 · Slow 1 · CD 3 |
 | **Sunbaked Rest** ★ | Utility |  Heal 40% [self] · Slow 1 [self] · CD 5 |
@@ -1323,9 +1323,9 @@ An ice-winged bird that chills the whole field.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Frost Gust** ★ | Special | Light special hit · all foes · Slow 1 · CD 2 |
-| **Hailstorm** ★ | Special | 3 hits (random foes) · Slow 1 (30%) · CD 3 |
-| **Wind Chill Dive** | Physical | Heavy physical hit · 2 turns (dodges) · CD 3 |
+| **Frost Gust** ★ | Special | Power 40 · Special · all foes · Slow 1 · CD 2 |
+| **Hailstorm** ★ | Special | Power 35 x3 (random foes) · Special · Slow 1 (30%) · CD 3 |
+| **Wind Chill Dive** | Physical | Power 110 · Physical · 2 turns (dodges) · CD 3 |
 | **Jet Stream** | Utility |  ally or self · Haste 3 · Focus · CD 4 |
 
 2 of 4 moves are unique to this friend.
@@ -1348,9 +1348,9 @@ A lava-veined beast that wounds everything around it.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Magma Fist** | Physical | Medium physical hit · Wound 2 (30%) |
+| **Magma Fist** | Physical | Power 70 · Physical · Wound 2 (30%) |
 | **Molten Carapace** | Utility |  Armor 3 [self] · Thorns 3 [self] · CD 4 |
-| **Eruption** ★ | Special | Medium special hit · all foes · Wound 2 · CD 3 |
+| **Eruption** ★ | Special | Power 70 · Special · all foes · Wound 2 · CD 3 |
 | **Obsidian Rage** ★ | Utility |  Lose 15% HP [self] · ATK +50% 3t [self] · Next 1 atk +40% [self] · CD 5 |
 
 2 of 4 moves are unique to this friend.
@@ -1375,9 +1375,9 @@ Evolves into **Honeybrute** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Tiny Sting** | Physical | Light physical hit |
-| **Buzz Barrage** ★ | Physical | 2 hits (random foes) · Wound 2 (30%) · CD 2 |
-| **Pollen Cloud** | Physical | Light physical hit · all foes · Wound 2 · CD 3 |
+| **Tiny Sting** | Physical | Power 40 · Physical |
+| **Buzz Barrage** ★ | Physical | Power 40 x2 (random foes) · Physical · Wound 2 (30%) · CD 2 |
+| **Pollen Cloud** | Physical | Power 40 · Physical · all foes · Wound 2 · CD 3 |
 | **Wing Hum** ★ | Utility |  ally or self · Haste 2 · Can't miss · CD 4 |
 
 2 of 4 moves are unique to this friend. Closest relative: Honeybrute (2 shared moves).
@@ -1398,9 +1398,9 @@ Evolves from **Bumblet** at level 16. Evolves into **Queenbuzz** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Stinger Jab** | Physical | Light physical hit |
-| **Hive Flurry** | Physical | 3 hits (random foes) · Wound 2 (20%) · CD 2 |
-| **Honey Splash** | Physical | Light physical hit · all foes · Wound 2 · CD 3 |
+| **Stinger Jab** | Physical | Power 40 · Physical |
+| **Hive Flurry** | Physical | Power 40 x3 (random foes) · Physical · Wound 2 (20%) · CD 2 |
+| **Honey Splash** | Physical | Power 40 · Physical · all foes · Wound 2 · CD 3 |
 | **Drone Rally** ★ | Utility |  ally or self · ATK +20% 3t · Haste 1 · CD 4 |
 
 1 of 4 moves are unique to this friend. Closest relative: Bumblet (2 shared moves).
@@ -1421,9 +1421,9 @@ Evolves from **Honeybrute** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Royal Stinger** | Physical | Light physical hit |
-| **Swarm Volley** | Physical | 3 hits (random foes) · Wound 2 (20%) · CD 2 |
-| **Wax Storm** ★ | Physical | Light physical hit · all foes · Wound 3 · CD 3 |
+| **Royal Stinger** | Physical | Power 40 · Physical |
+| **Swarm Volley** | Physical | Power 40 x3 (random foes) · Physical · Wound 2 (20%) · CD 2 |
+| **Wax Storm** ★ | Physical | Power 40 · Physical · all foes · Wound 3 · CD 3 |
 | **Queen's Decree** ★ | Utility |  all foes · Taunt 2 · ATK +15% 2t [self] · CD 4 |
 
 2 of 4 moves are unique to this friend. Closest relative: Honeybrute (2 shared moves).
@@ -1448,10 +1448,10 @@ Evolves into **Bogbark** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Mud Pie** | Physical | Light physical hit · Slow 1 (25%) |
+| **Mud Pie** | Physical | Power 40 · Physical · Slow 1 (25%) |
 | **Wallow** | Utility |  Regen 3 [self] · CD 3 |
 | **Muddy Paws** ★ | Utility |  ally or self · Regen 3 · Heal 12% · CD 4 |
-| **Slurp Silt** ★ | Physical | Medium physical hit · Wound 2 · Slow 1 · Leech [self] · CD 3 |
+| **Slurp Silt** ★ | Physical | Power 70 · Physical · Wound 2 · Slow 1 · Leech [self] · CD 3 |
 
 2 of 4 moves are unique to this friend.
 
@@ -1471,10 +1471,10 @@ Evolves from **Mudpup** at level 16. Evolves into **Swampcrown** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Swamp Snap** | Physical | Medium physical hit · Slow 1 (25%) |
+| **Swamp Snap** | Physical | Power 70 · Physical · Slow 1 (25%) |
 | **Peat Blanket** ★ | Utility |  Regen 3 [self] · Cleanse [self] · CD 3 |
 | **Bog Tonic** | Utility |  ally or self · Regen 3 · Heal 10% · CD 4 |
-| **Mire Drain** ★ | Physical | Medium physical hit · drain 65% · DEF -15% 2t · CD 3 |
+| **Mire Drain** ★ | Physical | Power 70 · Physical · drain 65% · DEF -15% 2t · CD 3 |
 
 2 of 4 moves are unique to this friend.
 
@@ -1494,7 +1494,7 @@ Evolves from **Bogbark** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Reed Whip** | Physical | Medium physical hit · Slow 1 (35%) |
+| **Reed Whip** | Physical | Power 70 · Physical · Slow 1 (35%) |
 | **Lotus Bloom** ★ | Utility |  Regen 4 [self] · Cleanse [self] · CD 3 |
 | **Marsh Blessing** ★ | Utility |  ally or self · Regen 3 · Heal 11% · CD 4 |
 | **Quagmire Grasp** ★ | Utility |  Trap 3 · DEF -20% 3t · CD 4 |
@@ -1521,7 +1521,7 @@ Evolves into **Snowmane** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Snowball** ★ | Special | Light special hit · Slow 1 (35%) |
+| **Snowball** ★ | Special | Power 40 · Special · Slow 1 (35%) |
 | **Chilly Nuzzle** | Utility |  Slow 2 · CD 3 |
 | **Flurry Spray** | Utility |  all foes · Slow 2 · CD 4 |
 | **Drift Pin** ★ | Utility |  Trap 2 · Slow 1 · Daze 1 · CD 3 |
@@ -1544,7 +1544,7 @@ Evolves from **Flurrcub** at level 16. Evolves into **Blizzarion** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Frost Nip** | Special | Medium special hit · Slow 1 (30%) |
+| **Frost Nip** | Special | Power 70 · Special · Slow 1 (30%) |
 | **Numbing Roar** | Utility |  Slow 2 · CD 3 |
 | **Whiteout Gust** | Utility |  all foes · Slow 2 · CD 4 |
 | **Deep Freeze** ★ | Utility |  Stun · Slow 2 · CD 5 |
@@ -1567,7 +1567,7 @@ Evolves from **Snowmane** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Glacier Mane Slash** | Special | Medium special hit · Slow 1 (30%) |
+| **Glacier Mane Slash** | Special | Power 70 · Special · Slow 1 (30%) |
 | **Hoarfrost Howl** ★ | Utility |  Slow 3 · CD 3 |
 | **Polar Cyclone** ★ | Utility |  all foes · Slow 3 · CD 4 |
 | **Absolute Zero** ★ | Utility |  all foes · Slow 3 · ATK -25% 3t · CD 5 |
@@ -1594,10 +1594,10 @@ Evolves into **Rosewhip** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Briar Scratch** | Physical | Medium physical hit |
-| **Reckless Thorn Rush** ★ | Physical | Heavy physical hit · recoil 8% · CD 2 |
+| **Briar Scratch** | Physical | Power 70 · Physical |
+| **Reckless Thorn Rush** ★ | Physical | Power 110 · Physical · recoil 8% · CD 2 |
 | **Bloom Rage** ★ | Utility |  Thorns 2 [self] · ATK +15% 3t [self] · CD 3 |
-| **Sap Sting** ★ | Physical | Medium physical hit · drain 30% · Wound 2 · Thorns 2 [self] · CD 3 |
+| **Sap Sting** ★ | Physical | Power 70 · Physical · drain 30% · Wound 2 · Thorns 2 [self] · CD 3 |
 
 3 of 4 moves are unique to this friend.
 
@@ -1617,10 +1617,10 @@ Evolves from **Thornet** at level 16. Evolves into **Bramblequeen** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Vine Lash** | Physical | Medium physical hit |
-| **Barbed Charge** | Physical | Heavy physical hit · recoil 10% · CD 2 |
+| **Vine Lash** | Physical | Power 70 · Physical |
+| **Barbed Charge** | Physical | Power 110 · Physical · recoil 10% · CD 2 |
 | **Petal Fury** ★ | Utility |  Thorns 3 [self] · ATK +25% 3t [self] · CD 3 |
-| **Nectar Leech** ★ | Physical | Medium physical hit · drain 30% · Wound 3 · Leech [self] · CD 3 |
+| **Nectar Leech** ★ | Physical | Power 70 · Physical · drain 30% · Wound 3 · Leech [self] · CD 3 |
 
 2 of 4 moves are unique to this friend. Closest relative: Bramblequeen (2 shared moves).
 
@@ -1640,10 +1640,10 @@ Evolves from **Rosewhip** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Queen's Lash** | Physical | Medium physical hit |
-| **Bramble Stampede** | Physical | Heavy physical hit · recoil 10% · CD 2 |
+| **Queen's Lash** | Physical | Power 70 · Physical |
+| **Bramble Stampede** | Physical | Power 110 · Physical · recoil 10% · CD 2 |
 | **Crimson Bloom** ★ | Utility |  Thorns 3 [self] · ATK +30% 3t [self] · Regen 2 [self] · CD 4 |
-| **Thorned Embrace** ★ | Physical | Heavy physical hit · Trap 2 · Thorns 3 [self] · CD 3 |
+| **Thorned Embrace** ★ | Physical | Power 110 · Physical · Trap 2 · Thorns 3 [self] · CD 3 |
 
 2 of 4 moves are unique to this friend. Closest relative: Rosewhip (2 shared moves).
 
@@ -1667,10 +1667,10 @@ Evolves into **Starfall** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Star Bonk** | Special | Medium special hit |
-| **Shooting Charge** ★ | Special | Heavy special hit · recoil 10% · Wound 2 · CD 2 |
+| **Star Bonk** | Special | Power 70 · Special |
+| **Shooting Charge** ★ | Special | Power 110 · Special · recoil 10% · Wound 2 · CD 2 |
 | **Stardust Surge** ★ | Utility |  Lose 20% HP [self] · Next 1 atk +70% [self] · CD 4 |
-| **Meteor Shower** ★ | Special | 2 hits (random foes) · Wound 2 (35%) · CD 3 |
+| **Meteor Shower** ★ | Special | Power 50 x2 (random foes) · Special · Wound 2 (35%) · CD 3 |
 
 3 of 4 moves are unique to this friend.
 
@@ -1690,10 +1690,10 @@ Evolves from **Cometling** at level 16. Evolves into **Novadrake** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Comet Tail** | Special | Medium special hit |
-| **Falling Star** ★ | Special | Heavy special hit · recoil 11% · Wound 2 · CD 2 |
+| **Comet Tail** | Special | Power 70 · Special |
+| **Falling Star** ★ | Special | Power 110 · Special · recoil 11% · Wound 2 · CD 2 |
 | **Supernova Wish** ★ | Utility |  Lose 20% HP [self] · Next 1 atk +80% [self] · CD 4 |
-| **Asteroid Rain** ★ | Special | 4 hits (random foes) · Daze 1 (30%) · CD 3 |
+| **Asteroid Rain** ★ | Special | Power 40 x4 (random foes) · Special · Daze 1 (30%) · CD 3 |
 
 3 of 4 moves are unique to this friend.
 
@@ -1713,10 +1713,10 @@ Evolves from **Starfall** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Nova Claw** | Special | Medium special hit |
-| **Cosmic Crash** ★ | Special | Heavy special hit · recoil 12% · Wound 3 · CD 2 |
+| **Nova Claw** | Special | Power 70 · Special |
+| **Cosmic Crash** ★ | Special | Power 110 · Special · recoil 12% · Wound 3 · CD 2 |
 | **Stellar Overload** ★ | Utility |  Lose 20% HP [self] · Next 1 atk +90% [self] · CD 4 |
-| **Event Horizon** ★ | Special | Medium special hit · all foes · ignores Shield/Armor · recoil 11% · Slow 2 · CD 5 |
+| **Event Horizon** ★ | Special | Power 70 · Special · all foes · ignores Shield/Armor · recoil 11% · Slow 2 · CD 5 |
 
 3 of 4 moves are unique to this friend.
 
@@ -1740,7 +1740,7 @@ Evolves into **Spineurchin** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Spine Poke** ★ | Physical | Light physical hit · Wound 2 (25%) |
+| **Spine Poke** ★ | Physical | Power 40 · Physical · Wound 2 (25%) |
 | **Curl Tight** | Utility |  Armor 2 [self] · CD 3 |
 | **Prickle Coat** | Utility |  Thorns 3 [self] · CD 3 |
 | **Tidepool Nap** ★ | Utility |  Heal 27% [self] · Shield 12% [self] · Slow 1 [self] · CD 4 |
@@ -1763,7 +1763,7 @@ Evolves from **Urchi** at level 16. Evolves into **Pricklord** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Needle Jab** | Physical | Medium physical hit · Wound 2 (25%) |
+| **Needle Jab** | Physical | Power 70 · Physical · Wound 2 (25%) |
 | **Sea Spine Guard** | Utility |  Armor 2 [self] · CD 3 |
 | **Barbed Reprisal** | Utility |  Counter x1.5 [self] · CD 3 |
 | **Brine Recovery** ★ | Utility |  Heal 20% [self] · Absorb & heal [self] · CD 4 |
@@ -1786,7 +1786,7 @@ Evolves from **Spineurchin** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Trident Spike** | Physical | Medium physical hit · Wound 2 (25%) |
+| **Trident Spike** | Physical | Power 70 · Physical · Wound 2 (25%) |
 | **Spiked Bulwark** ★ | Utility |  Armor 3 [self] · Cleanse [self] · CD 3 |
 | **Pincushion Retort** | Utility |  Counter hit [self] · CD 3 |
 | **Abyssal Rest** ★ | Utility |  Heal 39% [self] · Armor 3 [self] · Slow 2 [self] · CD 5 |
@@ -1813,10 +1813,10 @@ Evolves into **Magmahound** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Ember Chomp** | Physical | Medium physical hit |
-| **Lava Lunge** | Special | Medium special hit · 25% crit · CD 2 |
+| **Ember Chomp** | Physical | Power 70 · Physical |
+| **Lava Lunge** | Special | Power 70 · Special · 25% crit · CD 2 |
 | **Heat Surge** ★ | Utility |  Lose 15% HP [self] · ATK +25% 3t [self] · CD 4 |
-| **Scorch Gnaw** ★ | Physical | Medium physical hit · Wound 3 (45%) · ATK +10% 2t [self] · CD 3 |
+| **Scorch Gnaw** ★ | Physical | Power 70 · Physical · Wound 3 (45%) · ATK +10% 2t [self] · CD 3 |
 
 2 of 4 moves are unique to this friend. Closest relative: Magmahound (2 shared moves).
 
@@ -1836,10 +1836,10 @@ Evolves from **Lavapup** at level 16. Evolves into **Calderon** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Magma Maw** | Physical | Medium physical hit |
-| **Molten Pounce** | Special | Medium special hit · 25% crit · CD 2 |
+| **Magma Maw** | Physical | Power 70 · Physical |
+| **Molten Pounce** | Special | Power 70 · Special · 25% crit · CD 2 |
 | **Core Rage** | Utility |  Lose 15% HP [self] · ATK +35% 3t [self] · CD 4 |
-| **Cinder Drain** ★ | Physical | Medium physical hit · drain 35% · Wound 2 · CD 3 |
+| **Cinder Drain** ★ | Physical | Power 70 · Physical · drain 35% · Wound 2 · CD 3 |
 
 1 of 4 moves are unique to this friend. Closest relative: Lavapup (2 shared moves).
 
@@ -1859,10 +1859,10 @@ Evolves from **Magmahound** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Caldera Claw** | Physical | Medium physical hit |
-| **Volcanic Tackle** ★ | Special | Medium special hit · 35% crit · CD 2 |
+| **Caldera Claw** | Physical | Power 70 · Physical |
+| **Volcanic Tackle** ★ | Special | Power 70 · Special · 35% crit · CD 2 |
 | **Eruption Heart** | Utility |  Lose 15% HP [self] · ATK +30% 3t [self] · CD 4 |
-| **Pyroclast Bite** ★ | Physical | Heavy physical hit · 35% crit · recoil 8% · Wound 2 · CD 3 |
+| **Pyroclast Bite** ★ | Physical | Power 110 · Physical · 35% crit · recoil 8% · Wound 2 · CD 3 |
 
 2 of 4 moves are unique to this friend. Closest relative: Scarabrute (2 shared moves).
 
@@ -1886,7 +1886,7 @@ Evolves into **Galelynx** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Gust Swipe** | Special | Light special hit · Priority |
+| **Gust Swipe** | Special | Power 40 · Special · Priority |
 | **Air Skip** | Utility |  Evade [self] · Haste 1 [self] · CD 3 |
 | **Dizzy Draft** ★ | Utility |  Mark · Daze 2 · Slow 1 · CD 3 |
 | **Shove Breeze** ★ | Utility |  Force switch · Daze 1 · CD 3 |
@@ -1909,7 +1909,7 @@ Evolves from **Breezecub** at level 16. Evolves into **Cycloneth** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Slipstream Slash** | Special | Light special hit · Priority |
+| **Slipstream Slash** | Special | Power 40 · Special · Priority |
 | **Tailwind Blur** | Utility |  Evade [self] · Haste 2 [self] · CD 3 |
 | **Vertigo Gale** | Utility |  Mark · Slow 2 · CD 3 |
 | **Pilfer Wind** ★ | Utility |  Evade [self] · Steal a buff · CD 3 |
@@ -1932,7 +1932,7 @@ Evolves from **Galelynx** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Cyclone Claw** ★ | Special | Medium special hit · Priority |
+| **Cyclone Claw** ★ | Special | Power 70 · Special · Priority |
 | **Eye Wall Dodge** | Utility |  Evade [self] · Haste 2 [self] · CD 3 |
 | **Whirling Daze** ★ | Utility |  Mark · Daze 3 · CD 4 |
 | **Echoing Gust** | Utility |  Foe's buffs become debuffs · CD 4 |
@@ -1959,7 +1959,7 @@ Evolves into **Belltoll** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Ting Strike** | Special | Light special hit · Daze 1 (25%) |
+| **Ting Strike** | Special | Power 40 · Special · Daze 1 (25%) |
 | **Soothing Ring** ★ | Utility |  ally or self · Heal 23% · CD 3 |
 | **Quickstep Chime** | Utility |  ally or self · Haste 3 · CD 3 |
 | **Clear Tone** ★ | Utility |  ally or self · Cleanse · Haste 1 · CD 4 |
@@ -1982,7 +1982,7 @@ Evolves from **Chimey** at level 16. Evolves into **Carillon** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Clapper Bonk** | Special | Medium special hit · Daze 1 (25%) |
+| **Clapper Bonk** | Special | Power 70 · Special · Daze 1 (25%) |
 | **Healing Peal** ★ | Utility |  ally or self · Heal 29% · CD 3 |
 | **Tempo Toll** | Utility |  ally or self · Haste 3 · CD 3 |
 | **Sanctuary Note** ★ | Utility |  ally or self · Shield 29% · Regen 2 · CD 4 |
@@ -2005,7 +2005,7 @@ Evolves from **Belltoll** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Resonant Smash** | Special | Medium special hit · Daze 1 (35%) |
+| **Resonant Smash** | Special | Power 70 · Special · Daze 1 (35%) |
 | **Choir of Mending** ★ | Utility |  ally or self · Heal 34% · CD 3 |
 | **Allegro Cascade** | Utility |  ally or self · Haste 3 · CD 3 |
 | **Hymn of Warding** ★ | Utility |  ally or self · Shield 32% · Armor 3 · Cleanse · CD 5 |
@@ -2032,7 +2032,7 @@ Evolves into **Duskpanther** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Shade Pounce** | Physical | Medium physical hit · Mark |
+| **Shade Pounce** | Physical | Power 70 · Physical · Mark |
 | **Fading Whisper** | Utility |  Mark · Daze 1 (30%) · CD 3 |
 | **Silence Paw** | Utility |  Seal · CD 3 |
 | **Gloom Mist** ★ | Utility |  all foes · Daze 1 · Evade [self] · CD 3 |
@@ -2055,7 +2055,7 @@ Evolves from **Shadowcub** at level 16. Evolves into **Nightstalker** at level 3
 
 | Move | Kind | Details |
 |---|---|---|
-| **Dusk Claw** | Physical | Medium physical hit · Mark |
+| **Dusk Claw** | Physical | Power 70 · Physical · Mark |
 | **Dread Countdown** | Utility |  Doom 3 · CD 4 |
 | **Muzzle Shadow** | Utility |  Seal · CD 3 |
 | **Veil of Night** ★ | Utility |  Evade [self] · Next move Priority [self] · Can't miss [self] · CD 3 |
@@ -2078,7 +2078,7 @@ Evolves from **Duskpanther** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Stalker's Mark** | Physical | Medium physical hit · Mark |
+| **Stalker's Mark** | Physical | Power 70 · Physical · Mark |
 | **Doom Prowl** | Utility |  Doom 3 · CD 4 |
 | **Hush of Ruin** | Utility |  Seal · CD 3 |
 | **Nightfall Shroud** ★ | Utility |  all foes · Daze 2 · Slow 1 · Evade [self] · CD 5 |
@@ -2105,10 +2105,10 @@ Evolves into **Tidemane** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Wave Nip** | Physical | Medium physical hit |
-| **Breaker Dive** | Physical | Medium physical hit · 2 turns (dodges) · CD 3 |
+| **Wave Nip** | Physical | Power 70 · Physical |
+| **Breaker Dive** | Physical | Power 70 · Physical · 2 turns (dodges) · CD 3 |
 | **Foam Shield** | Utility |  Evade [self] · CD 3 |
-| **Rip Tether** ★ | Physical | Medium physical hit · then swap out · Slow 1 · Daze 1 · CD 3 |
+| **Rip Tether** ★ | Physical | Power 70 · Physical · then swap out · Slow 1 · Daze 1 · CD 3 |
 
 1 of 4 moves are unique to this friend. Closest relative: Tidemane (2 shared moves).
 
@@ -2128,10 +2128,10 @@ Evolves from **Kelpie** at level 16. Evolves into **Maelstrider** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Surf Kick** | Physical | Medium physical hit |
-| **Crest Leap** | Physical | Heavy physical hit · 2 turns (dodges) · CD 3 |
+| **Surf Kick** | Physical | Power 70 · Physical |
+| **Crest Leap** | Physical | Power 110 · Physical · 2 turns (dodges) · CD 3 |
 | **Sea Spray Guard** | Utility |  Evade [self] · CD 3 |
-| **Undercurrent Bind** ★ | Physical | Medium physical hit · Trap 2 · Slow 2 · CD 3 |
+| **Undercurrent Bind** ★ | Physical | Power 70 · Physical · Trap 2 · Slow 2 · CD 3 |
 
 1 of 4 moves are unique to this friend. Closest relative: Maelstrider (3 shared moves).
 
@@ -2151,10 +2151,10 @@ Evolves from **Tidemane** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Gale Hoof** | Physical | Medium physical hit |
-| **Whirlpool Plunge** | Physical | Heavy physical hit · 2 turns (dodges) · CD 3 |
+| **Gale Hoof** | Physical | Power 70 · Physical |
+| **Whirlpool Plunge** | Physical | Power 110 · Physical · 2 turns (dodges) · CD 3 |
 | **Brine Armor** | Utility |  Evade [self] · CD 3 |
-| **Maelstrom Snare** ★ | Physical | Medium physical hit · all foes · Trap 1 · Slow 2 · CD 5 |
+| **Maelstrom Snare** ★ | Physical | Power 70 · Physical · all foes · Trap 1 · Slow 2 · CD 5 |
 
 1 of 4 moves are unique to this friend. Closest relative: Tidemane (3 shared moves).
 
@@ -2178,7 +2178,7 @@ Evolves into **Cocoonix** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Silk Spit** | Special | Light special hit · Daze 1 (35%) |
+| **Silk Spit** | Special | Power 40 · Special · Daze 1 (35%) |
 | **Leaf Snack** | Utility |  ally or self · Regen 3 · Heal 14% · CD 4 |
 | **Cozy Thread** | Utility |  ally or self · Evade · Regen 3 · CD 4 |
 | **Sticky Cocoon** ★ | Utility |  Slow 2 · Daze 1 · CD 3 |
@@ -2201,7 +2201,7 @@ Evolves from **Caterpix** at level 16. Evolves into **Papilion** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Cocoon Bump** | Special | Medium special hit · Daze 1 (30%) |
+| **Cocoon Bump** | Special | Power 70 · Special · Daze 1 (30%) |
 | **Chrysalis Rest** | Utility |  ally or self · Regen 3 · Heal 14% · CD 4 |
 | **Silken Blessing** | Utility |  ally or self · Evade · Regen 3 · CD 4 |
 | **Armored Wrap** ★ | Utility |  Armor 2 [self] · Reflect debuff [self] · CD 4 |
@@ -2224,7 +2224,7 @@ Evolves from **Cocoonix** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Wing Flutter** | Special | Medium special hit · Daze 1 (30%) |
+| **Wing Flutter** | Special | Power 70 · Special · Daze 1 (30%) |
 | **Scale Dust Heal** | Utility |  ally or self · Regen 3 · Heal 10% · CD 4 |
 | **Rainbow Dust** ★ | Utility |  ally or self · Evade · Regen 4 · CD 4 |
 | **Butterfly Barrier** ★ | Utility |  ally or self · Evade · Shield 22% · Regen 2 · CD 5 |
@@ -2251,10 +2251,10 @@ Evolves into **Saguarock** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Needle Flick** | Physical | Light physical hit |
+| **Needle Flick** | Physical | Power 40 · Physical |
 | **Spiny Stance** | Utility |  Counter x1.5 [self] · CD 3 |
 | **Desert Coat** | Utility |  Armor 2 [self] · Thorns 2 [self] · CD 3 |
-| **Sting Bloom** ★ | Physical | Medium physical hit · Wound 3 · Thorns 1 [self] · CD 3 |
+| **Sting Bloom** ★ | Physical | Power 70 · Physical · Wound 3 · Thorns 1 [self] · CD 3 |
 
 1 of 4 moves are unique to this friend.
 
@@ -2274,10 +2274,10 @@ Evolves from **Pricklet** at level 16. Evolves into **Cactitan** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Arm Swing** | Physical | Medium physical hit |
+| **Arm Swing** | Physical | Power 70 · Physical |
 | **Cactus Riposte** | Utility |  Counter x2.5 [self] · CD 3 |
 | **Dry Fortress** | Utility |  Armor 2 [self] · Thorns 2 [self] · CD 3 |
-| **Flower Barb** ★ | Physical | Medium physical hit · Daze 1 · Thorns 2 [self] · CD 3 |
+| **Flower Barb** ★ | Physical | Power 70 · Physical · Daze 1 · Thorns 2 [self] · CD 3 |
 
 1 of 4 moves are unique to this friend. Closest relative: Cactitan (2 shared moves).
 
@@ -2297,10 +2297,10 @@ Evolves from **Saguarock** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Titan Arm** | Physical | Medium physical hit |
+| **Titan Arm** | Physical | Power 70 · Physical |
 | **Sunbaked Reprisal** | Utility |  Counter hit [self] · CD 3 |
 | **Oasis Bulwark** | Utility |  Armor 2 [self] · Thorns 2 [self] · CD 3 |
-| **Thousand Spines** ★ | Physical | 5 hits (random foes) · Wound 2 (20%) · CD 4 |
+| **Thousand Spines** ★ | Physical | Power 25 x5 (random foes) · Physical · Wound 2 (20%) · CD 4 |
 
 1 of 4 moves are unique to this friend. Closest relative: Saguarock (2 shared moves).
 
@@ -2324,7 +2324,7 @@ Evolves into **Stoneshell** at level 16.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Slimy Nudge** ★ | Physical | Light physical hit · Slow 1 (35%) |
+| **Slimy Nudge** ★ | Physical | Power 40 · Physical · Slow 1 (35%) |
 | **Withdraw** | Utility |  Taunt 2 · Armor 2 [self] · CD 4 |
 | **Slick Shell** ★ | Utility |  Shield 20% [self] · CD 3 |
 | **Slow Recovery** ★ | Utility |  Heal 20% [self] · Regen 3 [self] · Slow 2 [self] · CD 4 |
@@ -2347,7 +2347,7 @@ Evolves from **Snaillet** at level 16. Evolves into **Mountaingast** at level 32
 
 | Move | Kind | Details |
 |---|---|---|
-| **Shell Ram** | Physical | Medium physical hit · Slow 1 (35%) |
+| **Shell Ram** | Physical | Power 70 · Physical · Slow 1 (35%) |
 | **Stone Retreat** | Utility |  Taunt 2 · Armor 2 [self] · CD 4 |
 | **Granite Reprisal** | Utility |  Absorb & heal [self] · CD 3 |
 | **Mineral Rest** ★ | Utility |  Heal 24% [self] · DEF +20% 3t [self] · CD 4 |
@@ -2370,7 +2370,7 @@ Evolves from **Stoneshell** at level 32.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Boulder Crash** | Physical | Medium physical hit · Slow 1 (35%) |
+| **Boulder Crash** | Physical | Power 70 · Physical · Slow 1 (35%) |
 | **Fortress Withdrawal** | Utility |  Taunt 2 · Armor 2 [self] · CD 4 |
 | **Avalanche Reprisal** ★ | Utility |  Absorb & heal [self] · Thorns 2 [self] · CD 4 |
 | **Mountain's Patience** ★ | Utility |  Heal 32% [self] · Armor 3 [self] · Counter x1.5 [self] · CD 5 |
@@ -2397,9 +2397,9 @@ Evolves into **Puffmane** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Fluff Tackle** | Special | Light special hit |
-| **Seed Scatter** ★ | Special | Light special hit · all foes · Daze 1 (35%) · CD 2 |
-| **Wish Gust** | Special | Light special hit · all foes · Daze 2 · CD 3 |
+| **Fluff Tackle** | Special | Power 40 · Special |
+| **Seed Scatter** ★ | Special | Power 40 · Special · all foes · Daze 1 (35%) · CD 2 |
+| **Wish Gust** | Special | Power 40 · Special · all foes · Daze 2 · CD 3 |
 | **Breeze Ride** ★ | Utility |  Haste 2 [self] · Evade (65%) [self] · CD 3 |
 
 2 of 4 moves are unique to this friend.
@@ -2420,9 +2420,9 @@ Evolves from **Dandycub** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Mane Whip** | Special | Light special hit |
-| **Pappus Storm** ★ | Special | Light special hit · all foes · Daze 1 (25%) · CD 2 |
-| **Dandelion Blizzard** ★ | Special | Medium special hit · all foes · Daze 2 · CD 3 |
+| **Mane Whip** | Special | Power 40 · Special |
+| **Pappus Storm** ★ | Special | Power 40 · Special · all foes · Daze 1 (25%) · CD 2 |
+| **Dandelion Blizzard** ★ | Special | Power 70 · Special · all foes · Daze 2 · CD 3 |
 | **Wishful Sprint** ★ | Utility |  Haste 3 [self] · Next move Priority [self] · CD 3 |
 
 3 of 4 moves are unique to this friend.
@@ -2447,10 +2447,10 @@ Evolves into **Bounderhare** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Hop Tap** | Physical | Light physical hit · Priority |
+| **Hop Tap** | Physical | Power 40 · Physical · Priority |
 | **Spring Skip** | Utility |  Next move Priority [self] · Haste 2 [self] · CD 3 |
 | **Carrot Trick** | Utility |  Daze 2 · Seal · CD 3 |
-| **Bunny Bounce** ★ | Physical | Medium physical hit · then swap out · Slow 1 · CD 3 |
+| **Bunny Bounce** ★ | Physical | Power 70 · Physical · then swap out · Slow 1 · CD 3 |
 
 1 of 4 moves are unique to this friend. Closest relative: Bounderhare (3 shared moves).
 
@@ -2470,7 +2470,7 @@ Evolves from **Leapkin** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Kick Flurry** | Physical | Light physical hit · Priority |
+| **Kick Flurry** | Physical | Power 40 · Physical · Priority |
 | **Moonlit Leap** | Utility |  Next move Priority [self] · Haste 2 [self] · CD 3 |
 | **Lucky Foot Hex** | Utility |  Daze 2 · Seal · CD 3 |
 | **Burrow Swap** ★ | Utility |  Force switch · Evade [self] · CD 3 |
@@ -2497,7 +2497,7 @@ Evolves into **Rubybeetle** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Dot Nip** | Physical | Light physical hit |
+| **Dot Nip** | Physical | Power 40 · Physical |
 | **Shell Clasp** | Utility |  Absorb & heal [self] · CD 3 |
 | **Lucky Spots** | Utility |  Reflect hit [self] · CD 4 |
 | **Aphid Snack** ★ | Utility |  Heal 14% [self] · Regen 2 [self] · CD 4 |
@@ -2520,10 +2520,10 @@ Evolves from **Spotter** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Ruby Ram** | Physical | Medium physical hit |
+| **Ruby Ram** | Physical | Power 70 · Physical |
 | **Carapace Riposte** | Utility |  Absorb & heal [self] · CD 3 |
 | **Polished Shell** | Utility |  Reflect hit [self] · CD 4 |
-| **Garnet Stinger** ★ | Physical | Medium physical hit · Wound 3 · Mark · CD 3 |
+| **Garnet Stinger** ★ | Physical | Power 70 · Physical · Wound 3 · Mark · CD 3 |
 
 1 of 4 moves are unique to this friend. Closest relative: Spotter (2 shared moves).
 
@@ -2547,7 +2547,7 @@ Evolves into **Stormram** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Fleece Bump** ★ | Special | Light special hit · Daze 1 (30%) |
+| **Fleece Bump** ★ | Special | Power 40 · Special · Daze 1 (30%) |
 | **Soft Mist** | Utility |  ally or self · Heal 20% · CD 3 |
 | **Cumulus Cushion** ★ | Utility |  ally or self · Shield 22% · CD 3 |
 | **Rainy Day** | Utility |  ally or self · Regen 3 · Shield 10% · CD 4 |
@@ -2570,7 +2570,7 @@ Evolves from **Cloudlamb** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Thunder Ram** | Special | Medium special hit · Daze 1 (25%) |
+| **Thunder Ram** | Special | Power 70 · Special · Daze 1 (25%) |
 | **Rain Tonic** ★ | Utility |  ally or self · Heal 25% · CD 3 |
 | **Static Fleece** ★ | Utility |  ally or self · Shield 29% · CD 3 |
 | **Squall Shelter** ★ | Utility |  ally or self · Shield 34% · Thorns 2 · CD 4 |
@@ -2597,7 +2597,7 @@ Evolves into **Oakguard** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Nut Throw** | Physical | Light physical hit · Slow 1 (25%) |
+| **Nut Throw** | Physical | Power 40 · Physical · Slow 1 (25%) |
 | **Bark Up** | Utility |  Armor 2 [self] · CD 3 |
 | **Squirrel Away** | Utility |  Thorns 3 [self] · CD 3 |
 | **Forest Snack** ★ | Utility |  Heal 22% [self] · ATK +20% 3t [self] · CD 4 |
@@ -2620,7 +2620,7 @@ Evolves from **Acornet** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Branch Swing** | Physical | Medium physical hit · Slow 1 (25%) |
+| **Branch Swing** | Physical | Power 70 · Physical · Slow 1 (25%) |
 | **Ironwood Skin** | Utility |  Armor 2 [self] · CD 3 |
 | **Splinter Reprisal** ★ | Utility |  Counter x3.0 [self] · CD 3 |
 | **Sapwell** ★ | Utility |  Heal 36% [self] · Regen 3 [self] · CD 4 |
@@ -2647,7 +2647,7 @@ Evolves into **Kitsunar** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Cinder Flick** | Special | Light special hit · Priority |
+| **Cinder Flick** | Special | Power 40 · Special · Priority |
 | **Spirit Step** | Utility |  Next move Priority [self] · Haste 2 [self] · CD 3 |
 | **Will-o-Wisp Lure** | Utility |  Daze 2 · Mark · CD 3 |
 | **Fox Trick** ★ | Utility |  Daze 1 · Evade [self] · CD 3 |
@@ -2670,7 +2670,7 @@ Evolves from **Foxfire** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Flame Whisker** | Special | Light special hit · Priority |
+| **Flame Whisker** | Special | Power 40 · Special · Priority |
 | **Nine-Tail Blur** | Utility |  Next move Priority [self] · Haste 2 [self] · CD 3 |
 | **Phantom Fire Daze** ★ | Utility |  Daze 3 · Mark · Slow 1 · CD 3 |
 | **Shape Swap** | Utility |  Copy foe's stat changes · CD 4 |
@@ -2697,7 +2697,7 @@ Evolves into **Lanternoth** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Spark Peck** | Special | Light special hit · Daze 1 (35%) |
+| **Spark Peck** | Special | Power 40 · Special · Daze 1 (35%) |
 | **Glow Mend** | Utility |  ally or self · Regen 3 · Heal 13% · CD 4 |
 | **Guiding Flicker** | Utility |  ally or self · Evade · Focus · CD 4 |
 | **Safe Light** ★ | Utility |  ally or self · Shield 15% · Can't miss · CD 4 |
@@ -2720,7 +2720,7 @@ Evolves from **Fireflit** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Moth Dust** | Special | Medium special hit · Daze 1 (30%) |
+| **Moth Dust** | Special | Power 70 · Special · Daze 1 (30%) |
 | **Warm Lantern Heal** | Utility |  ally or self · Regen 3 · Heal 13% · CD 4 |
 | **Beacon Focus** | Utility |  ally or self · Evade · Focus · CD 4 |
 | **Haven Glow** ★ | Utility |  ally or self · Heal 25% · Focus · CD 4 |
@@ -2737,7 +2737,7 @@ Evolves from **Fireflit** at level 20.
 
 A crystal-backed digger that crushes foes with mineral fists.
 
-**Ability: Heavy Hitter** — Heavy hits deal 20% more damage.
+**Ability: Heavy Hitter** — Hits with power over 80 deal 20% more damage.
 
 Evolves into **Geodrake** at level 20.
 
@@ -2747,8 +2747,8 @@ Evolves into **Geodrake** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Pebble Punch** | Physical | Medium physical hit |
-| **Rock Roll** | Physical | Heavy physical hit · ignores 20% DEF · CD 2 |
+| **Pebble Punch** | Physical | Power 70 · Physical |
+| **Rock Roll** | Physical | Power 110 · Physical · ignores 20% DEF · CD 2 |
 | **Crystal Rage** ★ | Utility |  ATK +25% 3t [self] · CD 3 |
 | **Mineral Munch** ★ | Utility |  Heal 14% [self] · DEF +20% 3t [self] · CD 4 |
 
@@ -2760,7 +2760,7 @@ Evolves into **Geodrake** at level 20.
 
 A crystal-backed digger that crushes foes with mineral fists.
 
-**Ability: Heavy Hitter** — Heavy hits deal 20% more damage.
+**Ability: Heavy Hitter** — Hits with power over 80 deal 20% more damage.
 
 Evolves from **Geodot** at level 20.
 
@@ -2770,10 +2770,10 @@ Evolves from **Geodot** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Geode Smash** | Physical | Medium physical hit |
-| **Landquake Dive** ★ | Physical | Heavy physical hit · ignores 25% DEF · Slow 1 (25%) · CD 2 |
+| **Geode Smash** | Physical | Power 70 · Physical |
+| **Landquake Dive** ★ | Physical | Power 110 · Physical · ignores 25% DEF · Slow 1 (25%) · CD 2 |
 | **Amethyst Fury** ★ | Utility |  ATK +35% 3t [self] · CD 3 |
-| **Shard Siphon** ★ | Physical | Medium physical hit · drain 40% · Slow 1 · CD 3 |
+| **Shard Siphon** ★ | Physical | Power 70 · Physical · drain 40% · Slow 1 · CD 3 |
 
 3 of 4 moves are unique to this friend.
 
@@ -2797,7 +2797,7 @@ Evolves into **Lumenwyrm** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Wriggle Tap** | Special | Light special hit · Daze 1 (25%) |
+| **Wriggle Tap** | Special | Power 40 · Special · Daze 1 (25%) |
 | **Soft Glow Heal** ★ | Utility |  ally or self · Heal 22% · CD 3 |
 | **Aim Lantern** | Utility |  ally or self · Focus · CD 3 |
 | **Lumen Cover** ★ | Utility |  ally or self · Evade · Heal 11% · CD 3 |
@@ -2820,7 +2820,7 @@ Evolves from **Glowworm** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Coil Slam** | Special | Medium special hit · Daze 1 (25%) |
+| **Coil Slam** | Special | Power 70 · Special · Daze 1 (25%) |
 | **Radiant Mend** ★ | Utility |  ally or self · Heal 27% · CD 3 |
 | **Spotlight Focus** | Utility |  ally or self · Focus · CD 3 |
 | **Cavern Shelter** ★ | Utility |  ally or self · Shield 25% · Armor 2 · Cleanse · CD 4 |
@@ -2847,7 +2847,7 @@ Evolves into **Ferrofrog** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Static Tongue** ★ | Special | Light special hit · Slow 1 (30%) |
+| **Static Tongue** ★ | Special | Power 40 · Special · Slow 1 (30%) |
 | **Magnetize** | Utility |  Slow 2 · Mark · CD 3 |
 | **Pull Field** | Utility |  Seal · Slow 1 (30%) · CD 3 |
 | **Polarity Lock** ★ | Utility |  Trap 2 · DEF -15% 2t · CD 3 |
@@ -2870,7 +2870,7 @@ Evolves from **Magnetoad** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Iron Tongue** | Special | Medium special hit · Slow 1 (30%) |
+| **Iron Tongue** | Special | Power 70 · Special · Slow 1 (30%) |
 | **Attraction Surge** | Utility |  Slow 2 · Mark · CD 3 |
 | **Flux Storm** | Utility |  Seal · Slow 1 (30%) · CD 3 |
 | **Magnet Prison** ★ | Utility |  Stun · DEF -20% 3t · CD 5 |
@@ -2897,10 +2897,10 @@ Evolves into **Rainfrog** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Tail Slap** | Special | Light special hit · Daze 1 (25%) |
+| **Tail Slap** | Special | Power 40 · Special · Daze 1 (25%) |
 | **Puddle Hop** | Utility |  ally or self · Cleanse · Regen 3 · CD 3 |
 | **Lily Pad Rest** ★ | Utility |  Heal 27% [self] · Armor 2 [self] · CD 4 |
-| **Wriggle Siphon** ★ | Special | Medium special hit · drain 35% · Daze 1 · CD 3 |
+| **Wriggle Siphon** ★ | Special | Power 70 · Special · drain 35% · Daze 1 · CD 3 |
 
 2 of 4 moves are unique to this friend.
 
@@ -2920,10 +2920,10 @@ Evolves from **Tadwink** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Rain Tongue** | Special | Medium special hit · Daze 1 (25%) |
+| **Rain Tongue** | Special | Power 70 · Special · Daze 1 (25%) |
 | **Downpour Rest** | Utility |  ally or self · Cleanse · Regen 3 · CD 3 |
 | **Thunder Croak Bless** ★ | Utility |  Heal 29% [self] · Armor 2 [self] · CD 4 |
-| **Monsoon Siphon** ★ | Special | Medium special hit · drain 25% · Wound 2 · Leech [self] · CD 3 |
+| **Monsoon Siphon** ★ | Special | Power 70 · Special · drain 25% · Wound 2 · Leech [self] · CD 3 |
 
 2 of 4 moves are unique to this friend.
 
@@ -2947,7 +2947,7 @@ Evolves into **Medusar** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Tentacle Tap** | Special | Medium special hit · Daze 1 (35%) |
+| **Tentacle Tap** | Special | Power 70 · Special · Daze 1 (35%) |
 | **Sting Countdown** | Utility |  Daze 2 · Mark · CD 3 |
 | **Numbing Pulse** | Utility |  Mark · Slow 2 · CD 3 |
 | **Drift Fog** ★ | Utility |  all foes · Slow 1 · Daze 1 · CD 3 |
@@ -2970,7 +2970,7 @@ Evolves from **Jellybloom** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Venom Lash** ★ | Special | Medium special hit · Daze 1 (45%) |
+| **Venom Lash** ★ | Special | Power 70 · Special · Daze 1 (45%) |
 | **Lethargic Doom** | Utility |  Daze 2 · Mark · CD 3 |
 | **Paralytic Hush** ★ | Utility |  Doom 2 · Trap 2 · CD 5 |
 | **Bioluminous Haze** ★ | Utility |  all foes · Mark · Daze 2 · CD 5 |
@@ -2997,10 +2997,10 @@ Evolves into **Scarabrute** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Claw Snip** | Physical | Medium physical hit |
-| **Sidestep Slam** | Physical | Medium physical hit · 35% crit · CD 2 |
+| **Claw Snip** | Physical | Power 70 · Physical |
+| **Sidestep Slam** | Physical | Power 70 · Physical · 35% crit · CD 2 |
 | **Pincer Pump** | Utility |  Lose 15% HP [self] · ATK +35% 3t [self] · CD 4 |
-| **Brine Bite** ★ | Physical | Medium physical hit · drain 45% · Slow 1 · CD 3 |
+| **Brine Bite** ★ | Physical | Power 70 · Physical · drain 45% · Slow 1 · CD 3 |
 
 1 of 4 moves are unique to this friend. Closest relative: Magmahound (2 shared moves).
 
@@ -3020,10 +3020,10 @@ Evolves from **Scuttler** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Pincer Crush** | Physical | Medium physical hit |
-| **Beachhead Charge** | Physical | Medium physical hit · 35% crit · CD 2 |
+| **Pincer Crush** | Physical | Power 70 · Physical |
+| **Beachhead Charge** | Physical | Power 70 · Physical · 35% crit · CD 2 |
 | **Shell Rage** | Utility |  Lose 15% HP [self] · ATK +30% 3t [self] · CD 4 |
-| **Tideline Drain** ★ | Physical | Heavy physical hit · drain 35% · recoil 6% · CD 3 |
+| **Tideline Drain** ★ | Physical | Power 110 · Physical · drain 35% · recoil 6% · CD 3 |
 
 1 of 4 moves are unique to this friend. Closest relative: Calderon (2 shared moves).
 
@@ -3047,10 +3047,10 @@ Evolves into **Frostbrute** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Snow Swat** | Physical | Medium physical hit |
-| **Avalanche Roll** | Physical | Heavy physical hit · recoil 10% · CD 2 |
+| **Snow Swat** | Physical | Power 70 · Physical |
+| **Avalanche Roll** | Physical | Power 110 · Physical · recoil 10% · CD 2 |
 | **Chest Thump** ★ | Utility |  SPE +20% 3t [self] · ATK +25% 3t [self] · CD 3 |
-| **Icicle Gnaw** ★ | Physical | Medium physical hit · Slow 1 · Wound 2 (25%) · CD 3 |
+| **Icicle Gnaw** ★ | Physical | Power 70 · Physical · Slow 1 · Wound 2 (25%) · CD 3 |
 
 2 of 4 moves are unique to this friend. Closest relative: Rosewhip (2 shared moves).
 
@@ -3070,10 +3070,10 @@ Evolves from **Yetilet** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Glacier Fist** | Physical | Medium physical hit |
-| **Whiteout Rush** | Physical | Heavy physical hit · recoil 10% · CD 2 |
+| **Glacier Fist** | Physical | Power 70 · Physical |
+| **Whiteout Rush** | Physical | Power 110 · Physical · recoil 10% · CD 2 |
 | **Yeti Fury** ★ | Utility |  SPE +25% 3t [self] · ATK +30% 3t [self] · Armor 2 [self] · CD 4 |
-| **Permafrost Chomp** ★ | Physical | Medium physical hit · Slow 2 · DEF -20% 2t · CD 3 |
+| **Permafrost Chomp** ★ | Physical | Power 70 · Physical · Slow 2 · DEF -20% 2t · CD 3 |
 
 2 of 4 moves are unique to this friend. Closest relative: Rosewhip (2 shared moves).
 
@@ -3097,10 +3097,10 @@ Evolves into **Thunderhawk** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Talon Peck** | Physical | Medium physical hit |
-| **Swoop Down** | Physical | Medium physical hit · then swap out · CD 2 |
-| **Fledgling Flutter** ★ | Physical | Medium physical hit · 2 turns (dodges) · Daze 1 (30%) · CD 3 |
-| **Gale Grip** ★ | Physical | Medium physical hit · Trap 1 · Daze 1 · CD 3 |
+| **Talon Peck** | Physical | Power 70 · Physical |
+| **Swoop Down** | Physical | Power 70 · Physical · then swap out · CD 2 |
+| **Fledgling Flutter** ★ | Physical | Power 70 · Physical · 2 turns (dodges) · Daze 1 (30%) · CD 3 |
+| **Gale Grip** ★ | Physical | Power 70 · Physical · Trap 1 · Daze 1 · CD 3 |
 
 2 of 4 moves are unique to this friend. Closest relative: Thunderhawk (2 shared moves).
 
@@ -3120,10 +3120,10 @@ Evolves from **Eaglet** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Lightning Talon** | Physical | Medium physical hit |
-| **Stormdive** | Physical | Medium physical hit · then swap out · CD 2 |
-| **Static Plumage** ★ | Physical | Medium physical hit · 2 turns (dodges) · Daze 1 (35%) · CD 3 |
-| **Skyhook Snare** ★ | Physical | Medium physical hit · then swap out · Trap 2 · CD 3 |
+| **Lightning Talon** | Physical | Power 70 · Physical |
+| **Stormdive** | Physical | Power 70 · Physical · then swap out · CD 2 |
+| **Static Plumage** ★ | Physical | Power 70 · Physical · 2 turns (dodges) · Daze 1 (35%) · CD 3 |
+| **Skyhook Snare** ★ | Physical | Power 70 · Physical · then swap out · Trap 2 · CD 3 |
 
 2 of 4 moves are unique to this friend. Closest relative: Eaglet (2 shared moves).
 
@@ -3147,7 +3147,7 @@ Evolves into **Runewarden** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Glyph Bump** ★ | Physical | Light physical hit · Seal (35%) |
+| **Glyph Bump** ★ | Physical | Power 40 · Physical · Seal (35%) |
 | **Rune Plate** | Utility |  Taunt 2 · Armor 2 [self] · CD 4 |
 | **Etched Retort** ★ | Utility |  Shield 22% [self] · CD 3 |
 | **Sigil Heal** ★ | Utility |  Heal 19% [self] · Cleanse [self] · CD 4 |
@@ -3170,7 +3170,7 @@ Evolves from **Runepup** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Glyph Smash** ★ | Physical | Medium physical hit · Seal (45%) |
+| **Glyph Smash** ★ | Physical | Power 70 · Physical · Seal (45%) |
 | **Warding Script** | Utility |  Taunt 2 · Armor 2 [self] · CD 4 |
 | **Runic Reprisal** | Utility |  Absorb & heal [self] · CD 3 |
 | **Sealed Recovery** ★ | Utility |  Heal 32% [self] · Reflect debuff [self] · Armor 2 [self] · CD 4 |
@@ -3197,7 +3197,7 @@ Evolves into **Pharoth** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Bandage Whip** | Special | Medium special hit · Mark |
+| **Bandage Whip** | Special | Power 70 · Special · Mark |
 | **Curse Wrap** | Utility |  Mark · Daze 1 (30%) · CD 3 |
 | **Silent Tomb** | Utility |  Seal · CD 3 |
 | **Dust Cloud Hex** ★ | Utility |  all foes · Wound 2 · Daze 1 · CD 4 |
@@ -3220,7 +3220,7 @@ Evolves from **Wrapling** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Tomb Strike** | Special | Medium special hit · Mark |
+| **Tomb Strike** | Special | Power 70 · Special · Mark |
 | **Pharaoh's Countdown** | Utility |  Doom 3 · CD 4 |
 | **Seal of Ages** | Utility |  Seal · CD 3 |
 | **Sandstorm Curse** ★ | Utility |  all foes · Doom 2 · CD 5 |
@@ -3247,7 +3247,7 @@ Evolves into **Spectrael** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Boo Poke** | Special | Light special hit · Priority |
+| **Boo Poke** | Special | Power 40 · Special · Priority |
 | **Phase Blink** | Utility |  Next move Priority [self] · Haste 2 [self] · CD 3 |
 | **Chill Touch** ★ | Utility |  Seal · Slow 2 · CD 3 |
 | **Haunt Shuffle** ★ | Utility |  Force switch · Slow 1 · CD 3 |
@@ -3270,7 +3270,7 @@ Evolves from **Wisplet** at level 20.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Ghost Claw** | Special | Light special hit · Priority |
+| **Ghost Claw** | Special | Power 40 · Special · Priority |
 | **Ethereal Veil** | Utility |  Next move Priority [self] · Haste 2 [self] · CD 3 |
 | **Haunting Chill** ★ | Utility |  Seal · Slow 2 · DEF -15% 2t · CD 4 |
 | **Spirit Echo** | Utility |  Copy foe's last move · CD 3 |
@@ -3295,9 +3295,9 @@ A living mosaic whose shards split light into beams and mend its allies.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Prism Shard** | Special | Medium special hit · Mark |
+| **Prism Shard** | Special | Power 70 · Special · Mark |
 | **Mosaic Ward** ★ | Utility |  Shield 27% [self] · Armor 2 [self] · CD 4 |
-| **Kaleidoscope Beam** ★ | Special | Medium special hit · all foes · ignores Shield/Armor · CD 3 |
+| **Kaleidoscope Beam** ★ | Special | Power 70 · Special · all foes · ignores Shield/Armor · CD 3 |
 | **Fractal Cleanse** | Utility |  ally or self · Cleanse · Regen 2 · CD 3 |
 
 2 of 4 moves are unique to this friend.
@@ -3320,7 +3320,7 @@ A time loop in creature form: it rewinds cooldowns and turns buffs against their
 
 | Move | Kind | Details |
 |---|---|---|
-| **Echo Strike** | Special | Medium special hit |
+| **Echo Strike** | Special | Power 70 · Special |
 | **Rewind** ★ | Utility |  Heal 14% [self] · Reset your cooldowns · CD 5 |
 | **Temporal Mirror** | Utility |  Reflect hit [self] · CD 4 |
 | **Paradox Swap** | Utility |  Foe's buffs become debuffs · CD 4 |
@@ -3345,10 +3345,10 @@ A storm-cloud dinosaur that shakes the field with thunder and speeds up its team
 
 | Move | Kind | Details |
 |---|---|---|
-| **Thunderclap Stomp** ★ | Physical | Medium physical hit · all foes · Daze 1 · CD 2 |
+| **Thunderclap Stomp** ★ | Physical | Power 70 · Physical · all foes · Daze 1 · CD 2 |
 | **Cloud Cover** ★ | Utility |  ally or self · Evade · CD 3 |
 | **Storm Surge** | Utility |  ally or self · Haste 3 · Focus · CD 4 |
-| **Downpour** ★ | Special | Light special hit · all foes · Slow 2 · CD 3 |
+| **Downpour** ★ | Special | Power 40 · Special · all foes · Slow 2 · CD 3 |
 
 3 of 4 moves are unique to this friend.
 
@@ -3370,7 +3370,7 @@ A rusted knight's ghost that corrodes armor and retaliates with flaking steel.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Corroding Touch** ★ | Physical | Medium physical hit · DEF -30% 3t |
+| **Corroding Touch** ★ | Physical | Power 70 · Physical · DEF -30% 3t |
 | **Spectral Plate** ★ | Utility |  Armor 3 [self] · CD 4 |
 | **Oxidize** ★ | Utility |  all foes · DEF -20% 3t · CD 4 |
 | **Flake Reprisal** ★ | Utility |  Counter hit [self] · CD 3 |
@@ -3395,9 +3395,9 @@ A hungry void that devours buffs, shatters shields and ends with a slow collapse
 
 | Move | Kind | Details |
 |---|---|---|
-| **Hungry Bite** ★ | Physical | Medium physical hit · drain 45% |
+| **Hungry Bite** ★ | Physical | Power 70 · Physical · drain 45% |
 | **Devour Buff** ★ | Utility |  Heal 10% [self] · Steal a buff · CD 3 |
-| **Void Shatter** | Special | Medium special hit · Strip buffs, +20% each · CD 3 |
+| **Void Shatter** | Special | Power 70 · Special · Strip buffs, +20% each · CD 3 |
 | **Singularity** ★ | Utility |  Doom 2 · Slow 1 · CD 5 |
 
 3 of 4 moves are unique to this friend.
@@ -3420,10 +3420,10 @@ A sun-crowned guide that heals and hastens the whole team.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Sunbeam** | Special | Medium special hit · ignores Shield/Armor |
+| **Sunbeam** | Special | Power 70 · Special · ignores Shield/Armor |
 | **Daybreak Mend** ★ | Utility |  ally or self · Heal 29% · Regen 3 · CD 4 |
 | **Golden Hour** | Utility |  ally or self · Haste 3 · Focus · CD 4 |
-| **Solar Flare** | Special | Heavy special hit · Wound 2 · CD 2 |
+| **Solar Flare** | Special | Power 110 · Special · Wound 2 · CD 2 |
 
 1 of 4 moves are unique to this friend.
 
@@ -3445,10 +3445,10 @@ A scythe-wielder that tallies souls and ends fights with a final toll.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Harvest Swing** ★ | Physical | Medium physical hit · 20% crit |
+| **Harvest Swing** ★ | Physical | Power 70 · Physical · 20% crit |
 | **Soul Tally** | Utility |  Doom 2 · Mark · CD 4 |
 | **Grim Dash** ★ | Utility |  Haste 2 [self] · Evade [self] · CD 3 |
-| **Final Toll** ★ | Physical | Heavy physical hit · ignores 35% DEF · CD 3 |
+| **Final Toll** ★ | Physical | Power 110 · Physical · ignores 35% DEF · CD 3 |
 
 3 of 4 moves are unique to this friend.
 
@@ -3471,7 +3471,7 @@ A deep-sea angler whose glowing lure draws foes into a crushing trap.
 | Move | Kind | Details |
 |---|---|---|
 | **Lure Glow** ★ | Utility |  Mark · Daze 2 · CD 3 |
-| **Gulp** ★ | Special | Medium special hit · drain 45% |
+| **Gulp** ★ | Special | Power 70 · Special · drain 45% |
 | **Pressure Trap** ★ | Utility |  Trap 3 · Slow 1 · CD 4 |
 | **Deep Camouflage** | Utility |  Evade [self] · Armor 2 [self] · CD 4 |
 
@@ -3487,7 +3487,7 @@ A deep-sea angler whose glowing lure draws foes into a crushing trap.
 
 A plated pangolin golem that stacks armor until it can roll over anything.
 
-**Ability: Solid Rock** — Takes 25% less damage from Heavy hits.
+**Ability: Solid Rock** — Takes 25% less damage from hits with power over 80.
 
 | HP | ATK | DEF | SPA | SPD | SPE | Total |
 |---|---|---|---|---|---|---|
@@ -3495,10 +3495,10 @@ A plated pangolin golem that stacks armor until it can roll over anything.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Scale Slam** ★ | Physical | Medium physical hit · Slow 1 (45%) |
+| **Scale Slam** ★ | Physical | Power 70 · Physical · Slow 1 (45%) |
 | **Roll Up** ★ | Utility |  +1 Plate [self] · Armor 2 [self] · CD 3 |
 | **Plate Stack** ★ | Utility |  +1 Plate [self] · Counter x1.5 [self] |
-| **Ricochet Roll** ★ | Physical | Heavy physical hit · ignores 20% DEF · +10% per Plate · CD 3 |
+| **Ricochet Roll** ★ | Physical | Power 110 · Physical · ignores 20% DEF · +10% per Plate · CD 3 |
 
 4 of 4 moves are unique to this friend.
 
@@ -3520,10 +3520,10 @@ A wind spirit who gives her team evasion and speed.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Cutting Wind** | Special | Light special hit · Priority |
+| **Cutting Wind** | Special | Power 40 · Special · Priority |
 | **Updraft Blessing** ★ | Utility |  ally or self · Evade · Haste 2 · CD 3 |
 | **Zephyr Veil** | Utility |  ally or self · Evade · Shield 17% · CD 4 |
-| **Gale Force** ★ | Special | Medium special hit · all foes · Slow 1 · CD 3 |
+| **Gale Force** ★ | Special | Power 70 · Special · all foes · Slow 1 · CD 3 |
 
 2 of 4 moves are unique to this friend.
 
@@ -3545,9 +3545,9 @@ A fire queen with a crown of cinders and a retort for everything.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Ember Scepter** ★ | Special | Medium special hit · Wound 2 (35%) |
-| **Ashfall** ★ | Special | Light special hit · all foes · Wound 2 · CD 2 |
-| **Royal Blaze** ★ | Special | Heavy special hit · Wound 3 · CD 3 |
+| **Ember Scepter** ★ | Special | Power 70 · Special · Wound 2 (35%) |
+| **Ashfall** ★ | Special | Power 40 · Special · all foes · Wound 2 · CD 2 |
+| **Royal Blaze** ★ | Special | Power 110 · Special · Wound 3 · CD 3 |
 | **Crown of Cinders** | Utility |  Counter hit [self] · CD 3 |
 
 3 of 4 moves are unique to this friend.
@@ -3570,7 +3570,7 @@ A big-eared fox who repeats whatever the last foe tried.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Sandy Nip** | Special | Light special hit |
+| **Sandy Nip** | Special | Power 40 · Special |
 | **Echo Bark** | Utility |  Copy foe's last move · CD 3 |
 | **Big Ear Hush** ★ | Utility |  Seal · Daze 1 · CD 3 |
 | **Burrow Dodge** ★ | Utility |  Evade [self] · Next move Priority [self] · CD 3 |
@@ -3595,10 +3595,10 @@ A fortress wyrm that shelters allies behind stone scales.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Rampart Bite** | Physical | Medium physical hit |
+| **Rampart Bite** | Physical | Power 70 · Physical |
 | **Fortress Roar** ★ | Utility |  ally or self · Shield 34% · Armor 2 · CD 4 |
 | **Stone Scales** ★ | Utility |  Armor 3 [self] · Shield 22% [self] · CD 4 |
-| **Siege Breath** ★ | Physical | Heavy physical hit · Slow 1 · CD 3 |
+| **Siege Breath** ★ | Physical | Power 110 · Physical · Slow 1 · CD 3 |
 
 3 of 4 moves are unique to this friend.
 
@@ -3620,7 +3620,7 @@ A siren of the deep whose lullaby puts foes to sleep.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Soft Note** | Special | Light special hit · Daze 1 |
+| **Soft Note** | Special | Power 40 · Special · Daze 1 |
 | **Sleep Song** | Utility |  Stun · CD 5 |
 | **Lullaby Tide** ★ | Utility |  all foes · Slow 2 · Daze 1 · CD 4 |
 | **Dreamy Dive** ★ | Utility |  Evade [self] · Heal 20% [self] · CD 4 |
@@ -3645,8 +3645,8 @@ A jester whose tricks are never the same twice.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Pratfall** ★ | Physical | Medium physical hit · Random bonus effect |
-| **Juggling Act** | Special | 3 hits (random foes) · CD 2 |
+| **Pratfall** ★ | Physical | Power 70 · Physical · Random bonus effect |
+| **Juggling Act** | Special | Power 40 x3 (random foes) · Special · CD 2 |
 | **Joker's Gambit** | Utility |  Random effect · CD 3 |
 | **Mime Show** | Utility |  Copy foe's last move · CD 3 |
 
@@ -3670,7 +3670,7 @@ A matriarch of thorns that nurtures allies and snares foes in roots.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Briar Smack** | Physical | Medium physical hit |
+| **Briar Smack** | Physical | Power 70 · Physical |
 | **Nursery Bloom** ★ | Utility |  ally or self · Regen 4 · Heal 12% · CD 3 |
 | **Thorn Garden** ★ | Utility |  Thorns 3 [self] · Armor 2 [self] · CD 4 |
 | **Lullaby Roots** ★ | Utility |  Trap 2 · Slow 2 · CD 4 |
@@ -3695,8 +3695,8 @@ A rainbow moth whose scales dazzle foes and sharpen allies.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Rainbow Powder** ★ | Special | Light special hit · all foes · Daze 2 · CD 2 |
-| **Spectrum Wing** | Special | Medium special hit · ignores Shield/Armor |
+| **Rainbow Powder** ★ | Special | Power 40 · Special · all foes · Daze 2 · CD 2 |
+| **Spectrum Wing** | Special | Power 70 · Special · ignores Shield/Armor |
 | **Prism Veil** | Utility |  ally or self · Evade · Shield 17% · CD 4 |
 | **Glimmer Scales** ★ | Utility |  ATK +25% 3t [self] · SPE +30% 3t [self] · CD 4 |
 
@@ -3720,7 +3720,7 @@ A clockwork relic that freezes moments and resets its own cooldowns.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Chrono Nick** | Special | Light special hit · Priority |
+| **Chrono Nick** | Special | Power 40 · Special · Priority |
 | **Time Pocket** ★ | Utility |  Shield 20% [self] · Reset your cooldowns · CD 5 |
 | **Slow Time** | Utility |  all foes · Slow 2 · CD 4 |
 | **Frozen Instant** ★ | Utility |  Trap 2 · Seal · CD 4 |
@@ -3745,9 +3745,9 @@ A magnet crab that yanks foes around and crushes them in an iron grip.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Pincer Pull** ★ | Physical | Medium physical hit · Trap 1 |
+| **Pincer Pull** ★ | Physical | Power 70 · Physical · Trap 1 |
 | **Magnetic Yank** | Utility |  Force switch · CD 3 |
-| **Iron Grip** | Physical | Heavy physical hit · ignores 20% DEF · CD 2 |
+| **Iron Grip** | Physical | Power 110 · Physical · ignores 20% DEF · CD 2 |
 | **Field Polarize** ★ | Utility |  all foes · DEF -20% 2t · CD 4 |
 
 2 of 4 moves are unique to this friend.
@@ -3770,8 +3770,8 @@ A frost serpent whose stare freezes foes solid.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Rime Fang** ★ | Special | Medium special hit · Slow 1 |
-| **Flash Frostbreath** ★ | Special | Medium special hit · all foes · Slow 2 · CD 3 |
+| **Rime Fang** ★ | Special | Power 70 · Special · Slow 1 |
+| **Flash Frostbreath** ★ | Special | Power 70 · Special · all foes · Slow 2 · CD 3 |
 | **Deepfreeze Stare** | Utility |  Stun · CD 5 |
 | **Crystalline Coil** | Utility |  Armor 3 [self] · Slows attackers [self] · CD 4 |
 
@@ -3795,7 +3795,7 @@ A desert djinn that blurs reality, hiding and healing its team.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Heat Haze** | Special | Light special hit · Daze 1 |
+| **Heat Haze** | Special | Power 40 · Special · Daze 1 |
 | **Vanish** | Utility |  Evade [self] · Haste 2 [self] · CD 3 |
 | **Phantom Oasis** ★ | Utility |  ally or self · Heal 25% · Evade · CD 4 |
 | **Dust Devil Veil** ★ | Utility |  all foes · Daze 2 · Slow 1 · CD 4 |
@@ -3820,7 +3820,7 @@ A bone sorcerer that walls itself in ribs and hexes foes with rattling doom.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Bone Spear** ★ | Physical | Medium physical hit · Wound 2 |
+| **Bone Spear** ★ | Physical | Power 70 · Physical · Wound 2 |
 | **Bone Wall** ★ | Utility |  Armor 3 [self] · Thorns 2 [self] · CD 4 |
 | **Rattle Hex** | Utility |  Doom 3 · CD 4 |
 | **Skeletal Grasp** ★ | Utility |  Trap 2 · Wound 3 · CD 4 |
@@ -3845,10 +3845,10 @@ A radiant angel that mends and wards the whole team.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Halo Strike** | Special | Medium special hit |
+| **Halo Strike** | Special | Power 70 · Special |
 | **Radiant Rebirth** ★ | Utility |  ally or self · Heal 34% · Cleanse · CD 4 |
 | **Wings of Warding** ★ | Utility |  ally or self · Shield 34% · Haste 1 · CD 4 |
-| **Dawn Beam** ★ | Special | Heavy special hit · ignores Shield/Armor · CD 3 |
+| **Dawn Beam** ★ | Special | Power 110 · Special · ignores Shield/Armor · CD 3 |
 
 3 of 4 moves are unique to this friend.
 
@@ -3870,9 +3870,9 @@ A chess knight that sacrifices tempo for a decisive fork.
 
 | Move | Kind | Details |
 |---|---|---|
-| **Knight's Hop** | Physical | Medium physical hit · then swap out |
+| **Knight's Hop** | Physical | Power 70 · Physical · then swap out |
 | **Sacrifice Play** ★ | Utility |  Lose 15% HP [self] · Next 2 atk +80% [self] · CD 5 |
-| **Fork Strike** ★ | Physical | Heavy physical hit · Mark · CD 3 |
+| **Fork Strike** ★ | Physical | Power 110 · Physical · Mark · CD 3 |
 | **Castling** ★ | Utility |  Shield 25% [self] · Evade [self] · CD 4 |
 
 3 of 4 moves are unique to this friend.
