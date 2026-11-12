@@ -315,6 +315,6 @@ per-pixel alpha and click-through on the desktop, tray icon and balloon notifica
 The strip's ground is now an all-grass pixel meadow drawn on the same pixel grid as the sprites (one cell = one sprite
 pixel = 2 logical px, snapped to whole device pixels so it stays crisp at 125% and 150% scaling):
 - three flat grass layers that get darker and more see-through towards the bottom, with a checker-dithered seam
-- a repeating 8-column blade pattern on the top edge, a repeating diagonal lattice of tiny tufts, and sparse flowers by day
+- a repeating 8-column blade pattern on the top edge, tiny tufts laid out in offset (brick-like) rows, and sparse flowers by day. `kTuftStyle` in `drawGround` switches between five textures
 - a palette that blends smoothly through dawn, day, noon, dusk and night (no soil, no stones)
 - friends are drawn at the same pixel size as the ground, with an oval shadow on the grid

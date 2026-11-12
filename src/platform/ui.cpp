@@ -381,15 +381,26 @@ void Ui::drawGround(float gy, float gh) {
         cellRect(c, 3, 1, 1, P.g3, 0.80f);          // seam into layer 2
         cellRect(c + 1, 11, 1, 1, P.g4, 0.66f);     // seam into layer 3
     }
-    // Tufts: a tiny repeating "^" motif on a diagonal lattice, lighter than the layer it sits on.
-    for (int row = 2; row + 1 <= rows; row += 3) {
-        const gfx::Color base = bandCol[bandOf(row)];
-        const gfx::Color light = mixc(base, P.g1, 0.24f);
-        for (int c = (row * 5) % 14; c < cols; c += 14) {
-            cellRect(c, row, 1, 1, light, 0.9f);
-            cellRect(c - 1, row + 1, 1, 1, light, 0.8f);
-            cellRect(c + 1, row + 1, 1, 1, light, 0.8f);
-        }
+    // Texture inside the grass. Pick one with kTuftStyle: 0 plain layers, 1 staggered tufts, 2 even specks, 3 short
+    // dashes, 4 highlight rows. All of them are laid out in offset rows (like bricks), never on a diagonal.
+    constexpr int kTuftStyle = 1;
+    auto lighter = [&](int row) { return mixc(bandCol[bandOf(row)], P.g1, 0.22f); };
+    if (kTuftStyle == 1) {
+        for (int ri = 0, row = 3; row + 1 <= rows; row += 4, ++ri)
+            for (int c = (ri % 2) * 8 + 3; c < cols; c += 16) {
+                cellRect(c, row, 1, 1, lighter(row), 0.92f);
+                cellRect(c - 1, row + 1, 1, 1, lighter(row), 0.8f);
+                cellRect(c + 1, row + 1, 1, 1, lighter(row), 0.8f);
+            }
+    } else if (kTuftStyle == 2) {
+        for (int ri = 0, row = 3; row <= rows; row += 3, ++ri)
+            for (int c = (ri % 2) * 6 + 2; c < cols; c += 12) cellRect(c, row, 1, 1, lighter(row), 0.92f);
+    } else if (kTuftStyle == 3) {
+        for (int ri = 0, row = 4; row <= rows; row += 4, ++ri)
+            for (int c = (ri % 2) * 8 + 2; c < cols; c += 16) cellRect(c, row, 2, 1, lighter(row), 0.88f);
+    } else if (kTuftStyle == 4) {
+        for (int row : {1, 4, 12})
+            if (row <= rows) cellRect(0, row, cols, 1, mixc(bandCol[bandOf(row)], P.g1, 0.16f), 0.85f);
     }
     // Blades along the top edge: a repeating 8-column pattern, lightest tip.
     for (int c = 0; c < cols; ++c) {
