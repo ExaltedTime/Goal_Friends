@@ -46,7 +46,6 @@ struct App {
     int lastDay = -1;
     int slowCount = 0;
     bool hotkeyOk = false;
-    bool hintShown = false;
     ULONGLONG panelClosedSince = 0;
     bool trimmed = false;
     // diagnostics (GF_TRACE): average cost of drawing and of presenting a frame
@@ -301,10 +300,6 @@ void toggleVisible(App& a) {
     } else {
         presentBlank(a);
         setFrameInterval(a, 1000);  // only a once-a-second check for a finishing focus session
-        if (!a.hintShown && !std::getenv("GF_NOHINT")) {
-            a.hintShown = true;
-            balloon(a, a.hotkeyOk ? "Hidden. Press Ctrl+Shift+\u00d4 (or click the tray icon) to show it again." : "Hidden. Click the tray icon to show it again.");
-        }
     }
 }
 
