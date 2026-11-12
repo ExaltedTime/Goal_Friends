@@ -16,7 +16,7 @@ bool isDebuff(const Effect& e) {
         case EK::Wound: case EK::Daze: case EK::Slow: case EK::Trap: case EK::Stun: case EK::Taunt:
         case EK::Doom: case EK::Seal: case EK::Mark: case EK::ForceSwitch:
             return true;
-        case EK::AtkMod: case EK::DefMod: case EK::SpdMod:
+        case EK::AtkMod: case EK::DefMod: case EK::SpeMod:
             return e.a < 0;
         default:
             return false;
@@ -35,7 +35,7 @@ void Fighter::clearStatuses() {
     focus = mark = noMiss = prioNext = evade = false;
     evadeChance = 100;
     shield = 0;
-    atkMod = atkModT = defMod = defModT = spdMod = spdModT = 0;
+    atkMod = atkModT = defMod = defModT = speMod = speModT = 0;
     empowerPct = empowerN = 0;
     slowAttackers = 0;
     reflectDebuff = reflectDamage = false;
@@ -57,7 +57,9 @@ Fighter makeFighter(int speciesId, int level, bool sleepy, int friendId) {
     f.maxHp = f.hp = s.hp;
     f.atk = s.atk;
     f.def = s.def;
+    f.spa = s.spa;
     f.spd = s.spd;
+    f.spe = s.spe;
     f.sleepy = sleepy;
     f.friendId = friendId;
     return f;
@@ -118,28 +120,28 @@ std::string Battle::nameOf(int side, int slot) const {
     return (side == 1 ? "Foe " : "") + f.sp().name;
 }
 
-double Battle::effAtk(const Fighter& f) const {
-    double v = f.atk;
+double Battle::effAtk(const Fighter& f, bool special) const {
+    double v = special ? f.spa : f.atk;
     if (f.atkModT > 0) v *= 1.0 + f.atkMod / 100.0;
     if (f.sleepy) v *= 0.8;
     return std::max(1.0, v);
 }
-double Battle::effDef(const Fighter& f) const {
-    double v = f.def;
+double Battle::effDef(const Fighter& f, bool special) const {
+    double v = special ? f.spd : f.def;
     if (f.defModT > 0) v *= 1.0 + f.defMod / 100.0;
     return std::max(1.0, v);
 }
-double Battle::effSpd(const Fighter& f) const {
-    double v = f.spd;
+double Battle::effSpe(const Fighter& f) const {
+    double v = f.spe;
     if (f.slow > 0) v *= 0.7;
     if (f.haste > 0) v *= 1.4;
-    if (f.spdModT > 0) v *= 1.0 + f.spdMod / 100.0;
+    if (f.speModT > 0) v *= 1.0 + f.speMod / 100.0;
     if (f.sleepy) v *= 0.8;
     return std::max(1.0, v);
 }
 
-double Battle::estimateDamage(const Fighter& a, const Fighter& d, double power) const {
-    return ((2.0 * a.level / 5 + 2) * power * effAtk(a) / effDef(d) / 50 + 2) * 0.95;
+double Battle::estimateDamage(const Fighter& a, const Fighter& d, double power, bool special) const {
+    return ((2.0 * a.level / 5 + 2) * power * effAtk(a, special) / effDef(d, special) / 50 + 2) * 0.95;
 }
 
 std::vector<Ref> Battle::livingEnemies(int side) const {
@@ -193,7 +195,7 @@ int Battle::countBuffs(const Fighter& f) const {
     int n = 0;
     n += f.haste > 0; n += f.armor > 0; n += f.regen > 0; n += f.thorns > 0; n += f.shield > 0;
     n += f.focus; n += f.atkModT > 0 && f.atkMod > 0; n += f.defModT > 0 && f.defMod > 0;
-    n += f.spdModT > 0 && f.spdMod > 0; n += f.empowerN > 0;
+    n += f.speModT > 0 && f.speMod > 0; n += f.empowerN > 0;
     return n;
 }
 void Battle::clearBuffs(Fighter& f) {
@@ -202,7 +204,7 @@ void Battle::clearBuffs(Fighter& f) {
     f.focus = false;
     if (f.atkMod > 0) f.atkModT = 0;
     if (f.defMod > 0) f.defModT = 0;
-    if (f.spdMod > 0) f.spdModT = 0;
+    if (f.speMod > 0) f.speModT = 0;
     f.empowerN = f.empowerPct = 0;
 }
 
@@ -261,8 +263,8 @@ int Battle::dealHit(Ref u, Ref t, double power, const Move& m, double mult, int 
     if (fixed > 0) {
         dmg = fixed;
     } else {
-        const double atk = effAtk(a);
-        const double def = effDef(d) * (1.0 - m.ignoreDef / 100.0);
+        const double atk = effAtk(a, m.special);
+        const double def = effDef(d, m.special) * (1.0 - m.ignoreDef / 100.0);
         dmg = ((2.0 * a.level / 5 + 2) * power * atk / std::max(1.0, def) / 50 + 2) * (0.9 + 0.1 * (rnd(1001) / 1000.0));
     }
     dmg *= mult;
@@ -301,7 +303,7 @@ int Battle::dealHit(Ref u, Ref t, double power, const Move& m, double mult, int 
             say(nameOf(t.side, t.slot) + " strikes back for " + std::to_string(r) + "!");
         }
         if (d.counterHitPower > 0) {
-            const int r = std::max(1, static_cast<int>(estimateDamage(d, a, d.counterHitPower)));
+            const int r = std::max(1, static_cast<int>(estimateDamage(d, a, d.counterHitPower, false)));
             const int w = d.counterWound;
             d.counterHitPower = d.counterWound = 0;
             hurt(u, r, false);
@@ -367,14 +369,14 @@ void Battle::applyEffect(const Effect& e, Ref target, Ref source) {
             t->mark = false;
             if (t->atkMod < 0) t->atkModT = 0;
             if (t->defMod < 0) t->defModT = 0;
-            if (t->spdMod < 0) t->spdModT = 0;
+            if (t->speMod < 0) t->speModT = 0;
             break;
         case EK::ForceSwitch:
             forceSwitch(target);
             break;
         case EK::AtkMod: t->atkMod = e.a; t->atkModT = e.b; break;
         case EK::DefMod: t->defMod = e.a; t->defModT = e.b; break;
-        case EK::SpdMod: t->spdMod = e.a; t->spdModT = e.b; break;
+        case EK::SpeMod: t->speMod = e.a; t->speModT = e.b; break;
         case EK::Evade: t->evade = true; t->evadeChance = e.chance; break;
         case EK::Counter: t->counterMult = e.a; break;
         case EK::CounterHit: t->counterHitPower = e.a; t->counterWound = e.b; break;
@@ -633,13 +635,13 @@ void Battle::useMove(Ref user, const Move& m, int /*moveIdx*/, Ref primary, doub
                     if (tf.armor > 0) { tf.defMod = -30; tf.defModT = tf.armor; tf.armor = 0; }
                     if (tf.atkMod > 0 && tf.atkModT > 0) tf.atkMod = -tf.atkMod;
                     if (tf.defMod > 0 && tf.defModT > 0) tf.defMod = -tf.defMod;
-                    if (tf.spdMod > 0 && tf.spdModT > 0) tf.spdMod = -tf.spdMod;
+                    if (tf.speMod > 0 && tf.speModT > 0) tf.speMod = -tf.speMod;
                     tf.shield = 0; tf.focus = false; tf.empowerN = tf.empowerPct = 0; tf.thorns = 0;
                     say(nameOf(t.side, t.slot) + "'s buffs turn against it!");
                 } else {
                     f.atkMod = tf.atkMod; f.atkModT = tf.atkModT;
                     f.defMod = tf.defMod; f.defModT = tf.defModT;
-                    f.spdMod = tf.spdMod; f.spdModT = tf.spdModT;
+                    f.speMod = tf.speMod; f.speModT = tf.speModT;
                     f.haste = tf.haste; f.slow = tf.slow;
                     say(nameOf(user.side, user.slot) + " copies the target's stat changes.");
                 }
@@ -759,7 +761,7 @@ void Battle::endOfTurn() {
             if (f.seal > 0 && --f.seal == 0) f.sealMove = -1;
             if (f.atkModT > 0 && --f.atkModT == 0) f.atkMod = 0;
             if (f.defModT > 0 && --f.defModT == 0) f.defMod = 0;
-            if (f.spdModT > 0 && --f.spdModT == 0) f.spdMod = 0;
+            if (f.speModT > 0 && --f.speModT == 0) f.speMod = 0;
             if (f.slowAttackers > 0) f.slowAttackers--;
             f.evade = false;
             f.counterMult = f.counterHitPower = f.counterWound = 0;
@@ -868,7 +870,7 @@ void Battle::resolveTurn(const std::array<Action, 3>& playerActions) {
             e.who = {s, k};
             e.teamIdx = sides[s].active[static_cast<size_t>(k)];
             e.act = a;
-            e.spd = effSpd(f);
+            e.spe = effSpe(f);
             e.tie = static_cast<uint32_t>(rng_());
             if (a.type == Action::Switch) {
                 e.prio = 100;
@@ -882,7 +884,7 @@ void Battle::resolveTurn(const std::array<Action, 3>& playerActions) {
     }
     std::sort(entries.begin(), entries.end(), [](const Entry& a, const Entry& b) {
         if (a.prio != b.prio) return a.prio > b.prio;
-        if (a.spd != b.spd) return a.spd > b.spd;
+        if (a.spe != b.spe) return a.spe > b.spe;
         return a.tie < b.tie;
     });
     for (const Entry& e : entries) execute(e);
@@ -903,7 +905,8 @@ double Battle::scoreMove(int side, int slot, int mi, Ref& bestTarget) {
     Ref strongest = enemies[0], weakest = enemies[0];
     for (const Ref& r : enemies) {
         const Fighter& e = at(r);
-        if (effAtk(e) * e.hpPct() > effAtk(at(strongest)) * at(strongest).hpPct()) strongest = r;
+        const auto threat = [&](const Fighter& x) { return std::max(effAtk(x, false), effAtk(x, true)) * x.hpPct(); };
+        if (threat(e) > threat(at(strongest))) strongest = r;
         if (e.hp < at(weakest).hp) weakest = r;
     }
     bestTarget = strongest;
@@ -915,13 +918,13 @@ double Battle::scoreMove(int side, int slot, int mi, Ref& bestTarget) {
         if (m.sp == Sp::ShapeshiftSlam) totalPower = 60;
         double score = 0;
         if (m.tgt == Tgt::Spread) {
-            for (const Ref& r : enemies) score += std::min(estimateDamage(f, at(r), totalPower) * 0.75, static_cast<double>(at(r).hp)) / at(r).maxHp * 100;
+            for (const Ref& r : enemies) score += std::min(estimateDamage(f, at(r), totalPower, m.special) * 0.75, static_cast<double>(at(r).hp)) / at(r).maxHp * 100;
         } else if (m.randomTargets) {
-            for (const Ref& r : enemies) score += std::min(estimateDamage(f, at(r), totalPower), static_cast<double>(at(r).hp)) / at(r).maxHp * 100 / enemies.size();
+            for (const Ref& r : enemies) score += std::min(estimateDamage(f, at(r), totalPower, m.special), static_cast<double>(at(r).hp)) / at(r).maxHp * 100 / enemies.size();
         } else {
             double best = -1;
             for (const Ref& r : enemies) {
-                const double dmg = estimateDamage(f, at(r), totalPower);
+                const double dmg = estimateDamage(f, at(r), totalPower, m.special);
                 double s = std::min(dmg, static_cast<double>(at(r).hp)) / at(r).maxHp * 100;
                 if (dmg >= at(r).hp) s += 30;
                 if (s > best) { best = s; bestTarget = r; }
@@ -955,7 +958,7 @@ double Battle::scoreMove(int side, int slot, int mi, Ref& bestTarget) {
             case EK::Focus: case EK::Empower: return (target.focus || target.empowerN > 0) ? 2.0 : 28.0;
             case EK::AtkMod: return onUser ? (e.a > 0 && target.atkModT == 0 ? 26.0 : 4.0) : (target.atkModT == 0 ? 20.0 : 4.0);
             case EK::DefMod: return target.defModT == 0 ? 20.0 : 4.0;
-            case EK::SpdMod: return target.spdModT == 0 ? 14.0 : 4.0;
+            case EK::SpeMod: return target.speModT == 0 ? 14.0 : 4.0;
             case EK::Haste: return target.haste > 0 ? 2.0 : 18.0;
             case EK::Evade: return target.evade ? 0.0 : 14.0;
             case EK::Counter: case EK::CounterHit: case EK::CounterAbsorb: return 12.0;

@@ -20,9 +20,18 @@ struct Input {
 
 enum class Tab { None, Start, Tasks, Friends, Dex, Shop, Focus, Battle, Guide };
 
+// A friend walking on the strip. Position is in ground cells (one cell = one sprite pixel) and moves in whole-cell steps
+// locked to the frame, so the motion is perfectly even instead of jittering between 2 and 6 pixel jumps.
 struct Walker {
     int friendId = 0;
-    float x = 100, dir = 1, speed = 24, pause = 0, hop = 0, hopV = 0;
+    int cx = 60;            // horizontal centre, in cells
+    int dir = 1;            // +1 right, -1 left
+    bool fast = false;      // fast walkers step every frame, slow ones every other frame
+    bool phase = false;
+    bool init = false;
+    float walkT = 3, pause = 0;
+    float hop = 0, hopV = 0;
+    unsigned rng = 1;
 };
 
 class Ui {
@@ -119,6 +128,9 @@ private:
     std::vector<Walker> walkers_;
     float animT_ = 0;
     float dt_ = 0;
+    bool groupWalk_ = true;      // the whole party alternates between a stroll and a shared rest, so the strip is often idle
+    float groupT_ = 4.f;
+    unsigned groupRng_ = 7;
     bool animating_ = false;
     int dueTab_ = 0, dueNow_ = 0;   // cached once a second: tasks still to do today / already due
     float dueTimer_ = 0;
@@ -136,6 +148,8 @@ private:
     // friends / dex
     int selFriend_ = -1, selDex_ = -1;
     float scrollFriends_ = 0, scrollDex_ = 0;
+    float taskContent_[2] = {0, 0};   // content heights from the previous frame, so scrolling is clamped before drawing
+    float guideContent_ = 0;
 
     // focus
     bool focusRunning_ = false;

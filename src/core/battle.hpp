@@ -18,7 +18,7 @@ struct Ref {
 struct Fighter {
     int speciesId = 0;
     int level = 1;
-    int maxHp = 1, hp = 1, atk = 1, def = 1, spd = 1;
+    int maxHp = 1, hp = 1, atk = 1, def = 1, spa = 1, spd = 1, spe = 1;  // spd = special defence, spe = speed
     bool sleepy = false;
     int friendId = -1;  // index in the player's roster, or -1 for foes
 
@@ -33,7 +33,7 @@ struct Fighter {
     bool evade = false;
     int evadeChance = 100;
     int shield = 0;
-    int atkMod = 0, atkModT = 0, defMod = 0, defModT = 0, spdMod = 0, spdModT = 0;
+    int atkMod = 0, atkModT = 0, defMod = 0, defModT = 0, speMod = 0, speModT = 0;
     int empowerPct = 0, empowerN = 0;
     int slowAttackers = 0;
     bool reflectDebuff = false, reflectDamage = false;
@@ -129,12 +129,12 @@ public:
 
 private:
     std::mt19937 rng_;
-    struct Entry { Ref who; Action act; int prio; double spd; uint32_t tie; int teamIdx; };
+    struct Entry { Ref who; Action act; int prio; double spe; uint32_t tie; int teamIdx; };
 
-    double effAtk(const Fighter& f) const;
-    double effDef(const Fighter& f) const;
-    double effSpd(const Fighter& f) const;
-    double estimateDamage(const Fighter& a, const Fighter& d, double power) const;
+    double effAtk(const Fighter& f, bool special) const;
+    double effDef(const Fighter& f, bool special) const;
+    double effSpe(const Fighter& f) const;
+    double estimateDamage(const Fighter& a, const Fighter& d, double power, bool special) const;
 
     void execute(const Entry& e);
     void useMove(Ref user, const Move& m, int moveIdx, Ref primary, double scale);

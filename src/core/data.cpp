@@ -1,6 +1,9 @@
 #include "data.hpp"
 
+#include <algorithm>
+#include <array>
 #include <cmath>
+#include <set>
 
 namespace gf {
 namespace {
@@ -10,27 +13,42 @@ constexpr int L = 40, M = 70, H = 110;
 Move mv(const char* n, int p) { return Move(n, p); }
 Move util(const char* n) { return Move(n, 0); }
 
-struct Line {
-    const char* names[3];
-    int stages;
-    int hp[3], atk[3], def[3], spd[3];
-    bool starter;
-};
-
 std::vector<Species> build() {
     std::vector<Species> v;
-    auto add = [&](const char* name, int line, int stage, int hp, int atk, int def, int spd, std::array<Move, 4> m,
-                   bool rare = false, bool starter = false) {
+    // Six-stat add: HP, ATK, DEF, SPA, SPD (special defence), SPE (speed), all as pips 1..5.
+    auto add6 = [&](const char* name, int line, int stage, int hp, int atk, int def, int spa, int spd, int spe, std::array<Move, 4> m,
+                    bool rare = false, bool starter = false) {
         Species s;
         s.id = static_cast<int>(v.size());
         s.name = name;
         s.line = line;
         s.stage = stage;
-        s.hp = hp; s.atk = atk; s.def = def; s.spd = spd;
+        s.hp = hp; s.atk = atk; s.def = def; s.spa = spa; s.spd = spd; s.spe = spe;
         s.moves = std::move(m);
         s.rare = rare;
         s.starter = starter;
         v.push_back(std::move(s));
+    };
+    // Original friends are written with four stats; the special pair is derived from their moves (physical or special
+    // hitters) and a per-line special-bulk offset.
+    static const int kSpecialBulk[27] = {0, -1, -1, -2, 2, 1, -1, 2, -1, 1, 1, 2, -2, 0, 1, 1, 1, 1, 0, -1, 1, -1, 0, 2, 1, 0, -1};
+    auto add = [&](const char* name, int line, int stage, int hp, int atk, int def, int spe, std::array<Move, 4> m,
+                   bool rare = false, bool starter = false) {
+        double phys = 0, spec = 0;
+        for (const auto& mvv : m) {
+            if (!mvv.damaging()) continue;
+            double p = mvv.hits.empty() ? mvv.power : 0;
+            for (int h : mvv.hits) p += h;
+            (mvv.special ? spec : phys) += p;
+        }
+        const double share = (phys + spec) > 0 ? spec / (phys + spec) : 0.5;
+        int a = atk, sa = atk;
+        if ((phys + spec) == 0) { a = sa = std::max(1, atk - 1); }
+        else if (share >= 0.67) { a = std::max(1, atk - 2); sa = atk; }
+        else if (share <= 0.33) { a = atk; sa = std::max(1, atk - 2); }
+        else { a = sa = std::max(1, atk - 1); }
+        const int sd = std::clamp(def + kSpecialBulk[line], 1, 5);
+        add6(name, line, stage, hp, a, def, sa, sd, spe, std::move(m), rare, starter);
     };
     auto evo = [&](int from, int to, int level) { v[from].evolvesTo = to; v[from].evolveLevel = level; };
 
@@ -54,37 +72,37 @@ std::vector<Species> build() {
 
     // ---- Starter line S2: Swift (speed / tempo) ----
     add("Zapling", 1, 1, 2, 3, 1, 5, {
-        mv("Static Nip", L).Prio(),
+        mv("Static Nip", L).Spc().Prio(),
         util("Hyper Dash").CD(3).T(Tgt::Self).Me(EK::Haste, 3),
-        mv("Jolt Rattle", L).CD(3).Fx(EK::Daze, 2),
+        mv("Jolt Rattle", L).Spc().CD(3).Fx(EK::Daze, 2),
         util("Quick Charge").CD(3).T(Tgt::Self).Prio().Me(EK::Focus)}, false, true);
     add("Zephox", 1, 2, 3, 3, 2, 5, {
         mv("Slipstream Strike", M).Special(Sp::SlipstreamBonus),
         util("Afterimage").CD(3).T(Tgt::Self).Prio().Me(EK::Evade),
-        mv("Spark Chain", 0).CD(3).H({L, L}).Rand().PerHit().Fx(EK::Daze, 1, 0, 20),
+        mv("Spark Chain", 0).Spc().CD(3).H({L, L}).Rand().PerHit().Fx(EK::Daze, 1, 0, 20),
         util("Windup Zip").CD(3).T(Tgt::Self).Me(EK::Haste, 2).Me(EK::Focus)});
     add("Tempestail", 1, 3, 3, 4, 2, 5, {
-        mv("Thunder Lash", H).CD(2).IgnoreDef(30),
+        mv("Thunder Lash", H).Spc().CD(2).IgnoreDef(30),
         util("Eye of the Storm").CD(4).T(Tgt::Self).Me(EK::Evade).Me(EK::Empower, 60, 1),
-        mv("Rolling Thunder", 0).CD(2).H({30, 50, 70}),
+        mv("Rolling Thunder", 0).Spc().CD(2).H({30, 50, 70}),
         util("Gale Veil").CD(3).T(Tgt::Self).Me(EK::Haste, 3).Me(EK::Cleanse)});
     evo(3, 4, 16); evo(4, 5, 32);
 
     // ---- Starter line S3: Ember (burst / setup) ----
     add("Cindrel", 2, 1, 2, 4, 1, 3, {
-        mv("Ember Snap", L).Fx(EK::Wound, 2, 0, 25),
+        mv("Ember Snap", L).Spc().Fx(EK::Wound, 2, 0, 25),
         util("Kindle").CD(3).T(Tgt::Self).Me(EK::Focus),
-        mv("Flare Burst", H).CD(2).Recoil(10),
+        mv("Flare Burst", H).Spc().CD(2).Recoil(10),
         util("Smolder Aura").CD(4).Fx(EK::Wound, 3).Fx(EK::Mark)}, false, true);
     add("Ashwolf", 2, 2, 3, 4, 2, 3, {
         mv("Cinder Fang", M).Fx(EK::Wound, 2, 0, 30),
         util("Ashen Howl").CD(3).T(Tgt::Self).Me(EK::AtkMod, 30, 3),
         util("Scorched Earth").CD(4).Fx(EK::Wound, 3).Fx(EK::Slow, 2),
-        mv("Backdraft", H).CD(2).Special(Sp::BackdraftBonus)});
+        mv("Backdraft", H).Spc().CD(2).Special(Sp::BackdraftBonus)});
     add("Pyrelord", 2, 3, 3, 5, 2, 3, {
-        mv("Inferno Crown", H).CD(2).Fx(EK::Wound, 2),
+        mv("Inferno Crown", H).Spc().CD(2).Fx(EK::Wound, 2),
         util("Phoenix Pact").CD(5).T(Tgt::Self).Me(EK::SelfDamage, 25).Me(EK::Empower, 80, 2),
-        mv("Ember Rain", 0).CD(2).H({L, L, L}).Rand().PerHit().Fx(EK::Wound, 2, 0, 25),
+        mv("Ember Rain", 0).Spc().CD(2).H({L, L, L}).Rand().PerHit().Fx(EK::Wound, 2, 0, 25),
         util("Molten Guard").CD(3).T(Tgt::Self).Me(EK::CounterHit, M, 2)});
     evo(6, 7, 16); evo(7, 8, 32);
 
@@ -103,27 +121,27 @@ std::vector<Species> build() {
 
     // ---- L2 healer ----
     add("Dewdrip", 4, 1, 3, 1, 2, 3, {
-        mv("Bubble Pop", L),
+        mv("Bubble Pop", L).Spc(),
         util("Mending Mist").CD(3).T(Tgt::Ally).Fx(EK::Heal, 20),
         util("Rinse").CD(3).T(Tgt::Ally).Fx(EK::Cleanse).Fx(EK::Regen, 2),
         util("Slick Skin").CD(3).T(Tgt::Self).Me(EK::Evade, 0, 0, 50)});
     add("Tidalisk", 4, 2, 4, 2, 3, 3, {
-        mv("Crashing Wave", H).CD(2).Me(EK::Cleanse),
+        mv("Crashing Wave", H).Spc().CD(2).Me(EK::Cleanse),
         util("Healing Current").CD(3).T(Tgt::Ally).Fx(EK::Heal, 35),
-        mv("Undertow", M).Fx(EK::Slow, 2),
+        mv("Undertow", M).Spc().Fx(EK::Slow, 2),
         util("Tidal Barrier").CD(4).T(Tgt::Ally).Fx(EK::Shield, 25).Fx(EK::Regen, 2)});
     evo(11, 12, 20);
 
     // ---- L3 debuffer ----
     add("Gloomoth", 5, 1, 2, 2, 2, 4, {
-        mv("Dust Flutter", L).Fx(EK::Daze, 1),
+        mv("Dust Flutter", L).Spc().Fx(EK::Daze, 1),
         util("Hex Mark").CD(3).Fx(EK::Mark),
-        mv("Sap Scales", M).CD(3).Drain(50),
+        mv("Sap Scales", M).Spc().CD(3).Drain(50),
         util("Lullaby Wings").CD(4).Fx(EK::Slow, 3)});
     add("Dusklady", 5, 2, 3, 3, 2, 4, {
         util("Doom Whisper").CD(4).Fx(EK::Doom, 3),
         util("Silken Seal").CD(3).Fx(EK::Seal),
-        mv("Nightfall Wings", M).CD(3).Fx(EK::Mark).Fx(EK::Daze, 1),
+        mv("Nightfall Wings", M).Spc().CD(3).Fx(EK::Mark).Fx(EK::Daze, 1),
         util("Dark Veil").CD(3).T(Tgt::Self).Me(EK::Evade).Me(EK::Haste, 1)});
     evo(13, 14, 20);
 
@@ -136,20 +154,20 @@ std::vector<Species> build() {
     add("Cyclonix", 6, 2, 3, 4, 2, 4, {
         mv("Cyclone Strike", M).Pivot(),
         util("Whirl Away").CD(3).Fx(EK::ForceSwitch),
-        mv("Razor Gale", H).CD(2).Crit(25),
+        mv("Razor Gale", H).Spc().CD(2).Crit(25),
         util("Eye Dart").CD(3).T(Tgt::Self).Me(EK::Evade).Me(EK::Focus)});
     evo(15, 16, 20);
 
     // ---- L5 support ----
     add("Glimmerling", 7, 1, 3, 1, 2, 3, {
-        mv("Sparkle Tap", L),
+        mv("Sparkle Tap", L).Spc(),
         util("Prism Shield").CD(3).T(Tgt::Ally).Fx(EK::Shield, 15),
         util("Lucky Glint").CD(3).T(Tgt::Ally).Fx(EK::Focus).Fx(EK::NoMiss),
         util("Dazzle").CD(3).Fx(EK::Daze, 2)});
     add("Prismaw", 7, 2, 4, 2, 3, 3, {
-        mv("Refract Beam", M).CD(2).IgnoreDefenses(),
+        mv("Refract Beam", M).Spc().CD(2).IgnoreDefenses(),
         util("Crystal Aegis").CD(4).T(Tgt::Ally).Fx(EK::Shield, 30).Fx(EK::Thorns, 2),
-        util("Spectrum Boost").CD(4).T(Tgt::Ally).Fx(EK::AtkMod, 20, 3).Fx(EK::DefMod, 20, 3).Fx(EK::SpdMod, 20, 3),
+        util("Spectrum Boost").CD(4).T(Tgt::Ally).Fx(EK::AtkMod, 20, 3).Fx(EK::DefMod, 20, 3).Fx(EK::SpeMod, 20, 3),
         util("Mirror Shard").CD(3).T(Tgt::Self).Me(EK::ReflectDebuff)});
     evo(17, 18, 20);
 
@@ -168,9 +186,9 @@ std::vector<Species> build() {
 
     // ---- L7 control ----
     add("Frostwisp", 9, 1, 2, 2, 2, 3, {
-        mv("Chill Breath", L).Fx(EK::Slow, 1),
+        mv("Chill Breath", L).Spc().Fx(EK::Slow, 1),
         util("Frost Veil").CD(3).T(Tgt::Self).Me(EK::Armor, 2),
-        mv("Icicle Prick", M).CD(3).Fx(EK::Slow, 2, 0, 40),
+        mv("Icicle Prick", M).Spc().CD(3).Fx(EK::Slow, 2, 0, 40),
         util("Snow Drift").CD(5).Fx(EK::Stun)});
     add("Glacierra", 9, 2, 4, 3, 3, 2, {
         mv("Glacial Slam", H).CD(2).Fx(EK::Slow, 2),
@@ -214,14 +232,14 @@ std::vector<Species> build() {
         util("Gelatinous Absorb").CD(3).T(Tgt::Self).Me(EK::CounterAbsorb),
         mv("Shapeshift Slam", 0).CD(3).Special(Sp::ShapeshiftSlam)}, true);
     add("Ashenfeather", 15, 1, 3, 4, 2, 3, {
-        mv("Cinder Wing", M),
+        mv("Cinder Wing", M).Spc(),
         util("Rebirth Pyre").Once().T(Tgt::Self).Special(Sp::RebirthPyre),
         util("Ash Veil").CD(3).T(Tgt::Self).Me(EK::Shield, 15).Me(EK::Cleanse),
-        mv("Solar Dive", H).CD(3).Charge(false).IgnoreDefenses()}, true);
+        mv("Solar Dive", H).Spc().CD(3).Charge(false).IgnoreDefenses()}, true);
     add("Kaleidra", 16, 1, 3, 4, 2, 3, {
-        mv("Chaos Bolt", M).Special(Sp::ChaosBolt),
+        mv("Chaos Bolt", M).Spc().Special(Sp::ChaosBolt),
         util("Wild Card").CD(3).T(Tgt::Self).Special(Sp::WildCard),
-        mv("Prismatic Shatter", M).CD(3).Special(Sp::PrismaticShatter),
+        mv("Prismatic Shatter", M).Spc().CD(3).Special(Sp::PrismaticShatter),
         util("Anarchy").CD(5).T(Tgt::Self).Special(Sp::Anarchy)}, true);
 
     // ======================= Expansion (ids 31..47) =======================
@@ -242,10 +260,10 @@ std::vector<Species> build() {
     add("Sandpup", 18, 1, 3, 3, 2, 3, {
         mv("Sand Kick", L).Fx(EK::Daze, 1, 0, 40),
         util("Dust Devil").CD(3).T(Tgt::Self).Me(EK::Evade).Me(EK::Haste, 1),
-        mv("Quicksand Snap", M).CD(3).Fx(EK::Slow, 2),
+        mv("Quicksand Snap", M).Spc().CD(3).Fx(EK::Slow, 2),
         mv("Sinkhole Ambush", M).CD(3).Charge(true)});
     add("Dunewyrm", 18, 2, 4, 3, 3, 3, {
-        mv("Sandstorm", L).CD(3).T(Tgt::Spread).Fx(EK::Daze, 2),
+        mv("Sandstorm", L).Spc().CD(3).T(Tgt::Spread).Fx(EK::Daze, 2),
         util("Mirage Coil").CD(4).T(Tgt::Self).Me(EK::Evade).Me(EK::Armor, 2),
         mv("Constrict", M).CD(3).Fx(EK::Trap, 2),
         util("Serpent Dance").CD(4).T(Tgt::Ally).Fx(EK::Haste, 2).Fx(EK::Focus)});
@@ -259,7 +277,7 @@ std::vector<Species> build() {
         mv("Spring Dash", M).CD(2).Prio()});
     add("Gearhound", 19, 2, 4, 3, 3, 3, {
         mv("Piston Punch", H).CD(2).IgnoreDef(20),
-        util("Overclock").CD(4).T(Tgt::Self).Me(EK::AtkMod, 40, 3).Me(EK::SpdMod, 20, 3),
+        util("Overclock").CD(4).T(Tgt::Self).Me(EK::AtkMod, 40, 3).Me(EK::SpeMod, 20, 3),
         mv("Gear Grind", M).Fx(EK::DefMod, -20, 2),
         util("Safety Shell").CD(4).T(Tgt::Self).Me(EK::Shield, 25).Me(EK::Cleanse)});
     evo(35, 36, 20);
@@ -268,12 +286,12 @@ std::vector<Species> build() {
     add("Pearlclam", 20, 1, 4, 1, 4, 1, {
         mv("Shell Tap", L),
         util("Clam Up").CD(3).T(Tgt::Self).Me(EK::Armor, 2).Me(EK::Shield, 10),
-        mv("Pearl Shot", M).CD(2).Fx(EK::Daze, 1),
+        mv("Pearl Shot", M).Spc().CD(2).Fx(EK::Daze, 1),
         util("Tide Pool").CD(4).T(Tgt::Ally).Fx(EK::Heal, 15).Fx(EK::Regen, 2)});
     add("Pearlarch", 20, 2, 5, 2, 5, 1, {
-        mv("Pearl Barrage", 0).CD(2).H({L, L, L}).Rand(),
+        mv("Pearl Barrage", 0).Spc().CD(2).H({L, L, L}).Rand(),
         util("Iron Shell").CD(4).T(Tgt::Self).Me(EK::Armor, 3).Me(EK::Thorns, 3),
-        mv("Riptide Slam", M).CD(3).Fx(EK::ForceSwitch),
+        mv("Riptide Slam", M).Spc().CD(3).Fx(EK::ForceSwitch),
         util("Lustrous Veil").CD(4).T(Tgt::Ally).Fx(EK::Shield, 30).Fx(EK::Cleanse)});
     evo(37, 38, 20);
 
@@ -292,25 +310,25 @@ std::vector<Species> build() {
 
     // ---- L14 Finlet line (sea: three stages, tempo into control) ----
     add("Finlet", 22, 1, 2, 2, 2, 4, {
-        mv("Flick Splash", L),
-        mv("Tidal Dart", L).CD(3).Prio(),
+        mv("Flick Splash", L).Spc(),
+        mv("Tidal Dart", L).Spc().CD(3).Prio(),
         util("Bubble Net").CD(3).Fx(EK::Trap, 2),
         util("Schooling").CD(4).T(Tgt::Ally).Fx(EK::Haste, 2).Fx(EK::Regen, 2)});
     add("Reefray", 22, 2, 3, 3, 3, 4, {
         mv("Stingray Lash", M).Fx(EK::Wound, 2, 0, 35),
         util("Glide Away").CD(3).T(Tgt::Self).Me(EK::Evade).Me(EK::Haste, 2),
-        mv("Electro Pulse", M).CD(3).T(Tgt::Spread).Fx(EK::Daze, 1),
+        mv("Electro Pulse", M).Spc().CD(3).T(Tgt::Spread).Fx(EK::Daze, 1),
         util("Coral Wall").CD(4).T(Tgt::Ally).Fx(EK::Armor, 3).Fx(EK::Shield, 15)});
     add("Leviathor", 22, 3, 4, 4, 3, 2, {
         mv("Abyssal Crush", H).CD(2).Fx(EK::Slow, 2),
-        mv("Maelstrom", M).CD(4).T(Tgt::Spread).Fx(EK::ForceSwitch),
+        mv("Maelstrom", M).Spc().CD(4).T(Tgt::Spread).Fx(EK::ForceSwitch),
         util("Deep Current").CD(4).T(Tgt::Ally).Fx(EK::Regen, 4).Fx(EK::Cleanse),
         mv("Kraken's Grasp", M).CD(3).Fx(EK::Trap, 3).Fx(EK::Wound, 2)});
     evo(41, 42, 16); evo(42, 43, 32);
 
     // ---- Four more rares ----
     add("Eclipsa", 23, 1, 3, 3, 2, 4, {
-        mv("Crescent Slash", M).Fx(EK::Mark),
+        mv("Crescent Slash", M).Spc().Fx(EK::Mark),
         util("Lunar Eclipse").CD(5).T(Tgt::Spread).Fx(EK::Daze, 2).Fx(EK::Slow, 1),
         util("Dusk Step").CD(3).T(Tgt::Self).Me(EK::Evade).Me(EK::Haste, 1).Me(EK::PrioNext),
         util("Starlit Hex").CD(4).Fx(EK::Doom, 2).Fx(EK::Mark)}, true);
@@ -320,15 +338,51 @@ std::vector<Species> build() {
         util("Root Snare").CD(3).Fx(EK::Trap, 2).Fx(EK::Slow, 1),
         util("Sunbaked Rest").CD(5).T(Tgt::Self).Me(EK::Heal, 40).Me(EK::Slow, 1)}, true);
     add("Hailwing", 25, 1, 3, 4, 2, 5, {
-        mv("Frost Gust", L).CD(2).T(Tgt::Spread).Fx(EK::Slow, 1),
-        mv("Hailstorm", 0).CD(3).H({35, 35, 35}).Rand().PerHit().Fx(EK::Slow, 1, 0, 30),
+        mv("Frost Gust", L).Spc().CD(2).T(Tgt::Spread).Fx(EK::Slow, 1),
+        mv("Hailstorm", 0).Spc().CD(3).H({35, 35, 35}).Rand().PerHit().Fx(EK::Slow, 1, 0, 30),
         mv("Wind Chill Dive", H).CD(3).Charge(true),
         util("Jet Stream").CD(4).T(Tgt::Ally).Fx(EK::Haste, 3).Fx(EK::Focus)}, true);
     add("Magmaroth", 26, 1, 4, 4, 3, 1, {
         mv("Magma Fist", M).Fx(EK::Wound, 2, 0, 30),
         util("Molten Carapace").CD(4).T(Tgt::Self).Me(EK::Armor, 3).Me(EK::Thorns, 3),
-        mv("Eruption", M).CD(3).T(Tgt::Spread).Fx(EK::Wound, 2),
+        mv("Eruption", M).Spc().CD(3).T(Tgt::Spread).Fx(EK::Wound, 2),
         util("Obsidian Rage").CD(5).T(Tgt::Self).Me(EK::SelfDamage, 15).Me(EK::AtkMod, 50, 3).Me(EK::Empower, 40, 1)}, true);
+
+
+    // Role and one-line concept for the original 27 lines.
+    static const char* kRole[27] = {"Regrowing tank", "Lightning tempo", "Burst setup", "Rock wall and counter", "Healer", "Curse and Doom", "Hit and run",
+        "Crystal support", "Trapper", "Ice control", "Mirror trickster", "Time rogue", "Armored bruiser", "Vampire drainer", "Shapeshifting wall",
+        "Phoenix", "Chaos prism", "Fungus control", "Desert evader", "Clockwork tempo", "Shell support", "Mountain ram", "Sea tempo", "Curse and evasion",
+        "Regrowing wall", "Spread control", "Lava bruiser"};
+    static const char* kBlurb[27] = {
+        "A sprout-crowned tank that outlasts foes with regrowth, thorns and armor.",
+        "A crackling fox that wins by acting first: priority, haste and dodging.",
+        "A flame-crested hound that stacks Focus and wounds before a huge burst.",
+        "A cracked-stone wall that shrugs off hits and answers with a counter.",
+        "A gentle water drop that mends, cleanses and slips away from danger.",
+        "A patterned moth that marks, slows and eventually dooms its prey.",
+        "A quick bird that pecks then swaps out, diving from the sky with a dodging charge.",
+        "A faceted crystal that shields its allies and dazzles foes.",
+        "A claw-handed mole that digs in, dodges underground and traps foes.",
+        "A drifting ice spirit that slows, armors up and freezes foes in place.",
+        "A mirror-bellied rat that copies moves, reflects attacks and steals buffs.",
+        "An owl that rewinds cooldowns, seeds Doom and slows time itself.",
+        "An armored beetle that stacks plates and crushes with cannonball rolls.",
+        "A bat that drains life, wounds foes and trades its own health for power.",
+        "A jelly cube that absorbs hits, copies stat changes and slams back what it took.",
+        "A flame-winged phoenix that revives once and dives for huge damage.",
+        "A rainbow prism that strips buffs, wipes the field and gambles on random effects.",
+        "A spotted mushroom that spreads spore clouds, wounds and regrowth.",
+        "A dune pup that kicks sand, slows foes and ambushes from below.",
+        "A gear-driven hound that speeds itself up and shatters defenses.",
+        "A pearl-bearing clam that armors up and heals its allies.",
+        "A sure-footed goat that charges, locks horns and traps foes.",
+        "A darting fish that grows into a tide-controlling sea beast.",
+        "A moon spirit that hexes foes and vanishes before they can strike.",
+        "A turtle with a living garden on its shell that heals the whole team.",
+        "An ice-winged bird that chills the whole field.",
+        "A lava-veined beast that wounds everything around it."};
+    for (auto& sp : v) if (sp.line < 27) { sp.role = kRole[sp.line]; sp.blurb = kBlurb[sp.line]; }
 
     // Habitats: where each line can be found (bit 0 Meadow, 1 Woods, 2 Caverns, 3 Shore, 4 Peaks, 5 Ruins).
     const int hab[27] = {3, 17, 33, 20, 9, 34, 17, 36, 5, 16, 40, 32, 4, 6, 40, 48, 32, 2, 5, 36, 8, 16, 8, 34, 10, 16, 36};
@@ -336,6 +390,20 @@ std::vector<Species> build() {
 
     // ======================= Expansion II (ids 48..149), generated by tools/gen_roster.py =======================
 #include "roster_ext.inc"
+
+    // No two friends share the exact same six-stat spread: a duplicate is nudged by moving one pip between two stats.
+    {
+        std::set<std::array<int, 6>> seen;
+        for (auto& sp : v) {
+            int* st[6] = {&sp.hp, &sp.atk, &sp.def, &sp.spa, &sp.spd, &sp.spe};
+            auto key = [&]() { return std::array<int, 6>{*st[0], *st[1], *st[2], *st[3], *st[4], *st[5]}; };
+            for (int attempt = 0; seen.count(key()) && attempt < 5000; ++attempt) {
+                const int up = (sp.id * 5 + attempt * 7) % 6, down = (sp.id * 3 + attempt * 11 + 1) % 6;
+                if (up != down && *st[up] < 5 && *st[down] > 1) { ++*st[up]; --*st[down]; }
+            }
+            seen.insert(key());
+        }
+    }
     return v;
 }
 
@@ -371,7 +439,9 @@ Stats statsFor(const Species& s, int level) {
     st.hp = static_cast<int>((2 * hpBase + 31) * level / 100.0 + level + 10);
     st.atk = stat(s.atk);
     st.def = stat(s.def);
+    st.spa = stat(s.spa);
     st.spd = stat(s.spd);
+    st.spe = stat(s.spe);
     return st;
 }
 

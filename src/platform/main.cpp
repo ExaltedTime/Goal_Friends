@@ -224,9 +224,9 @@ void renderFrame(App& a) {
     // strip is just sitting there.
     const bool recent = (nowMs - a.lastActivity) < 2500;
     UINT want;
-    if (recent) want = 33;
+    if (recent) want = open ? 33 : 66;
     else if (open) want = a.ui->effectsActive() ? 50 : 100;       // static panels barely need redrawing
-    else want = a.ui->animating() ? 125 : 500;                    // walking friends: 8 fps; sitting still: 2 fps
+    else want = a.ui->animating() ? 66 : 500;                     // walking friends: a steady 15 fps; sitting still: 2 fps
     setFrameInterval(a, want);
 }
 

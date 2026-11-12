@@ -2,12 +2,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <array>
 #include <map>
 #include <set>
 #include <string>
 
 #include "battle.hpp"
 #include "data.hpp"
+#include "describe.hpp"
 #include "game.hpp"
 #include "sprite.hpp"
 #include "timeutil.hpp"
@@ -415,6 +417,48 @@ static void testAreasAndEvents() {
     CHECK(anyActor);
 }
 
+// The roster must have real variety: no two friends are copies of each other.
+static void testRosterVariety() {
+    std::map<std::string, int> use;
+    std::vector<std::vector<std::string>> sigs(allSpecies().size());
+    std::set<std::array<int, 6>> spreads;
+    for (const auto& s : allSpecies()) {
+        for (const auto& m : s.moves) { const std::string g = moveSignature(m); sigs[static_cast<size_t>(s.id)].push_back(g); use[g]++; }
+        spreads.insert({s.hp, s.atk, s.def, s.spa, s.spd, s.spe});
+        CHECK(!s.role.empty() && !s.blurb.empty());
+        CHECK(s.hp >= 1 && s.hp <= 5 && s.atk >= 1 && s.atk <= 5 && s.def >= 1 && s.def <= 5 && s.spa >= 1 && s.spa <= 5 && s.spd >= 1 && s.spd <= 5 && s.spe >= 1 && s.spe <= 5);
+    }
+    CHECK(spreads.size() == allSpecies().size());          // every friend has its own six-stat spread
+    int noSignature = 0, crossLine3 = 0, identical = 0;
+    for (const auto& s : allSpecies()) {
+        bool has = false;
+        for (const auto& g : sigs[static_cast<size_t>(s.id)]) if (use[g] == 1) has = true;
+        if (!has) ++noSignature;
+    }
+    for (size_t a = 0; a < allSpecies().size(); ++a)
+        for (size_t b = a + 1; b < allSpecies().size(); ++b) {
+            std::multiset<std::string> A(sigs[a].begin(), sigs[a].end());
+            int common = 0;
+            for (const auto& g : sigs[b]) { auto it = A.find(g); if (it != A.end()) { ++common; A.erase(it); } }
+            if (common == 4) ++identical;
+            if (common >= 3 && allSpecies()[a].line != allSpecies()[b].line) ++crossLine3;
+        }
+    std::printf("  variety: %zu distinct mechanics in %zu moves, %d friends without a signature move, %d cross-line pairs sharing 3+ moves\n", use.size(), allSpecies().size() * 4, noSignature, crossLine3);
+    CHECK(noSignature == 0);        // every friend has at least one move nobody else has
+    CHECK(identical == 0);          // no two friends have the same moveset
+    CHECK(crossLine3 == 0);         // friends from different lines never share more than two moves
+    CHECK(use.size() >= 380);       // plenty of distinct mechanics
+    // Roles reflect the stats: a friend that is mostly special hits has SPA >= ATK, and the reverse.
+    int mismatched = 0;
+    for (const auto& s : allSpecies()) {
+        double phys = 0, spec = 0;
+        for (const auto& m : s.moves) { if (!m.damaging()) continue; double p = m.hits.empty() ? m.power : 0; for (int h : m.hits) p += h; (m.special ? spec : phys) += p; }
+        if (spec > phys * 2 && s.atk > s.spa) ++mismatched;
+        if (phys > spec * 2 && s.spa > s.atk) ++mismatched;
+    }
+    CHECK(mismatched <= 6);
+}
+
 static void testSprites() {
     std::set<std::vector<uint32_t>> seen;
     for (int i = 0; i < kSpeciesCount; ++i) {
@@ -449,7 +493,7 @@ int main() {
         {"streaks+sleepy", testStreaksAndSleepy}, {"late", testLate}, {"reminders", testReminders},
         {"eggs+evolution", testEggsAndEvolution}, {"shop+party", testShopAndParty}, {"save/load", testSaveLoad},
         {"battle basics", testBattleBasics}, {"switch+catch", testSwitchAndCatch}, {"battle flow", testBattleFlow},
-        {"areas+events", testAreasAndEvents}, {"sprites", testSprites}, {"simulation", testSimulation},
+        {"areas+events", testAreasAndEvents}, {"roster variety", testRosterVariety}, {"sprites", testSprites}, {"simulation", testSimulation},
     };
     for (auto& t : tests) {
         const int before = g_failures;

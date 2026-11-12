@@ -1,3 +1,4 @@
+#include "describe.hpp"
 #include "ui.hpp"
 
 #include <windows.h>
@@ -16,6 +17,8 @@ using gfx::TF_WRAP;
 
 namespace ui {
 namespace {
+
+using gf::describeMove;
 
 const gfx::Color kBg = rgba(20, 24, 36, 244);
 const gfx::Color kCard = rgba(34, 40, 58);
@@ -47,105 +50,6 @@ std::string two(int v) { char b[8]; std::snprintf(b, sizeof b, "%02d", v); retur
 std::string clock(int minute) { return two(minute / 60) + ":" + two(minute % 60); }
 
 const char* kDayNames[7] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-
-std::string effText(const gf::Effect& e) {
-    using gf::EK;
-    const std::string a = std::to_string(e.a);
-    std::string s;
-    switch (e.k) {
-        case EK::Wound: s = "Wound " + a; break;
-        case EK::Daze: s = "Daze " + a; break;
-        case EK::Slow: s = "Slow " + a; break;
-        case EK::Haste: s = "Haste " + a; break;
-        case EK::Armor: s = "Armor " + a; break;
-        case EK::Thorns: s = "Thorns " + a; break;
-        case EK::Regen: s = "Regen " + a; break;
-        case EK::Focus: s = "Focus"; break;
-        case EK::Mark: s = "Mark"; break;
-        case EK::Trap: s = "Trap " + a; break;
-        case EK::Stun: s = "Stun"; break;
-        case EK::Taunt: s = "Taunt " + a; break;
-        case EK::Doom: s = "Doom " + a; break;
-        case EK::Seal: s = "Seal"; break;
-        case EK::Shield: s = "Shield " + a + "%"; break;
-        case EK::Heal: s = "Heal " + a + "%"; break;
-        case EK::Cleanse: s = "Cleanse"; break;
-        case EK::ForceSwitch: s = "Force switch"; break;
-        case EK::AtkMod: s = "ATK " + std::string(e.a > 0 ? "+" : "") + a + "% " + std::to_string(e.b) + "t"; break;
-        case EK::DefMod: s = "DEF " + std::string(e.a > 0 ? "+" : "") + a + "% " + std::to_string(e.b) + "t"; break;
-        case EK::SpdMod: s = "SPD " + std::string(e.a > 0 ? "+" : "") + a + "% " + std::to_string(e.b) + "t"; break;
-        case EK::Evade: s = e.chance < 100 ? "Evade (" + std::to_string(e.chance) + "%)" : "Evade"; break;
-        case EK::Counter: s = "Counter x" + std::to_string(e.a / 10.0).substr(0, 3); break;
-        case EK::CounterHit: s = "Counter hit"; break;
-        case EK::CounterAbsorb: s = "Absorb & heal"; break;
-        case EK::Empower: s = "Next " + std::to_string(e.b) + " atk +" + a + "%"; break;
-        case EK::NoMiss: s = "Can't miss"; break;
-        case EK::PrioNext: s = "Next move Priority"; break;
-        case EK::SlowAttackers: s = "Slows attackers"; break;
-        case EK::ReflectDebuff: s = "Reflect debuff"; break;
-        case EK::ReflectDamage: s = "Reflect hit"; break;
-        case EK::SelfDamage: s = "Lose " + a + "% HP"; break;
-        case EK::Plate: s = "+1 Plate"; break;
-        case EK::Leech: s = "Leech"; break;
-    }
-    if (e.chance < 100 && e.k != gf::EK::Evade) s += " (" + std::to_string(e.chance) + "%)";
-    if (e.self) s += " [self]";
-    return s;
-}
-
-std::string spText(gf::Sp sp) {
-    using gf::Sp;
-    switch (sp) {
-        case Sp::SlipstreamBonus: return "+30% if you move first";
-        case Sp::WardenBonus: return "+50% with Armor/Shield/Thorns";
-        case Sp::BackdraftBonus: return "+50% vs Wounded";
-        case Sp::CannonballBonus: return "+10% per Plate";
-        case Sp::ShapeshiftSlam: return "1.2x damage you last took";
-        case Sp::Mimic: return "Copy foe's last move";
-        case Sp::InvertBuffs: return "Foe's buffs become debuffs";
-        case Sp::StealBuff: return "Steal a buff";
-        case Sp::CopyMods: return "Copy foe's stat changes";
-        case Sp::ResetCooldowns: return "Reset your cooldowns";
-        case Sp::WildCard: return "Random effect";
-        case Sp::ChaosBolt: return "Random bonus effect";
-        case Sp::PrismaticShatter: return "Strip buffs, +20% each";
-        case Sp::Anarchy: return "Reset all statuses & cooldowns";
-        case Sp::RebirthPyre: return "Revive once when KO'd";
-        default: return "";
-    }
-}
-
-std::string describeMove(const gf::Move& m) {
-    std::string s;
-    auto add = [&](const std::string& p) { if (!p.empty()) { if (!s.empty()) s += " · "; s += p; } };
-    if (m.damaging() || m.sp == gf::Sp::ShapeshiftSlam) {
-        if (m.multiHit()) {
-            std::string h = std::to_string(m.hits.size()) + " hits";
-            if (m.randomTargets) h += " (random foes)";
-            add(h);
-        } else {
-            const int p = m.hits.empty() ? m.power : m.hits[0];
-            add(p <= 45 ? "Light hit" : p <= 80 ? "Medium hit" : p > 0 ? "Heavy hit" : "Special hit");
-        }
-    } else {
-        add("Utility");
-    }
-    if (m.tgt == gf::Tgt::Spread) add("all foes");
-    if (m.tgt == gf::Tgt::Ally) add("ally or self");
-    if (m.prio) add("Priority");
-    if (m.charge) add(m.chargeEvade ? "2 turns (dodges)" : "2 turns");
-    if (m.pivot) add("then swap out");
-    if (m.ignoreDef) add("ignores " + std::to_string(m.ignoreDef) + "% DEF");
-    if (m.ignoreDefenses) add("ignores Shield/Armor");
-    if (m.crit) add(std::to_string(m.crit) + "% crit");
-    if (m.drain) add("drain " + std::to_string(m.drain) + "%");
-    if (m.recoil) add("recoil " + std::to_string(m.recoil) + "%");
-    for (const auto& e : m.fx) add(effText(e));
-    add(spText(m.sp));
-    if (m.once) add("once per battle");
-    if (m.cd > 0) add("CD " + std::to_string(m.cd));
-    return s;
-}
 
 std::string statusText(const gf::Fighter& f) {
     std::string s;
@@ -465,30 +369,47 @@ void Ui::drawWorld(float dt) {
         if (std::none_of(walkers_.begin(), walkers_.end(), [&](const Walker& w) { return w.friendId == id; })) {
             Walker w;
             w.friendId = id;
-            w.x = 120.f + static_cast<float>((id * 137) % 600);
-            w.dir = (id % 2) ? 1.f : -1.f;
-            w.speed = 18.f + static_cast<float>((id * 7) % 20);
+            w.rng = static_cast<unsigned>(id) * 2654435761u + 12345u;
             walkers_.push_back(w);
         }
     }
     const bool sleepy = gf::isSleepy(g_, now_.day);
     const int lead = gf::leadFriendId(g_);
+    const float cell = groundCell(*gx_);
+    const int minC = 14, maxC = std::max(minC + 4, static_cast<int>(W_ / cell) - 14);
+    auto next = [](Walker& w) { w.rng = w.rng * 1664525u + 1013904223u; return (w.rng >> 8) & 0xFFFF; };
+    groupT_ -= dt;
+    if (groupT_ <= 0) {
+        groupRng_ = groupRng_ * 1664525u + 1013904223u;
+        groupWalk_ = !groupWalk_;
+        groupT_ = groupWalk_ ? 4.f + static_cast<float>((groupRng_ >> 8) % 40) / 10.f : 3.f + static_cast<float>((groupRng_ >> 8) % 30) / 10.f;
+    }
     for (auto& w : walkers_) {
         const gf::Friend* f = gf::findFriend(g_, w.friendId);
         if (!f) continue;
-        const gf::Species& sp = gf::species(f->species);
-        const float cell = groundCell(*gx_);
         const float size = 24.f * cell;  // every friend uses the same sprite-pixel size as the ground
-        (void)sp;
-        if (!sleepy) {
-            if (w.pause > 0) w.pause -= dt;
-            else {
+        if (!w.init) {
+            w.init = true;
+            w.cx = minC + static_cast<int>(next(w) % static_cast<unsigned>(std::max(1, maxC - minC)));
+            w.dir = (next(w) & 1) ? 1 : -1;
+            w.fast = (next(w) % 3) != 0;
+            w.walkT = 1.5f + static_cast<float>(next(w) % 30) / 10.f;
+        }
+        if (!sleepy && groupWalk_) {
+            if (w.pause > 0) {
+                w.pause -= dt;
+                if (w.pause <= 0) {                       // rest is over: maybe turn around, then walk for a while
+                    if (next(w) % 3 == 0) w.dir = -w.dir;
+                    w.walkT = 2.5f + static_cast<float>(next(w) % 25) / 10.f;
+                }
+            } else {
                 animating_ = true;
-                w.x += w.dir * w.speed * dt;
-                if (w.x < 30) { w.x = 30; w.dir = 1; }
-                if (w.x > W_ - 40) { w.x = W_ - 40; w.dir = -1; }
-                if (std::fmod(animT_ + static_cast<float>(w.friendId), 7.f) < dt) { w.pause = 1.5f + static_cast<float>(w.friendId % 3); }
-                if (std::fmod(animT_ * 1.3f + static_cast<float>(w.friendId * 3), 11.f) < dt) w.dir = -w.dir;
+                w.phase = !w.phase;
+                if (w.fast || w.phase) w.cx += w.dir;     // exactly one cell per step: even, jitter-free motion
+                if (w.cx < minC) { w.cx = minC; w.dir = 1; }
+                if (w.cx > maxC) { w.cx = maxC; w.dir = -1; }
+                w.walkT -= dt;
+                if (w.walkT <= 0) w.pause = 1.5f + static_cast<float>(next(w) % 30) / 10.f;
             }
         }
         if (w.hop > 0 || w.hopV != 0) {
@@ -499,12 +420,14 @@ void Ui::drawWorld(float dt) {
         }
         const int frame = sleepy ? 1 : static_cast<int>(animT_ * 2.5f + static_cast<float>(w.friendId)) % 2;
         const float bob = sleepy ? 0.f : (frame ? cell : 0.f);
-        const float sx = std::round((w.x - size / 2) / cell) * cell, sy = gy - 20.f * cell - bob - w.hop;
+        const float hopSnap = std::round(w.hop / cell) * cell;   // hops land on the grid too
+        const float xPx = static_cast<float>(w.cx) * cell;
+        const float sx = xPx - size / 2, sy = gy - 20.f * cell - bob - hopSnap;
         // small oval shadow on the ground grid
         gx_->fillRect(sx + 5.f * cell, gy + 2.f * cell, 14.f * cell, cell, rgba(0, 0, 0, 52));
         gx_->fillRect(sx + 7.f * cell, gy + 3.f * cell, 10.f * cell, cell, rgba(0, 0, 0, 38));
         gx_->sprite(gfx::SpriteKind::Species, f->species, frame, w.dir < 0, sx, sy, size);
-        if (sleepy) gx_->text("z z", w.x - 10, sy - 6, 40, 16, 12, kText, TF_BOLD);
+        if (sleepy) gx_->text("z z", xPx - 10, sy - 6, 40, 16, 12, kText, TF_BOLD);
         if (!lock && !blocked_ && !consumed_ && in_->pressed && hover(sx, sy, size, size) && !(panel_.w > 0 && tab_ != Tab::None && hover(panel_.x, panel_.y, panel_.w, panel_.h))) {
             consumed_ = true;
             w.hopV = 190;
@@ -524,8 +447,8 @@ void Ui::drawWorld(float dt) {
                 animating_ = true;  // the bubble bobs
                 const float bw = gx_->textWidth(t, 12, true) + 18;
                 const float by = sy - 26 + (std::sin(animT_ * 4) * 2);
-                gx_->fillRect(w.x - bw / 2, by, bw, 22, rgba(255, 255, 255, 235), 11);
-                gx_->text(t, w.x - bw / 2, by, bw, 22, 12, rgba(30, 30, 40), TF_CENTER | TF_VCENTER | TF_BOLD);
+                gx_->fillRect(xPx - bw / 2, by, bw, 22, rgba(255, 255, 255, 235), 11);
+                gx_->text(t, xPx - bw / 2, by, bw, 22, 12, rgba(30, 30, 40), TF_CENTER | TF_VCENTER | TF_BOLD);
             }
         }
     }
@@ -717,6 +640,7 @@ void Ui::drawTasks(const Rect& b) {
     gx_->pushClip(b.x, ly, lw, lh);
     float& scroll = taskView_ == 0 ? scrollToday_ : scrollAll_;
     if (hover(b.x, ly, lw, lh)) scroll -= in_->wheel * 40;
+    scroll = std::clamp(scroll, 0.f, std::max(0.f, taskContent_[taskView_] - lh));   // clamp before drawing
     const float rowH = 48;
     float y = ly - scroll;
     float contentH = 0;
@@ -783,6 +707,7 @@ void Ui::drawTasks(const Rect& b) {
         contentH = static_cast<float>(g_.tasks.size()) * rowH;
         if (removeId >= 0) { gf::removeTask(g_, removeId); dirty_ = true; }
     }
+    taskContent_[taskView_] = contentH;
     scroll = std::clamp(scroll, 0.f, std::max(0.f, contentH - lh));
     gx_->popClip();
 
@@ -887,12 +812,15 @@ void Ui::drawFriends(const Rect& b) {
     gx_->text(sp.name, dx + 112, b.y + 10, dw - 120, 26, 18, kText, TF_BOLD);
     gx_->text("Stage " + std::to_string(sp.stage) + (sp.rare ? " · Rare" : "") + " · Lv " + std::to_string(sf->level), dx + 112, b.y + 38, dw - 120, 18, 12, kDim);
     if (sp.evolvesTo >= 0) gx_->text("Evolves at Lv " + std::to_string(sp.evolveLevel), dx + 112, b.y + 56, dw - 120, 18, 12, kAccent);
-    gx_->text("HP " + std::to_string(st.hp) + "  ATK " + std::to_string(st.atk) + "  DEF " + std::to_string(st.def) + "  SPD " + std::to_string(st.spd), dx + 10, b.y + 96, dw - 20, 18, 12, kText, TF_BOLD);
-    float my = b.y + 120;
+    gx_->text(sp.role, dx + 112, b.y + 74, dw - 120, 18, 12, rgba(130, 200, 255), TF_BOLD);
+    gx_->text(sp.blurb, dx + 10, b.y + 100, dw - 20, 32, 11, kDim, TF_WRAP);
+    gx_->text("HP " + std::to_string(st.hp) + "   ATK " + std::to_string(st.atk) + "   DEF " + std::to_string(st.def), dx + 10, b.y + 134, dw - 20, 18, 12, kText, TF_BOLD);
+    gx_->text("SPA " + std::to_string(st.spa) + "   SPD " + std::to_string(st.spd) + "   SPE " + std::to_string(st.spe), dx + 10, b.y + 152, dw - 20, 18, 12, kText, TF_BOLD);
+    float my = b.y + 176;
     for (const auto& m : sp.moves) {
         gx_->text(m.name, dx + 10, my, dw - 20, 18, 12, kAccent, TF_BOLD);
-        gx_->text(describeMove(m), dx + 10, my + 17, dw - 20, 30, 11, kDim, TF_WRAP);
-        my += 52;
+        gx_->text(describeMove(m), dx + 10, my + 16, dw - 20, 30, 11, kDim, TF_WRAP);
+        my += 48;
     }
     // Buttons
     const bool inParty = std::find(g_.party.begin(), g_.party.end(), sf->id) != g_.party.end();
@@ -960,13 +888,16 @@ void Ui::drawDex(const Rect& b) {
             gx_->sprite(gfx::SpriteKind::Species, selDex_, static_cast<int>(animT_ * 2) % 2, false, dx + 10, b.y + 10, 96);
             gx_->text(sp.name, dx + 112, b.y + 14, dw - 120, 26, 18, kText, TF_BOLD);
             gx_->text("Stage " + std::to_string(sp.stage) + (sp.rare ? " · Rare" : ""), dx + 112, b.y + 42, dw - 120, 18, 12, kDim);
-            gx_->text("Base  HP " + std::string(static_cast<size_t>(sp.hp), '|') + "  ATK " + std::string(static_cast<size_t>(sp.atk), '|'), dx + 12, b.y + 112, dw - 24, 16, 11, kText);
-            gx_->text("DEF " + std::string(static_cast<size_t>(sp.def), '|') + "  SPD " + std::string(static_cast<size_t>(sp.spd), '|'), dx + 12, b.y + 128, dw - 24, 16, 11, kText);
-            float my = b.y + 150;
+            gx_->text(sp.role, dx + 112, b.y + 62, dw - 120, 18, 12, rgba(130, 200, 255), TF_BOLD);
+            gx_->text(sp.blurb, dx + 12, b.y + 108, dw - 24, 32, 11, kDim, TF_WRAP);
+            auto pips = [](int n) { return std::string(static_cast<size_t>(n), '|'); };
+            gx_->text("HP " + pips(sp.hp) + "   ATK " + pips(sp.atk) + "   DEF " + pips(sp.def), dx + 12, b.y + 144, dw - 24, 16, 11, kText, TF_BOLD);
+            gx_->text("SPA " + pips(sp.spa) + "   SPD " + pips(sp.spd) + "   SPE " + pips(sp.spe), dx + 12, b.y + 160, dw - 24, 16, 11, kText, TF_BOLD);
+            float my = b.y + 184;
             for (const auto& m : sp.moves) {
                 gx_->text(m.name, dx + 12, my, dw - 24, 18, 12, kAccent, TF_BOLD);
-                gx_->text(describeMove(m), dx + 12, my + 17, dw - 24, 30, 11, kDim, TF_WRAP);
-                my += 50;
+                gx_->text(describeMove(m), dx + 12, my + 16, dw - 24, 30, 11, kDim, TF_WRAP);
+                my += 46;
             }
         }
     } else {
@@ -1546,6 +1477,8 @@ const std::vector<GuideSection>& guideSections() {
             "You bring a party of 6 into battle; every other friend waits in the Box. Open a friend in the Friends tab to move them, or to make them the lead.",
             "# Levels and evolution",
             "Friends level up from 1 to 50. Three-stage lines evolve at levels 16 and 32, two-stage lines at level 20. Rare friends don't evolve. Each friend has exactly four unique moves, and an evolved form gets a new set.",
+            "# Stats",
+            "Every friend has six stats, like the Pokémon games: HP (health), ATK (attack), DEF (defence), SPA (special attack), SPD (special defence) and SPE (speed). Physical moves use the user's ATK against the target's DEF; special moves use SPA against SPD. Each move says Physical or Special. Speed decides who acts first.",
             "# Getting new friends",
             "- Eggs cost 40 coins in the Shop and hatch after you complete 5 tasks. Some trainers also give you eggs.",
             "- Catch Charms (20 coins) can befriend a wild friend in battle. They work best when the foe is hurt.",
@@ -1568,7 +1501,7 @@ const std::vector<GuideSection>& guideSections() {
             "# Turn order",
             "Switching goes first. Then moves with Priority, then everyone else by speed (SPD). Ties are random.",
             "# Moves",
-            "- Light, Medium and Heavy hits do damage. Utility moves do something else: heal, shield, buff, weaken, trap, and more. Hover over a move to read what it does.",
+            "- Light, Medium and Heavy hits do damage, as Physical (ATK vs DEF) or Special (SPA vs SPD) moves. Utility moves do something else: heal, shield, buff, weaken, trap, and more. Hover over a move to read what it does.",
             "- CD n means the move can't be used for n turns after you use it. If all four moves are cooling down, your friend uses Scuffle, a basic attack.",
             "- Most moves hit one foe. Spread moves hit all foes at 75% damage. Some moves hit random foes, and some can target an ally or yourself.",
             "# Winning",
@@ -1582,7 +1515,7 @@ const std::vector<GuideSection>& guideSections() {
             "- Doom: after a few turns, take a heavy hit (it never knocks the friend out by itself).",
             "# Slowing and disabling",
             "- Daze: attacks have a 30% chance to miss.",
-            "- Slow / Haste: speed down 30% / up 40%.",
+            "- Slow / Haste: SPE down 30% / up 40%.",
             "- Stun: skips its next action.",
             "- Trap: can't be switched out or forced out.",
             "- Seal: the last move it used can't be used for 2 turns.",
@@ -1628,13 +1561,16 @@ void Ui::drawGuide(const Rect& b) {
         if (button(b.x, b.y + static_cast<float>(i) * 40, nw, 34, secs[i].title, guideSection_ == static_cast<int>(i) ? kBlue : kBtn, true, 13)) {
             guideSection_ = static_cast<int>(i);
             scrollGuide_ = 0;
+            guideContent_ = 0;
         }
     }
     const float cx = b.x + nw + 14, cw = b.w - nw - 14;
     card(cx, b.y, cw, b.h);
     const GuideSection& sec = secs[static_cast<size_t>(std::clamp(guideSection_, 0, static_cast<int>(secs.size()) - 1))];
     gx_->pushClip(cx, b.y, cw, b.h);
+    // Clamp before drawing (using last frame's content height) so nothing is ever drawn scrolled past the content.
     if (hover(cx, b.y, cw, b.h)) scrollGuide_ -= in_->wheel * 48;
+    scrollGuide_ = std::clamp(scrollGuide_, 0.f, std::max(0.f, guideContent_ - b.h));
     float y = b.y + 12 - scrollGuide_;
     gx_->text(sec.title, cx + 18, y, cw - 36, 28, 20, kAccent, TF_BOLD);
     y += 38;
@@ -1655,8 +1591,8 @@ void Ui::drawGuide(const Rect& b) {
             y += h + 8;
         }
     }
-    const float contentH = y + scrollGuide_ - b.y + 12;
-    scrollGuide_ = std::clamp(scrollGuide_, 0.f, std::max(0.f, contentH - b.h));
+    guideContent_ = y + scrollGuide_ - b.y + 12;
+    scrollGuide_ = std::clamp(scrollGuide_, 0.f, std::max(0.f, guideContent_ - b.h));
     gx_->popClip();
 }
 

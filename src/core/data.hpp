@@ -19,7 +19,7 @@ enum class EK {
     ForceSwitch,
     AtkMod,        // a = percent (negative for debuff), b = turns
     DefMod,
-    SpdMod,
+    SpeMod,
     Evade,         // chance = probability (default 100)
     Counter,       // a = damage multiplier in tenths (15 = 1.5x of damage taken)
     CounterHit,    // a = power of retaliation, b = wound turns on attacker
@@ -62,6 +62,7 @@ struct Move {
     bool charge = false;
     bool chargeEvade = false;
     bool once = false;
+    bool special = false;      // uses SPA / SPD (special defence) instead of ATK / DEF
     int ignoreDef = 0;         // % of target DEF ignored
     bool ignoreDefenses = false;  // ignores Shield and Armor
     int crit = 0;              // % chance of 1.5x
@@ -82,6 +83,7 @@ struct Move {
     Move& Pivot() { pivot = true; return *this; }
     Move& Charge(bool evade) { charge = true; chargeEvade = evade; return *this; }
     Move& Once() { once = true; return *this; }
+    Move& Spc() { special = true; return *this; }
     Move& IgnoreDef(int v) { ignoreDef = v; return *this; }
     Move& IgnoreDefenses() { ignoreDefenses = true; return *this; }
     Move& Crit(int v) { crit = v; return *this; }
@@ -107,11 +109,14 @@ struct Species {
     bool rare = false;
     bool starter = false;
     int habitats = 0;   // bitmask of areas where this friend can be found
-    int hp = 3, atk = 3, def = 3, spd = 3;  // pips 1..5
+    // Base stats as pips 1..5 (same six stats as the Pokémon games): HP, attack, defence, special attack, special defence, speed.
+    int hp = 3, atk = 3, def = 3, spa = 3, spd = 3, spe = 3;
+    std::string role;    // short role description
+    std::string blurb;   // one-line concept
     std::array<Move, 4> moves;
 };
 
-struct Stats { int hp, atk, def, spd; };
+struct Stats { int hp, atk, def, spa, spd, spe; };
 
 constexpr int kSpeciesCount = 150;
 constexpr int kMaxLevel = 50;

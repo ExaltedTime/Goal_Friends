@@ -1,4 +1,4 @@
-# Goal Friends — Design Doc (draft v1.0)
+# Goal Friends — Design Doc (draft v1.1)
 
 _Status: working prototype built (see section 11). Personal use, Windows laptop, native C++.
 Companion file: [ROSTER.md](ROSTER.md) (150 creatures and their moves)._
@@ -350,3 +350,19 @@ What mattered:
 3. Text layouts are cached; task counts are computed once a second instead of several times per frame.
 4. Hidden mode draws nothing and only checks once a second whether a focus session finished.
 5. Memory is trimmed 15 seconds after the panel closes, and the window shrinks back to strip size.
+
+## 16. Stats, uniqueness and polish (v1.1)
+
+- **Six stats** as in the Pokémon games: HP, ATK, DEF, SPA, SPD (special defence), SPE (speed). Each damaging move is
+  Physical (ATK vs DEF) or Special (SPA vs SPD). The speed-modifier effect is now `SpeMod`; Slow/Haste act on SPE.
+  Attack and defence modifiers apply to both the physical and special stat.
+- **Uniqueness.** The first roster pass produced lookalikes (only 293 distinct mechanics in 600 moves, 57 friends with no
+  unique move, 130 pairs sharing three or more moves, 93 shared stat spreads). Now each role has two move kits, every friend
+  has a hand-written signature move, numbers vary per friend, categories and bulk (physical or special) vary per line, and a
+  pass makes every six-stat spread unique. Result: 403 distinct mechanics, 0 friends without a signature move, 0 cross-line
+  pairs sharing 3+ moves, 150 distinct spreads. Tests enforce all of this.
+- **Roster document** (`ROSTER.md`) is generated from the game data by `gf_roster_doc`.
+- **Scrolling** is clamped before drawing using the last frame's content height, so nothing is ever drawn scrolled past
+  its content.
+- **Friends walk in whole-cell steps** locked to the frame (15 fps while walking), with shared rest periods for the whole
+  party, so the motion is even and the strip drops to 2 fps when everyone rests.

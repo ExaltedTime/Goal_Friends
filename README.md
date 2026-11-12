@@ -70,6 +70,20 @@ The strip is meant to sit on screen all day, so it is built to cost almost nothi
 `EXE=build-win/GoalFriends.exe SECS=20 bash tools/measure.sh`. Setting `GF_TRACE=<file>` makes the app log its average
 draw and present time per frame every 10 seconds.
 
+## Roster and stats
+
+Every friend has the six Pokémon stats: HP, ATK, DEF, SPA (special attack), SPD (special defence) and SPE (speed).
+Moves are Physical (ATK vs DEF), Special (SPA vs SPD) or Utility. `ROSTER.md` lists every friend with stats, role,
+concept, areas, evolution chain, full move details and which moves are unique to them. It is generated from the game
+data, so it always matches the game:
+
+```bash
+cmake --build build && ./build/gf_roster_doc > ROSTER.md
+```
+
+The tests enforce variety: every friend has its own stat spread and at least one move with mechanics nobody else has, no
+two friends share a moveset, and friends from different lines never share more than two moves.
+
 ## Roster generator
 
 Friends 49 to 150 come from `tools/gen_roster.py` (Python 3, no dependencies). Edit the tables in that file and run

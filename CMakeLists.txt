@@ -11,6 +11,7 @@ add_library(gf_core STATIC
     src/core/data.cpp
     src/core/battle.cpp
     src/core/game.cpp
+    src/core/describe.cpp
     src/core/sprite.cpp)
 target_include_directories(gf_core PUBLIC src/core)
 if(MSVC)
@@ -19,6 +20,10 @@ else()
     target_compile_options(gf_core PRIVATE -Wall -Wextra)
     target_compile_definitions(gf_core PUBLIC _GLIBCXX_ASSERTIONS)  # bounds-checked containers
 endif()
+
+# ---- Roster document generator (prints ROSTER.md from the game data)
+add_executable(gf_roster_doc tools/dump_roster.cpp)
+target_link_libraries(gf_roster_doc PRIVATE gf_core)
 
 # ---- Tests ----
 enable_testing()
