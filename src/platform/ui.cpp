@@ -376,7 +376,11 @@ void Ui::drawWorld(float dt) {
         if (std::none_of(walkers_.begin(), walkers_.end(), [&](const Walker& w) { return w.friendId == id; })) {
             Walker w;
             w.friendId = id;
-            w.rng = static_cast<unsigned>(id) * 2654435761u + 12345u;
+            {   // well-mixed seed (an LCG seeded with consecutive ids gives nearly identical rolls, which made the friends rest in sync)
+                unsigned z = static_cast<unsigned>(id) * 0x9E3779B9u + static_cast<unsigned>(nowMs_) * 0x85EBCA6Bu + 0x7F4A7C15u;
+                z ^= z >> 16; z *= 0x7FEB352Du; z ^= z >> 15; z *= 0x846CA68Bu; z ^= z >> 16;
+                w.rng = z ? z : 1u;
+            }
             walkers_.push_back(w);
         }
     }
@@ -384,7 +388,7 @@ void Ui::drawWorld(float dt) {
     const int lead = gf::leadFriendId(g_);
     const float cell = groundCell(*gx_);
     const int minC = 14, maxC = std::max(minC + 4, static_cast<int>(W_ / cell) - 14);
-    auto next = [](Walker& w) { w.rng = w.rng * 1664525u + 1013904223u; return (w.rng >> 8) & 0xFFFF; };
+    auto next = [](Walker& w) { unsigned x = w.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; w.rng = x; return (x >> 8) & 0xFFFF; };
     for (auto& w : walkers_) {
         const gf::Friend* f = gf::findFriend(g_, w.friendId);
         if (!f) continue;
@@ -401,8 +405,8 @@ void Ui::drawWorld(float dt) {
             w.dir = (next(w) & 1) ? 1 : -1;
             static const float kSpeeds[5] = {4.f, 5.5f, 7.f, 8.5f, 10.f};   // cells per second: steady, differing rhythms
             w.cps = kSpeeds[next(w) % 5];
-            if (next(w) % 2) { w.pause = 0.5f + static_cast<float>(next(w) % 80) / 10.f; w.walkT = 0; }
-            else { w.pause = 0; w.walkT = 0.5f + static_cast<float>(next(w) % 40) / 10.f; }
+            if (next(w) % 2) { w.pause = 0.5f + static_cast<float>(next(w) % 900) / 100.f; w.walkT = 0; }
+            else { w.pause = 0; w.walkT = 0.5f + static_cast<float>(next(w) % 600) / 100.f; }
             w.animRate = 3.4f + static_cast<float>(next(w) % 25) / 10.f;       // 3.4 to 5.9 walk frames per second
             w.animT = static_cast<float>(next(w) % 400) / 100.f;               // random starting phase
             w.idleRate = 1.1f + static_cast<float>(next(w) % 14) / 10.f;
@@ -419,13 +423,13 @@ void Ui::drawWorld(float dt) {
                 w.pause -= dt;
                 if (w.pause <= 0) {
                     if (next(w) % 3 == 0) w.dir = -w.dir;
-                    w.walkT = 2.f + static_cast<float>(next(w) % 30) / 10.f;
+                    w.walkT = 1.5f + static_cast<float>(next(w) % 600) / 100.f;
                 }
             } else if (w.walkT > 0) {
                 w.walkT -= dt;
             } else if (w.vel < 0.5f) {                             // slowed to a halt: now rest
                 w.vel = 0;
-                w.pause = 3.f + static_cast<float>(next(w) % 60) / 10.f;
+                w.pause = 2.f + static_cast<float>(next(w) % 900) / 100.f;
             }
             if (w.vel > 0.f) {
                 animating_ = true;
