@@ -84,35 +84,6 @@ void saveNow(App& a) {
     }
 }
 
-HICON makeTrayIcon(int speciesId) {
-    const gf::Sprite s = gf::makeSprite(speciesId, 0);
-    const int scale = 2, n = gf::kSpriteSize * scale;
-    BITMAPINFO bmi = {};
-    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bmi.bmiHeader.biWidth = n;
-    bmi.bmiHeader.biHeight = -n;
-    bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 32;
-    bmi.bmiHeader.biCompression = BI_RGB;
-    void* bits = nullptr;
-    HDC dc = GetDC(nullptr);
-    HBITMAP color = CreateDIBSection(dc, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
-    ReleaseDC(nullptr, dc);
-    if (!color || !bits) return nullptr;
-    auto* px = static_cast<uint32_t*>(bits);
-    for (int y = 0; y < n; ++y)
-        for (int x = 0; x < n; ++x) px[y * n + x] = s.at(x / scale, y / scale);
-    HBITMAP mask = CreateBitmap(n, n, 1, 1, nullptr);
-    ICONINFO ii = {};
-    ii.fIcon = TRUE;
-    ii.hbmColor = color;
-    ii.hbmMask = mask;
-    HICON icon = CreateIconIndirect(&ii);
-    DeleteObject(color);
-    DeleteObject(mask);
-    return icon;
-}
-
 void addTray(App& a) {
     a.nid = {};
     a.nid.cbSize = sizeof(a.nid);
@@ -120,7 +91,7 @@ void addTray(App& a) {
     a.nid.uID = ID_TRAY;
     a.nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     a.nid.uCallbackMessage = WM_TRAY;
-    a.nid.hIcon = a.trayIcon ? a.trayIcon : LoadIcon(nullptr, IDI_APPLICATION);
+    a.nid.hIcon = a.trayIcon ? a.trayIcon : LoadIcon(nullptr, IDI_APPLICATION);   // the app icon (resource 1), see app.rc
     wcscpy_s(a.nid.szTip, L"Goal Friends");
     Shell_NotifyIconW(NIM_ADD, &a.nid);
 }
@@ -499,6 +470,8 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE, LPSTR, int) {
     wc.cbSize = sizeof(wc);
     wc.lpfnWndProc = wndProc;
     wc.hInstance = inst;
+    wc.hIcon = LoadIconW(inst, MAKEINTRESOURCEW(1));
+    wc.hIconSm = app.trayIcon;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.lpszClassName = L"GoalFriendsStrip";
     RegisterClassExW(&wc);
@@ -509,7 +482,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE, LPSTR, int) {
                                WS_POPUP, app.work.left, app.work.bottom - ph, pw, ph, nullptr, nullptr, inst, nullptr);
     if (!app.hwnd) return 1;
 
-    app.trayIcon = makeTrayIcon(0);
+    app.trayIcon = static_cast<HICON>(LoadImageW(inst, MAKEINTRESOURCEW(1), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
     app.taskbarCreated = RegisterWindowMessageW(L"TaskbarCreated");
     addTray(app);
 

@@ -783,7 +783,7 @@ void Ui::drawTasks(const Rect& b) {
     fy += 26;
     if (textField(1, fx, fy, fw, 32, formTitle_, "What do you want to get done?")) submitTaskForm();
     fy += 42;
-    gx_->text("Effort (XP 10 / 25 / 60 / 120)", fx, fy, fw, 18, 11, kDim);
+    gx_->text("Effort: S about 10 min, M 25 min, L 1 hour, XL 2 hours", fx, fy, fw, 18, 11, kDim);
     fy += 18;
     const char* eff[] = {"S", "M", "L", "XL"};
     for (int i = 0; i < 4; ++i)
@@ -1639,6 +1639,7 @@ const std::vector<GuideSection>& guideSections() {
             "New tasks don't repeat by default. Use Repeat to make a task daily, on chosen weekdays, every N days, weekly or monthly. Use Time to give it a window (morning, afternoon, evening) or a specific time.",
             "# Rewards",
             "- Effort S / M / L / XL gives 10 / 25 / 60 / 120 XP, 1 / 2 / 4 / 8 Energy and 2 / 5 / 12 / 24 Coins.",
+            "- Pick the size by how long the task takes you: S is about 10 minutes (a quick errand), M about 25 minutes, L about an hour, XL about two hours or a big chunk of your morning. XP matches the Focus timer, which pays 1 XP per minute.",
             "- The XP goes to your lead friend (the first one in your party).",
             "- Streak bonus: +5% XP per consecutive completion of a recurring task (up to +50%), plus +2% per day of your overall streak (up to +20%).",
             "- Finish a timed task after its window has closed (within 2 hours) and you get half XP. Missing a recurring task completely resets its streak.",

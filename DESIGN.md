@@ -397,3 +397,10 @@ What mattered:
   position for the moved window edge. The mouse is captured while a button is held so a drag can leave the window.
 - Party order is set in the Friends tab with the < and > buttons (the first friend is the lead; the first three start battles).
   Cards show their place ("Party #2"). "Make lead" was replaced by these buttons.
+
+## 20. App icon and effort hints (v1.5)
+
+- The app icon (`src/platform/app.ico`, embedded through `app.rc`) is a friend on a pixel meadow in a rounded square, drawn
+  from the game's own sprite. Regenerate it with `gf_dump_sprite` and `tools/make_icon.py`. The tray icon uses the same icon.
+- The task form and guide give approximate times for the effort sizes: S about 10 minutes, M 25, L an hour, XL two hours
+  (XP matches the Focus timer's 1 XP per minute).

@@ -24,6 +24,8 @@ else()
 endif()
 
 # ---- Roster document generator (prints ROSTER.md from the game data)
+add_executable(gf_dump_sprite tools/dump_sprite.cpp)
+target_link_libraries(gf_dump_sprite PRIVATE gf_core)
 add_executable(gf_roster_doc tools/dump_roster.cpp)
 target_link_libraries(gf_roster_doc PRIVATE gf_core)
 
@@ -38,10 +40,13 @@ endif()
 
 # ---- Windows desktop app ----
 if(WIN32)
+    enable_language(RC)
     add_executable(GoalFriends WIN32
         src/platform/main.cpp
         src/platform/gfx.cpp
-        src/platform/ui.cpp)
+        src/platform/ui.cpp
+        src/platform/app.rc)
+    set_source_files_properties(src/platform/app.rc PROPERTIES OBJECT_DEPENDS ${CMAKE_SOURCE_DIR}/src/platform/app.ico)
     target_link_libraries(GoalFriends PRIVATE gf_core d2d1 dwrite shell32 user32 gdi32 ole32 uuid advapi32)
     target_compile_definitions(GoalFriends PRIVATE UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN)
     if(MSVC)
