@@ -168,17 +168,32 @@ void renderFrame(App& a) {
     const int pw = a.work.right - a.work.left;
     const float logicalW = static_cast<float>(pw) / a.scale;
     const float maxH = static_cast<float>(a.work.bottom - a.work.top) / a.scale;
-    const float logicalH = std::min(a.ui->desiredHeight(), maxH);
-    const int ph = static_cast<int>(logicalH * a.scale + 0.5f);
-    if (!a.gx.resize(pw, ph)) return;
-    a.gx.setScale(a.scale);
+    auto clearInput = [&a] {
+        a.in.pressed = false;
+        a.in.wheel = 0;
+        a.in.typed.clear();
+        a.in.paste.clear();
+        a.in.backspace = a.in.enter = a.in.escape = false;
+    };
 
     LARGE_INTEGER q0, q1, q2, qf;
     QueryPerformanceFrequency(&qf);
     QueryPerformanceCounter(&q0);
-    if (!a.gx.begin()) return;
-    a.ui->frame(a.gx, logicalW, logicalH, a.in, dt, static_cast<long long>(nowMs), localNow());
-    a.gx.end();
+    int ph = 0;
+    // A click can open or close a panel in the middle of a frame, which changes the window height. Draw that frame again
+    // at the new height right away instead of presenting a stale one and resizing on the next timer tick (that was the jitter).
+    for (int pass = 0; pass < 2; ++pass) {
+        const float logicalH = std::min(a.ui->desiredHeight(), maxH);
+        ph = static_cast<int>(logicalH * a.scale + 0.5f);
+        if (!a.gx.resize(pw, ph)) return;
+        a.gx.setScale(a.scale);
+        if (!a.gx.begin()) return;
+        a.ui->frame(a.gx, logicalW, logicalH, a.in, pass == 0 ? dt : 0.0, static_cast<long long>(nowMs), localNow());
+        a.gx.end();
+        const float after = std::min(a.ui->desiredHeight(), maxH);
+        if (pass == 1 || static_cast<int>(after * a.scale + 0.5f) == ph) break;
+        clearInput();   // the click was already used by the first pass
+    }
     QueryPerformanceCounter(&q1);
 
     HDC screen = GetDC(nullptr);
@@ -205,11 +220,7 @@ void renderFrame(App& a) {
         }
     }
 
-    a.in.pressed = false;
-    a.in.wheel = 0;
-    a.in.typed.clear();
-    a.in.paste.clear();
-    a.in.backspace = a.in.enter = a.in.escape = false;
+    clearInput();
 
     const bool open = a.ui->panelOpen();
     if (open != a.panelWasOpen) {
