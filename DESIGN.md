@@ -1,7 +1,7 @@
-# Goal Friends — Design Doc (draft v0.8)
+# Goal Friends — Design Doc (draft v0.9)
 
 _Status: working prototype built (see section 11). Personal use, Windows laptop, native C++.
-Companion file: [ROSTER.md](ROSTER.md) (48 creatures and their moves)._
+Companion file: [ROSTER.md](ROSTER.md) (150 creatures and their moves)._
 
 A creature-collector that lives as a slim strip along the bottom of your screen. **Real-life tasks are the
 only way to progress.** You can't grind in-game: tasks give you XP, Energy and Coins, and you spend
@@ -84,7 +84,7 @@ Rewards and streaks:
 - Each friend has: **base stats** (HP, ATK, DEF, SPD), **level** (1 to 50) and **exactly 4 unique moves**.
 - Moves are unique to each creature, including between evolution stages (an evolved form has its own 4 moves).
 - **Evolution:** 3-stage lines at levels 16 and 32, 2-stage lines at level 20. Six single-stage rares.
-- **Roster:** 48 friends, listed in [ROSTER.md](ROSTER.md): 3 starter lines, 13 two-stage lines, one extra three-stage line and 10 rares.
+- **Roster:** 150 friends, listed in [ROSTER.md](ROSTER.md): 3 starter lines, 31 two-stage lines, 18 three-stage lines in total and 34 rares.
 - **Stat growth:** `stat = base * (1 + 0.06 * (level - 1))` plus a small flat bonus (tuned in balancing).
 
 **Getting friends:**
@@ -318,3 +318,15 @@ pixel = 2 logical px, snapped to whole device pixels so it stays crisp at 125% a
 - a repeating 8-column blade pattern on the top edge, tiny tufts laid out in offset (brick-like) rows, and sparse flowers by day. `kTuftStyle` in `drawGround` switches between five textures
 - a palette that blends smoothly through dawn, day, noon, dusk and night (no soil, no stones)
 - friends are drawn at the same pixel size as the ground, with an oval shadow on the grid
+
+## 14. Roster of 150 (v0.9)
+
+- 102 new friends (Dex 49 to 150), 408 new unique moves (600 in total), all assigned to battle areas.
+- They come from `tools/gen_roster.py`: creative content (names, concepts, stats, areas, sprite parts, rare move sets) is
+  written by hand there; roles (swarm, tank, support, controller, ...) expand into balanced four-move kits that scale by
+  evolution stage. The generator checks that no move name repeats.
+- Sprites use a parts system (`sprite_gen.inc`): a body shape per evolution stage plus themed parts (horns, wings, tails,
+  crests, shells, lanterns, scythes, ...), so each new line looks like what it does.
+- Balance check over 6000 simulated battles: mean 50%, standard deviation about 10 points, strongest friend at 76%. Win
+  rate rises with evolution stage, as intended.
+- The Dex scrolls.

@@ -113,7 +113,7 @@ struct Species {
 
 struct Stats { int hp, atk, def, spd; };
 
-constexpr int kSpeciesCount = 48;
+constexpr int kSpeciesCount = 150;
 constexpr int kMaxLevel = 50;
 constexpr int kPartySize = 6;
 constexpr int kActiveSlots = 3;

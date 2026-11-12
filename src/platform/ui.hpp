@@ -124,7 +124,7 @@ private:
 
     // friends / dex
     int selFriend_ = -1, selDex_ = -1;
-    float scrollFriends_ = 0;
+    float scrollFriends_ = 0, scrollDex_ = 0;
 
     // focus
     bool focusRunning_ = false;

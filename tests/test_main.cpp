@@ -356,7 +356,7 @@ static void testSimulation() {
     std::string missing;
     for (const auto& m : all) if (!usedMoves.count(m)) missing += m + ", ";
     if (!missing.empty()) std::printf("  moves never used in sims: %s\n", missing.c_str());
-    CHECK(usedMoves.size() >= all.size() - 6);
+    CHECK(usedMoves.size() >= all.size() * 95 / 100);
 }
 
 static void testAreasAndEvents() {

@@ -896,17 +896,24 @@ void Ui::drawDex(const Rect& b) {
     int owned = 0;
     for (int i = 0; i < gf::kSpeciesCount; ++i) if (g_.dexOwned.count(i)) ++owned;
     gx_->text("Discovered " + std::to_string(owned) + " / " + std::to_string(gf::kSpeciesCount) + " friends", b.x, b.y - 2, 400, 22, 14, kAccent, TF_BOLD);
-    const float gy0 = b.y + 24;
+    const float gy0 = b.y + 24, gridH = b.h - 24;
+    const int rowsN = (gf::kSpeciesCount + cols - 1) / cols;
+    const float content = static_cast<float>(rowsN) * (ch + gap);
+    if (hover(b.x, gy0, cols * (cw + gap), gridH)) scrollDex_ -= in_->wheel * 48;
+    scrollDex_ = std::clamp(scrollDex_, 0.f, std::max(0.f, content - gridH));
+    gx_->pushClip(b.x, gy0, cols * (cw + gap), gridH);
     for (int i = 0; i < gf::kSpeciesCount; ++i) {
-        const float x = b.x + static_cast<float>(i % cols) * (cw + gap), y = gy0 + static_cast<float>(i / cols) * (ch + gap);
+        const float x = b.x + static_cast<float>(i % cols) * (cw + gap), y = gy0 + static_cast<float>(i / cols) * (ch + gap) - scrollDex_;
+        if (y + ch < gy0 || y > gy0 + gridH) continue;
         const bool own = g_.dexOwned.count(i) > 0, seen = own || g_.dexSeen.count(i) > 0;
         card(x, y, cw, ch, i == selDex_ ? kCard2 : kCard);
         if (i == selDex_) gx_->strokeRect(x, y, cw, ch, kAccent, 2, 8);
         gx_->sprite(seen ? gfx::SpriteKind::Species : gfx::SpriteKind::Silhouette, i, 0, false, x + (cw - 48) / 2, y + 3, 48);
         gx_->text(seen ? gf::species(i).name : "???", x, y + 52, cw, 18, 11, own ? kText : kDim, TF_CENTER | TF_BOLD);
         gx_->text(own ? "owned" : seen ? "seen" : "", x, y + 66, cw, 16, 10, own ? kGreen : kDim, TF_CENTER);
-        if (hover(x, y, cw, ch) && in_->pressed && !consumed_ && !blocked_) { consumed_ = true; selDex_ = i; }
+        if (hover(x, y, cw, ch) && in_->my >= gy0 && in_->my < gy0 + gridH && in_->pressed && !consumed_ && !blocked_) { consumed_ = true; selDex_ = i; }
     }
+    gx_->popClip();
     const float dx = b.x + cols * (cw + gap) + 14, dw = b.w - cols * (cw + gap) - 14;
     if (selDex_ >= 0) {
         const bool seen = g_.dexOwned.count(selDex_) || g_.dexSeen.count(selDex_);

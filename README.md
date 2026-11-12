@@ -18,7 +18,7 @@ What's in it:
 - Focus sessions (15 / 25 / 45 min, plus a 1-minute test) that lock the rest of the app while they run and award Energy
   when they finish (no popup: the Battle button pulses)
 - Shop (Eggs hatch after 5 completed tasks; Catch Charms), party of 6 plus a Box, dex of 31 friends
-- 48 friends with 192 unique moves and ability-themed pixel art
+- 150 friends with 600 unique moves and ability-themed pixel art
 - Triple battles: 6-friend teams, 3 active at once, cooldowns and 20+ status effects, wild encounters, trainer
   duels and a streak-unlocked boss, AI opponents. Turns replay step by step with health bars, floating damage numbers
   and a log (Skip / Speed buttons)
@@ -54,6 +54,12 @@ cmake -S . -B build -G Ninja && cmake --build build && ./build/gf_tests
 
 That runs unit tests (recurrence, streaks, rewards, reminders, saving) and 1500 simulated AI-vs-AI battles across
 the whole roster to catch crashes and degenerate loops.
+
+## Roster generator
+
+Friends 49 to 150 come from `tools/gen_roster.py` (Python 3, no dependencies). Edit the tables in that file and run
+`python3 tools/gen_roster.py` from the repo root to regenerate `src/core/roster_ext.inc` and `src/core/sprite_lines.inc`.
+The generator refuses to run if two moves share a name.
 
 ## Diagnostics
 

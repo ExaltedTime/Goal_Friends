@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "data.hpp"
+#include "sprite_gen.hpp"
 
 namespace gf {
 namespace {
@@ -571,16 +572,29 @@ const LineInfo& lineInfo(int line) {
 
 }  // namespace
 
+#include "sprite_gen.inc"
+
 Sprite makeSprite(int speciesId, int frame) {
     const Species& sp = species(speciesId);
-    const LineInfo& li = lineInfo(sp.line);
     Cv c;
     int eyeY = 12, eyeA = 8;
-    li.paint(c, sp.stage, frame, li.pal, eyeY, eyeA);
+    Pal pal;
+    int eyeStyle = 0;
+    if (sp.line >= 27) {
+        const GenLine& gl = genLine(sp.line - 27);
+        paintGeneric(c, sp.stage, frame, gl, eyeY, eyeA);
+        pal = gl.pal;
+        eyeStyle = gl.eyeStyle;
+    } else {
+        const LineInfo& li = lineInfo(sp.line);
+        li.paint(c, sp.stage, frame, li.pal, eyeY, eyeA);
+        pal = li.pal;
+        eyeStyle = li.eyeStyle;
+    }
 
     // Outline: darken the border of the painted shape.
     std::vector<u32> out = c.p;
-    const u32 dark = mul(mix(li.pal.body, rgb(20, 14, 30), 0.65), 1.0);
+    const u32 dark = mul(mix(pal.body, rgb(20, 14, 30), 0.65), 1.0);
     for (int y = 0; y < N; ++y)
         for (int x = 0; x < N; ++x) {
             if (c.get(x, y) != 0) continue;
@@ -590,8 +604,8 @@ Sprite makeSprite(int speciesId, int frame) {
         }
     c.p = out;
     // Eyes go on top of the outline.
-    const int style = (frame == 1 && (speciesId % 3) != 0 && li.eyeStyle != 3) ? 1 : li.eyeStyle;
-    eyes(c, eyeA, eyeY, style, li.pal.accent2);
+    const int style = (frame == 1 && (speciesId % 3) != 0 && eyeStyle != 3) ? 1 : eyeStyle;
+    eyes(c, eyeA, eyeY, style, pal.accent2);
 
     Sprite s;
     s.px = c.p;  // opaque or fully transparent, so premultiplication is a no-op
