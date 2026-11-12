@@ -2,7 +2,7 @@
 
 A creature collector that lives as a slim strip along the bottom of your screen. **Real-life tasks are the only
 way to progress**: finishing tasks (and focus sessions) earns XP, Energy and Coins, which you spend on levelling
-friends, hatching eggs, and strategic 3v3 battles.
+friends, hatching eggs, and strategic triple battles.
 
 See [DESIGN.md](DESIGN.md) for the design and [ROSTER.md](ROSTER.md) for all 31 friends and their moves.
 
@@ -15,10 +15,15 @@ What's in it:
 - One-off and recurring tasks (daily, chosen weekdays, every N days, weekly, monthly), time windows, grace period,
   per-task streaks, reminders as tray notifications with nudges, snooze and quiet hours (22:00 to 08:00)
 - XP, levels (1 to 50), evolution, Energy, Coins, global streak, "sleepy" friends after a missed day
-- Focus sessions (15 / 25 / 45 min, plus a 1-minute test) that award Energy and open the battle screen when they finish
+- Focus sessions (15 / 25 / 45 min, plus a 1-minute test) that lock the rest of the app while they run and award Energy
+  when they finish (no popup: the Battle button pulses)
 - Shop (Eggs hatch after 5 completed tasks; Catch Charms), party of 6 plus a Box, dex of 31 friends
+- 48 friends with 192 unique moves and ability-themed pixel art
 - Triple battles: 6-friend teams, 3 active at once, cooldowns and 20+ status effects, wild encounters, trainer
-  duels and a streak-unlocked boss, AI opponents
+  duels and a streak-unlocked boss, AI opponents. Turns replay step by step with health bars, floating damage numbers
+  and a log (Skip / Speed buttons)
+- Six battle areas with their own friends, level bonus and coin multiplier, unlocked by winning battles
+- A Guide tab explaining everything in the app
 - JSON save in `%APPDATA%\GoalFriends\save.json`
 
 ## Build with Visual Studio 2022
@@ -36,7 +41,8 @@ cmake --build build --config Release
 build\Release\GoalFriends.exe
 ```
 
-Quit from the tray icon (right-click > Quit). Closing the strip with the tray's *Hide* keeps reminders running.
+Quit from the tray icon (right-click > Quit). **Ctrl+Shift+Ô** (or the tray icon) hides and shows the window;
+reminders keep working while it is hidden.
 
 ## Tests
 

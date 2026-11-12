@@ -1,6 +1,6 @@
-# Goal Friends — Roster Draft (v0.2)
+# Goal Friends — Roster (v0.3)
 
-31 friends, original designs inspired by Pokémon. **No types.** Each has 4 unique moves (no move name is
+48 friends (31 original + 17 added in v0.3), original designs inspired by Pokémon. **No types.** Each has 4 unique moves (no move name is
 reused). Effect keywords (Wound, Daze, Armor, Charge, ...) are defined in [DESIGN.md](DESIGN.md) section 5.
 
 Stat pips are relative (1 = low, 5 = high): HP / ATK / DEF / SPD.
@@ -242,3 +242,45 @@ Evolution: 3-stage lines evolve at levels 16 and 32. 2-stage lines evolve at lev
 - **Triples:** support friends (Dewdrip/Tidalisk, Glimmerling/Prismaw) gain a lot of value from [Ally] moves. Spread moves are priced at -25% damage.
 - **To check in balance sims:** Evade-heavy kits (Zephox, Dusklady, Cyclonix), Counter loops (Boulderon vs Molten Guard), and Anarchy resetting everything.
 - **Names and designs are placeholders.** Easy to rename or swap any friend or move.
+
+
+---
+
+## Expansion (ids 31 to 47)
+
+Each new friend also lives in one or two battle areas (see below). Move details are shown in the in-game Dex and
+Friends tab; this is the overview. The sprites are generated from a per-line motif (mushroom cap, clam shell, gear,
+curled horns, ...) so each friend looks like what it does.
+
+| # | Friend | Stage | Role | Moves |
+|---|---|---|---|---|
+| 32 | Sporeling | 1 of 2 | Fungus control | Cap Bonk, Spore Puff (spread Daze), Rot Touch (Wound 3), Mulch Meal (heal + Regen) |
+| 33 | Mycelord | 2 of 2 | Poison support | Toadstool Slam, Choking Cloud (spread Wound), Fungal Network (ally Regen + Shield), Parasite Bloom (Wound + leech) |
+| 34 | Sandpup | 1 of 2 | Evasive harasser | Sand Kick, Dust Devil (Evade + Haste), Quicksand Snap (Slow), Sinkhole Ambush (dodging charge) |
+| 35 | Dunewyrm | 2 of 2 | Trapper | Sandstorm (spread Daze 2), Mirage Coil (Evade + Armor), Constrict (Trap), Serpent Dance (ally Haste + Focus) |
+| 36 | Cogpup | 1 of 2 | Clockwork tempo | Wrench Whack, Oil Slick (Slow foe, Haste self), Tighten Bolts (Armor + Focus), Spring Dash (Priority) |
+| 37 | Gearhound | 2 of 2 | Empowered bruiser | Piston Punch (ignores DEF), Overclock (ATK + SPD up), Gear Grind (DEF down), Safety Shell (Shield + Cleanse) |
+| 38 | Pearlclam | 1 of 2 | Shell support | Shell Tap, Clam Up (Armor + Shield), Pearl Shot (Daze), Tide Pool (ally heal + Regen) |
+| 39 | Pearlarch | 2 of 2 | Thorny wall | Pearl Barrage (3 random hits), Iron Shell (Armor + Thorns), Riptide Slam (force switch), Lustrous Veil (ally Shield + Cleanse) |
+| 40 | Cragoat | 1 of 2 | Ram | Head Butt (recoil), Mountain Leap (dodging charge), Horn Lock (Trap), Steady Footing (Armor + Cleanse) |
+| 41 | Summitaur | 2 of 2 | Heavy charger | Avalanche Charge, Thunderhoof (spread Daze), Cliffside Stance (strong Counter), Summit Roar (spread Slow + ATK up) |
+| 42 | Finlet | 1 of 3 | Tempo support | Flick Splash, Tidal Dart (Priority), Bubble Net (Trap), Schooling (ally Haste + Regen) |
+| 43 | Reefray | 2 of 3 | Glider | Stingray Lash (Wound), Glide Away (Evade + Haste), Electro Pulse (spread Daze), Coral Wall (ally Armor + Shield) |
+| 44 | Leviathor | 3 of 3 | Sea power | Abyssal Crush (Slow), Maelstrom (spread force-switch), Deep Current (ally Regen + Cleanse), Kraken's Grasp (Trap + Wound) |
+| 45 | Eclipsa | Rare | Curse and evasion | Crescent Slash (Mark), Lunar Eclipse (spread Daze + Slow), Dusk Step (Evade + Haste + Priority next), Starlit Hex (Doom + Mark) |
+| 46 | Mossback | Rare | Regrowing wall | Shell Bash, Garden Grows (ally Regen + Shield), Root Snare (Trap + Slow), Sunbaked Rest (big heal) |
+| 47 | Hailwing | Rare | Spread control | Frost Gust (spread Slow), Hailstorm (3 random hits, chance of Slow), Wind Chill Dive (dodging charge), Jet Stream (ally Haste + Focus) |
+| 48 | Magmaroth | Rare | Lava bruiser | Magma Fist (Wound), Molten Carapace (Armor + Thorns), Eruption (spread Wound), Obsidian Rage (self-cost power-up) |
+
+(The # column is the Dex number, starting at 1.)
+
+## Battle areas
+
+| Area | Needs | Level bonus | Coins | Friends found there |
+|---|---|---|---|---|
+| Sunny Meadow | start | +0 | x1.0 | Mossling, Zapling, Cindrel lines, Dewdrip, Gustling, Burrowby, Sandpup lines |
+| Whispering Woods | 3 wins | +1 | x1.2 | Mossling, Gloomoth, Sangrebat, Sporeling lines, Eclipsa, Mossback |
+| Echo Caverns | 8 wins | +2 | x1.4 | Pebblet, Glimmerling, Burrowby, Sandpup, Cogpup lines, Ironmite, Sangrebat, Magmaroth |
+| Sapphire Shore | 14 wins | +3 | x1.6 | Dewdrip, Mirrorat, Pearlclam, Finlet lines, Mimicube, Mossback |
+| Stormcrest Peaks | 22 wins | +4 | x1.8 | Zapling, Pebblet, Gustling, Frostwisp, Cragoat lines, Hailwing, Ashenfeather |
+| Ember Ruins | 32 wins | +6 | x2.2 | Cindrel, Gloomoth, Glimmerling, Mirrorat, Cogpup lines, Chronowl, Kaleidra, Eclipsa, Mimicube, Magmaroth |

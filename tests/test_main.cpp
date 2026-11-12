@@ -271,13 +271,14 @@ static void testBattleFlow() {
     GameState g = fresh(38000);
     std::unique_ptr<Battle> b;
     std::string why;
-    CHECK(!startBattle(g, BattleMode::Wild, T(38000), b, why));  // no energy
+    CHECK(!startBattle(g, BattleMode::Wild, 0, T(38000), b, why));  // no energy
     g.energy = 10;
-    CHECK(startBattle(g, BattleMode::Wild, T(38000), b, why) && g.energy == 9);
+    CHECK(startBattle(g, BattleMode::Wild, 0, T(38000), b, why) && g.energy == 9);
+    CHECK(b->sides[1].team.size() == 1);  // one friend in the party: one wild foe
     CHECK(b && b->wild);
-    CHECK(!startBattle(g, BattleMode::Boss, T(38000), b, why));  // locked
+    CHECK(!startBattle(g, BattleMode::Boss, 0, T(38000), b, why));  // locked
     g.globalStreak = 3;
-    CHECK(startBattle(g, BattleMode::Boss, T(38000), b, why) && g.energy == 4 && b->smartAi);
+    CHECK(startBattle(g, BattleMode::Boss, 0, T(38000), b, why) && g.energy == 4 && b->smartAi);
     // Force a win and check the boss reward.
     for (auto& f : b->sides[1].team) f.hp = 0;
     b->sides[1].active = {-1, -1, -1};
@@ -292,7 +293,7 @@ static void testBattleFlow() {
     s.everActive = true;
     s.lastActiveDay = 38990;
     s.energy = 5;
-    CHECK(startBattle(s, BattleMode::Wild, T(39000), b, why));
+    CHECK(startBattle(s, BattleMode::Wild, 0, T(39000), b, why));
     CHECK(b->sides[0].team[0].sleepy);
 }
 
@@ -358,6 +359,62 @@ static void testSimulation() {
     CHECK(usedMoves.size() >= all.size() - 6);
 }
 
+static void testAreasAndEvents() {
+    // Every area has enough local friends at low and high levels, and a locked area refuses to start.
+    for (int a = 0; a < kAreaCount; ++a) {
+        int common = 0, rares = 0;
+        for (const auto& sp : allSpecies())
+            if (sp.habitats & area(a).habitat) (sp.rare ? rares : common)++;
+        CHECK(common >= 4);
+        CHECK(area(a).habitat == (1 << a));
+    }
+    GameState g = fresh(40000);
+    g.energy = 50;
+    std::unique_ptr<Battle> b;
+    std::string why;
+    CHECK(areaUnlocked(g, 0) && !areaUnlocked(g, 1));
+    CHECK(!startBattle(g, BattleMode::Wild, 1, T(40000), b, why));
+    CHECK(g.energy == 50);  // a refused start costs nothing
+    g.battlesWon = 100;
+    for (int a = 0; a < kAreaCount; ++a) {
+        for (int i = 0; i < 20; ++i) {
+            g.energy = 50;
+            CHECK(startBattle(g, BattleMode::Duel, a, T(40000), b, why));
+            for (const auto& f : b->sides[1].team) CHECK((f.sp().habitats & area(a).habitat) != 0);
+        }
+        CHECK(g.lastArea == a);
+    }
+    // Harder areas pay more.
+    std::vector<Fighter> mine = {makeFighter(0, 10)}, foe = {makeFighter(9, 10)};
+    GameState pay = fresh(41000);
+    Battle w0(mine, foe, 1), w5(mine, foe, 1);
+    w0.winner = w5.winner = 0;
+    w5.areaId = 5;
+    const int c0 = (finishBattle(pay, w0, BattleMode::Duel), pay.coins);
+    const int c5 = (finishBattle(pay, w5, BattleMode::Duel), pay.coins - c0);
+    CHECK(c5 > c0 - 20);  // Ruins coin multiplier (2.2x) outweighs the starting 20 coins already counted in c0
+
+    // Event recording: every log line has a snapshot, and the last one matches the live state.
+    std::vector<Fighter> pa = {makeFighter(3, 12), makeFighter(0, 12), makeFighter(6, 12)};
+    std::vector<Fighter> pb = {makeFighter(9, 12), makeFighter(11, 12), makeFighter(13, 12)};
+    Battle bt(pa, pb, 5);
+    bt.recordEvents = true;
+    std::array<Action, 3> act{};
+    for (int k = 0; k < 3; ++k) { act[static_cast<size_t>(k)].type = Action::UseMove; act[static_cast<size_t>(k)].move = 0; act[static_cast<size_t>(k)].target = {1, 0}; }
+    bt.resolveTurn(act);
+    CHECK(!bt.events.empty());
+    CHECK(bt.events.size() + 1 == bt.log.size());  // the constructor's first line predates recording
+    const Snapshot& last = bt.events.back().snap;
+    bool same = true;
+    for (int s = 0; s < 2; ++s)
+        for (size_t i = 0; i < bt.sides[static_cast<size_t>(s)].team.size(); ++i)
+            same = same && last.team[static_cast<size_t>(s)][i].hp == bt.sides[static_cast<size_t>(s)].team[i].hp;
+    CHECK(same);
+    bool anyActor = false;
+    for (const auto& e : bt.events) anyActor = anyActor || e.actor.side >= 0;
+    CHECK(anyActor);
+}
+
 static void testSprites() {
     std::set<std::vector<uint32_t>> seen;
     for (int i = 0; i < kSpeciesCount; ++i) {
@@ -369,7 +426,7 @@ static void testSprites() {
         seen.insert(s0.px);
     }
     CHECK(seen.size() == static_cast<size_t>(kSpeciesCount));
-    CHECK(makeSilhouette(makeSprite(0, 0)).px.size() == 256);
+    CHECK(makeSilhouette(makeSprite(0, 0)).px.size() == static_cast<size_t>(kSpriteSize * kSpriteSize));
     CHECK(makeEggSprite(0).px != makeEggSprite(1).px);
 }
 
@@ -381,7 +438,7 @@ static void testData() {
         for (const auto& m : s.moves) { CHECK(!m.name.empty()); moveNames.insert(m.name); }
         if (s.evolvesTo >= 0) CHECK(species(s.evolvesTo).stage == s.stage + 1);
     }
-    CHECK(moveNames.size() == 124);
+    CHECK(moveNames.size() == static_cast<size_t>(kSpeciesCount) * 4);
     CHECK(starterSpecies().size() == 3);
     CHECK(xpToNext(1) == 20 && xpToNext(10) > xpToNext(5));
 }
@@ -392,7 +449,7 @@ int main() {
         {"streaks+sleepy", testStreaksAndSleepy}, {"late", testLate}, {"reminders", testReminders},
         {"eggs+evolution", testEggsAndEvolution}, {"shop+party", testShopAndParty}, {"save/load", testSaveLoad},
         {"battle basics", testBattleBasics}, {"switch+catch", testSwitchAndCatch}, {"battle flow", testBattleFlow},
-        {"sprites", testSprites}, {"simulation", testSimulation},
+        {"areas+events", testAreasAndEvents}, {"sprites", testSprites}, {"simulation", testSimulation},
     };
     for (auto& t : tests) {
         const int before = g_failures;

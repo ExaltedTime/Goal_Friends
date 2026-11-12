@@ -275,6 +275,7 @@ void Ui::frame(gfx::Gfx& gx, float W, float H, Input& in, double dt, long long n
     gx_ = &gx; in_ = &in; W_ = W; H_ = H; nowMs_ = nowMs; now_ = now;
     consumed_ = false; blocked_ = false; fieldClicked_ = false;
     animT_ += static_cast<float>(dt);
+    dt_ = static_cast<float>(dt);
     if (nagSeconds_ > 0) nagSeconds_ -= static_cast<float>(dt);
 
     if (!g_.started && tab_ == Tab::None) tab_ = Tab::Start;
@@ -284,11 +285,13 @@ void Ui::frame(gfx::Gfx& gx, float W, float H, Input& in, double dt, long long n
         focusRunning_ = false;
         const gf::Result r = gf::completeFocus(g_, focusMinutes_, now_);
         for (const auto& m : r.messages) toast(m);
-        balloon("Focus session complete! Time for a battle?");
+        balloon("Focus session complete! Your friends are ready for a battle whenever you are.");
         focusDone_ = focusMinutes_;
+        battleReady_ = true;  // no popup: the Battle button pulses instead
         dirty_ = true;
-        tab_ = Tab::Battle;
     }
+    // During a focus session only the Focus tab is reachable.
+    if (focusRunning_ && tab_ != Tab::None && tab_ != Tab::Focus) tab_ = Tab::Focus;
     for (auto& t : toasts_) t.life -= static_cast<float>(dt);
     toasts_.erase(std::remove_if(toasts_.begin(), toasts_.end(), [](const Toast& t) { return t.life <= 0; }), toasts_.end());
 
@@ -317,20 +320,88 @@ void Ui::frame(gfx::Gfx& gx, float W, float H, Input& in, double dt, long long n
 // World strip
 // ---------------------------------------------------------------------------
 
+void Ui::drawGround(float gy, float gh) {
+    auto hsh = [](unsigned x) { x ^= x >> 16; x *= 0x7feb352du; x ^= x >> 15; x *= 0x846ca68bu; x ^= x >> 16; return x; };
+    const double hour = now_.minute / 60.0;
+    const bool night = hour < 6 || hour >= 20, dusk = !night && (hour < 8 || hour >= 18);
+    gfx::Color soilTop, soilBot, gA, gB, gC;
+    if (night) { soilTop = rgba(40, 52, 78); soilBot = rgba(20, 24, 42); gA = rgba(52, 96, 96); gB = rgba(66, 116, 108); gC = rgba(38, 74, 84); }
+    else if (dusk) { soilTop = rgba(128, 108, 84); soilBot = rgba(82, 62, 56); gA = rgba(160, 156, 88); gB = rgba(188, 170, 98); gC = rgba(130, 134, 78); }
+    else { soilTop = rgba(104, 158, 88); soilBot = rgba(112, 84, 60); gA = rgba(88, 172, 84); gB = rgba(124, 200, 102); gC = rgba(62, 140, 72); }
+    auto lerp = [](gfx::Color a, gfx::Color b, float t) { return gfx::Color{a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1.f}; };
+
+    // translucent layered soil
+    const int bands = 7;
+    const float bh = (gh - 3) / bands;
+    for (int i = 0; i < bands; ++i) {
+        const float t = static_cast<float>(i) / (bands - 1);
+        gx_->fillRect(0, gy + 3 + static_cast<float>(i) * bh, W_, bh + 1, gfx::withAlpha(lerp(soilTop, soilBot, t), 0.36f + 0.22f * t));
+    }
+    // dirt speckles and pebbles
+    for (float x = 0; x < W_; x += 9) {
+        const unsigned h = hsh(static_cast<unsigned>(x) * 7 + 3);
+        const float y = gy + 12 + static_cast<float>(h % static_cast<unsigned>(gh - 16));
+        const bool light = (h >> 8) & 1;
+        gx_->fillRect(x + static_cast<float>((h >> 4) % 6), y, 2, 2, light ? rgba(255, 255, 255, 40) : rgba(0, 0, 0, 55));
+    }
+    for (float x = 20; x < W_; x += 83) {
+        const unsigned h = hsh(static_cast<unsigned>(x) * 13 + 5);
+        const float px = x + static_cast<float>(h % 40), py = gy + 16 + static_cast<float>((h >> 6) % static_cast<unsigned>(gh - 24));
+        gx_->fillEllipse(px, py, 3.f + static_cast<float>(h % 3), 2.f, rgba(150, 150, 160, 120));
+        gx_->fillEllipse(px - 1, py - 1, 1.5f, 1.f, rgba(220, 220, 230, 110));
+    }
+    // soft shadow under the grass line
+    gx_->fillRect(0, gy + 3, W_, 5, rgba(0, 0, 0, 38));
+
+    // bushes
+    for (float x = 140; x < W_; x += 263) {
+        const unsigned h = hsh(static_cast<unsigned>(x) * 31 + 9);
+        const float bx = x + static_cast<float>(h % 80);
+        const gfx::Color bc = night ? rgba(34, 64, 66, 215) : rgba(52, 126, 66, 215);
+        gx_->fillEllipse(bx, gy + 1, 15, 9, bc);
+        gx_->fillEllipse(bx - 9, gy + 3, 9, 6, gfx::withAlpha(lerp(bc, gB, 0.2f), 0.85f));
+        gx_->fillEllipse(bx + 10, gy + 3, 9, 6, bc);
+        gx_->fillEllipse(bx - 3, gy - 3, 5, 3, rgba(255, 255, 255, 40));
+    }
+    // grass tufts along the edge
+    for (float x = -2; x < W_; x += 4) {
+        const unsigned h = hsh(static_cast<unsigned>(x + 5) * 17);
+        const float height = 4.f + static_cast<float>(h % 7);
+        const gfx::Color c = (h >> 5) % 3 == 0 ? gA : (h >> 5) % 3 == 1 ? gB : gC;
+        const float lean = static_cast<float>(static_cast<int>((h >> 9) % 3) - 1);
+        gx_->fillRect(x, gy - height + 4, 2, height, gfx::withAlpha(c, 0.92f));
+        gx_->fillRect(x + lean, gy - height + 2, 2, 3, gfx::withAlpha(c, 0.92f));
+        if ((h >> 12) % 5 == 0) gx_->fillRect(x + 2, gy - height + 6, 1, height - 3, gfx::withAlpha(gB, 0.8f));
+    }
+    // flowers by day
+    if (!night) {
+        const gfx::Color petals[] = {rgba(255, 120, 150), rgba(255, 226, 90), rgba(255, 255, 255), rgba(170, 140, 255)};
+        for (float x = 30; x < W_; x += 97) {
+            const unsigned h = hsh(static_cast<unsigned>(x) * 23 + 1);
+            const float fx = x + static_cast<float>(h % 60);
+            gx_->fillRect(fx, gy - 7, 1, 8, rgba(60, 130, 60, 230));
+            const gfx::Color pc = petals[(h >> 4) % 4];
+            gx_->fillRect(fx - 2, gy - 10, 2, 2, pc); gx_->fillRect(fx + 1, gy - 10, 2, 2, pc);
+            gx_->fillRect(fx - 1, gy - 12, 2, 2, pc); gx_->fillRect(fx - 1, gy - 8, 2, 2, pc);
+            gx_->fillRect(fx - 1, gy - 10, 2, 2, rgba(255, 210, 80));
+        }
+    } else {
+        // fireflies
+        for (int i = 0; i < 10; ++i) {
+            const unsigned h = hsh(static_cast<unsigned>(i) * 977 + 11);
+            const float fx = static_cast<float>(h % static_cast<unsigned>(std::max(1.f, W_)));
+            const float fy = gy - 10.f - static_cast<float>((h >> 10) % 50) + std::sin(animT_ * 1.3f + static_cast<float>(i)) * 4.f;
+            const float a = 0.35f + 0.65f * std::max(0.f, std::sin(animT_ * 2.f + static_cast<float>(i) * 1.7f));
+            gx_->fillEllipse(fx, fy, 5, 5, rgba(255, 240, 120, static_cast<int>(40 * a)));
+            gx_->fillEllipse(fx, fy, 1.6f, 1.6f, rgba(255, 250, 170, static_cast<int>(255 * a)));
+        }
+    }
+}
+
 void Ui::drawWorld(float dt) {
     const float gh = 54.f, gy = H_ - gh;
-    const double hour = now_.minute / 60.0;
-    // Day/night tint for the ground.
-    gfx::Color ground = rgba(74, 150, 86), grass = rgba(110, 190, 100);
-    if (hour < 6 || hour >= 20) { ground = rgba(30, 44, 70); grass = rgba(44, 66, 100); }
-    else if (hour < 8 || hour >= 18) { ground = rgba(110, 100, 90); grass = rgba(150, 140, 100); }
-    ground.a = 0.93f;
-    gx_->fillRect(0, gy, W_, gh, ground);
-    for (float x = 0; x < W_; x += 9) {
-        const float hgt = 3.f + static_cast<float>(static_cast<int>(x * 7) % 3);
-        gx_->fillRect(x, gy - hgt + 1, 5, hgt, grass);
-    }
-    gx_->fillRect(0, gy, W_, 3, grass);
+    drawGround(gy, gh);
+    const bool lock = locked();
 
     // Walkers follow the party.
     std::vector<int> ids = g_.party;
@@ -351,16 +422,15 @@ void Ui::drawWorld(float dt) {
         const gf::Friend* f = gf::findFriend(g_, w.friendId);
         if (!f) continue;
         const gf::Species& sp = gf::species(f->species);
-        const float sc = 2.6f + 0.4f * static_cast<float>(sp.stage);
-        const float size = 16 * sc;
+        const float size = sp.stage == 3 ? 72.f : 48.f;
         if (!sleepy) {
             if (w.pause > 0) w.pause -= dt;
             else {
                 w.x += w.dir * w.speed * dt;
                 if (w.x < 30) { w.x = 30; w.dir = 1; }
                 if (w.x > W_ - 40) { w.x = W_ - 40; w.dir = -1; }
-                if (std::fmod(animT_ + w.friendId, 7.f) < dt) { w.pause = 1.5f + static_cast<float>(w.friendId % 3); }
-                if (std::fmod(animT_ * 1.3f + w.friendId * 3, 11.f) < dt) w.dir = -w.dir;
+                if (std::fmod(animT_ + static_cast<float>(w.friendId), 7.f) < dt) { w.pause = 1.5f + static_cast<float>(w.friendId % 3); }
+                if (std::fmod(animT_ * 1.3f + static_cast<float>(w.friendId * 3), 11.f) < dt) w.dir = -w.dir;
             }
         }
         if (w.hop > 0 || w.hopV != 0) {
@@ -368,26 +438,30 @@ void Ui::drawWorld(float dt) {
             w.hop += w.hopV * dt;
             if (w.hop <= 0) { w.hop = 0; w.hopV = 0; }
         }
-        const int frame = sleepy ? 1 : static_cast<int>(animT_ * 2.5f + w.friendId) % 2;
+        const int frame = sleepy ? 1 : static_cast<int>(animT_ * 2.5f + static_cast<float>(w.friendId)) % 2;
         const float bob = sleepy ? 0.f : (frame ? 1.5f : 0.f);
-        const float sx = w.x - size / 2, sy = gy + 14 - size - bob - w.hop;
-        gx_->fillEllipse(w.x, gy + 13, size * 0.38f, 3.5f, rgba(0, 0, 0, 70));
-        gx_->sprite(gfx::SpriteKind::Species, f->species, frame, w.dir < 0, sx, sy, sc);
+        const float sx = w.x - size / 2, sy = gy + 12 - size - bob - w.hop;
+        gx_->fillEllipse(w.x, gy + 11, size * 0.36f, 3.5f, rgba(0, 0, 0, 70));
+        gx_->sprite(gfx::SpriteKind::Species, f->species, frame, w.dir < 0, sx, sy, size);
         if (sleepy) gx_->text("z z", w.x - 10, sy - 6, 40, 16, 12, kText, TF_BOLD);
-        if (!blocked_ && !consumed_ && in_->pressed && hover(sx, sy, size, size) && !(panel_.w > 0 && tab_ != Tab::None && hover(panel_.x, panel_.y, panel_.w, panel_.h))) {
+        if (!lock && !blocked_ && !consumed_ && in_->pressed && hover(sx, sy, size, size) && !(panel_.w > 0 && tab_ != Tab::None && hover(panel_.x, panel_.y, panel_.w, panel_.h))) {
             consumed_ = true;
             w.hopV = 190;
             w.hop = 0.01f;
             selFriend_ = w.friendId;
             tab_ = Tab::Friends;
         }
-        // Nag bubble on the lead friend when something is due.
+        // Nag bubble on the lead friend.
         if (w.friendId == lead && tab_ == Tab::None) {
             int due = 0;
             for (const auto& o : gf::occurrencesOn(g_, now_.day, now_.minute))
                 if (!o.done && !o.missed && now_.minute >= o.win.start) ++due;
-            if (due > 0 || nagSeconds_ > 0) {
-                const std::string t = due > 0 ? std::to_string(due) + " to do!" : "Hey!";
+            std::string t;
+            if (focusRunning_) t = "Stay focused!";
+            else if (battleReady_) t = "Battle time?";
+            else if (due > 0) t = std::to_string(due) + " to do!";
+            else if (nagSeconds_ > 0) t = "Hey!";
+            if (!t.empty()) {
                 const float bw = gx_->textWidth(t, 12, true) + 18;
                 const float by = sy - 26 + (std::sin(animT_ * 4) * 2);
                 gx_->fillRect(w.x - bw / 2, by, bw, 22, rgba(255, 255, 255, 235), 11);
@@ -396,21 +470,31 @@ void Ui::drawWorld(float dt) {
         }
     }
 
-    // HUD and buttons in the ground band.
+    // HUD on a soft dark pill so it stays readable on the translucent ground.
     std::string hud = "Energy " + std::to_string(g_.energy) + "   Coins " + std::to_string(g_.coins) + "   Streak " + std::to_string(g_.globalStreak) + "d";
     if (!g_.eggs.empty()) hud += "   Eggs " + std::to_string(g_.eggs.size());
-    gx_->text(hud, 14, gy + 6, 520, 20, 13, rgba(255, 255, 255), TF_BOLD);
+    const float hw = gx_->textWidth(hud, 13, true) + 22;
+    gx_->fillRect(8, gy + 6, hw, 22, rgba(10, 14, 24, 150), 11);
+    gx_->text(hud, 19, gy + 6, hw, 22, 13, rgba(255, 255, 255), TF_VCENTER | TF_BOLD);
+    std::string second;
+    gfx::Color secondCol = rgba(255, 255, 255, 235);
     if (focusRunning_) {
         const long long left = std::max(0LL, (focusEndMs_ - nowMs_) / 1000);
-        gx_->text("Focus " + two(static_cast<int>(left / 60)) + ":" + two(static_cast<int>(left % 60)), 14, gy + 28, 300, 20, 13, kAccent, TF_BOLD);
+        second = "Focus " + two(static_cast<int>(left / 60)) + ":" + two(static_cast<int>(left % 60)) + "  (everything else is locked)";
+        secondCol = kAccent;
     } else if (sleepy) {
-        gx_->text("Your friends are sleepy. Finish a task to wake them!", 14, gy + 28, 420, 20, 12, rgba(255, 255, 255, 220));
+        second = "Your friends are sleepy. Finish a task to wake them!";
+    }
+    if (!second.empty()) {
+        const float sw = gx_->textWidth(second, 12, true) + 22;
+        gx_->fillRect(8, gy + 31, sw, 20, rgba(10, 14, 24, 150), 10);
+        gx_->text(second, 19, gy + 31, sw, 20, 12, secondCol, TF_VCENTER | TF_BOLD);
     }
 
     struct TabBtn { Tab t; const char* label; };
-    const TabBtn tabs[] = {{Tab::Tasks, "Tasks"}, {Tab::Friends, "Friends"}, {Tab::Dex, "Dex"}, {Tab::Shop, "Shop"}, {Tab::Focus, "Focus"}, {Tab::Battle, "Battle"}};
-    const float bw = 78, bgap = 6;
-    float bx = W_ - (bw + bgap) * 6 - 6;
+    const TabBtn tabs[] = {{Tab::Tasks, "Tasks"}, {Tab::Friends, "Friends"}, {Tab::Dex, "Dex"}, {Tab::Shop, "Shop"}, {Tab::Focus, "Focus"}, {Tab::Battle, "Battle"}, {Tab::Guide, "Guide"}};
+    const float bw = 74, bgap = 5;
+    float bx = W_ - (bw + bgap) * 7 - 6;
     for (const auto& tb : tabs) {
         std::string label = tb.label;
         if (tb.t == Tab::Tasks) {
@@ -419,7 +503,17 @@ void Ui::drawWorld(float dt) {
             if (due > 0) label += " (" + std::to_string(due) + ")";
         }
         const bool active = tab_ == tb.t;
-        if (button(bx, gy + 12, bw, 30, label, active ? kAccent : rgba(40, 48, 70, 230), g_.started, 12) && g_.started) tab_ = active ? Tab::None : tb.t;
+        const bool enabled = g_.started && (!lock || tb.t == Tab::Focus);
+        gfx::Color col = active ? kAccent : rgba(40, 48, 70, 225);
+        if (tb.t == Tab::Battle && battleReady_ && !active) {
+            label = "Battle!";
+            const float pulse = 0.5f + 0.5f * std::sin(animT_ * 5.f);
+            col = gfx::Color{0.55f + 0.4f * pulse, 0.35f + 0.25f * pulse, 0.12f, 1.f};
+        }
+        if (button(bx, gy + 12, bw, 30, label, col, enabled, 12) && enabled) {
+            tab_ = active ? Tab::None : tb.t;
+            if (tb.t == Tab::Battle) battleReady_ = false;
+        }
         bx += bw + bgap;
     }
 }
@@ -437,11 +531,15 @@ void Ui::drawPanel() {
 
     if (tab_ != Tab::Start) {
         struct T { Tab t; const char* n; };
-        const T tabs[] = {{Tab::Tasks, "Tasks"}, {Tab::Friends, "Friends"}, {Tab::Dex, "Dex"}, {Tab::Shop, "Shop"}, {Tab::Focus, "Focus"}, {Tab::Battle, "Battle"}};
+        const T tabs[] = {{Tab::Tasks, "Tasks"}, {Tab::Friends, "Friends"}, {Tab::Dex, "Dex"}, {Tab::Shop, "Shop"}, {Tab::Focus, "Focus"}, {Tab::Battle, "Battle"}, {Tab::Guide, "Guide"}};
         float x = panel_.x + 12;
         for (const auto& t : tabs) {
-            if (button(x, 10, 96, 30, t.n, tab_ == t.t ? kBlue : kBtn, true, 13)) tab_ = t.t;
-            x += 102;
+            const bool enabled = !locked() || t.t == Tab::Focus;
+            if (button(x, 10, 88, 30, t.n, tab_ == t.t ? kBlue : kBtn, enabled, 13)) {
+                tab_ = t.t;
+                if (t.t == Tab::Battle) battleReady_ = false;
+            }
+            x += 92;
         }
         gx_->text("Energy " + std::to_string(g_.energy) + "   Coins " + std::to_string(g_.coins), x + 10, 10, 300, 30, 13, kAccent, TF_VCENTER | TF_BOLD);
         if (button(panel_.x + pw - 44, 10, 32, 30, "X", rgba(120, 50, 50), true, 13)) tab_ = Tab::None;
@@ -455,6 +553,7 @@ void Ui::drawPanel() {
         case Tab::Shop: drawShop(body); break;
         case Tab::Focus: drawFocus(body); break;
         case Tab::Battle: drawBattle(body); break;
+        case Tab::Guide: drawGuide(body); break;
         default: break;
     }
 }
@@ -467,7 +566,7 @@ void Ui::drawStart(const Rect& b) {
     float x = b.x + (b.w - total) / 2;
     for (int id : gf::starterSpecies()) {
         card(x, 110, cw, 300);
-        gx_->sprite(gfx::SpriteKind::Species, id, static_cast<int>(animT_ * 2) % 2, false, x + (cw - 128) / 2, 126, 8);
+        gx_->sprite(gfx::SpriteKind::Species, id, static_cast<int>(animT_ * 2) % 2, false, x + (cw - 120) / 2, 130, 120);
         gx_->text(gf::species(id).name, x, 262, cw, 26, 18, kText, TF_CENTER | TF_BOLD);
         gx_->text(roleText(id), x + 14, 292, cw - 28, 56, 12, kDim, TF_CENTER | TF_WRAP);
         if (button(x + 50, 358, cw - 100, 38, "Choose " + gf::species(id).name, kGreen, true, 13)) {
@@ -709,11 +808,11 @@ void Ui::drawFriends(const Rect& b) {
         card(x, y, cw, ch, sel ? kCard2 : kCard);
         if (sel) gx_->strokeRect(x, y, cw, ch, kAccent, 2, 8);
         const gf::Species& sp = gf::species(f.species);
-        gx_->sprite(gfx::SpriteKind::Species, f.species, static_cast<int>(animT_ * 2 + static_cast<float>(i)) % 2, false, x + 8, y + 18, 4);
-        gx_->text(sp.name, x + 80, y + 6, cw - 84, 20, 13, kText, TF_BOLD);
-        gx_->text("Lv " + std::to_string(f.level), x + 80, y + 28, 80, 18, 12, kAccent, TF_BOLD);
-        if (f.level < gf::kMaxLevel) bar(x + 80, y + 52, cw - 92, 8, static_cast<double>(f.xp) / gf::xpToNext(f.level), kBlue);
-        gx_->text(inParty ? (g_.party[0] == f.id ? "Party (lead)" : "Party") : "Box", x + 80, y + 66, cw - 84, 18, 11, inParty ? kGreen : kDim);
+        gx_->sprite(gfx::SpriteKind::Species, f.species, static_cast<int>(animT_ * 2 + static_cast<float>(i)) % 2, false, x + 6, y + 14, 72);
+        gx_->text(sp.name, x + 82, y + 6, cw - 84, 20, 13, kText, TF_BOLD);
+        gx_->text("Lv " + std::to_string(f.level), x + 82, y + 28, 80, 18, 12, kAccent, TF_BOLD);
+        if (f.level < gf::kMaxLevel) bar(x + 82, y + 52, cw - 94, 8, static_cast<double>(f.xp) / gf::xpToNext(f.level), kBlue);
+        gx_->text(inParty ? (g_.party[0] == f.id ? "Party (lead)" : "Party") : "Box", x + 82, y + 66, cw - 86, 18, 11, inParty ? kGreen : kDim);
         if (hover(x, y, cw, ch) && in_->pressed && !consumed_ && !blocked_ && in_->my >= b.y && in_->my < b.y + b.h) { consumed_ = true; selFriend_ = f.id; }
     }
     gx_->popClip();
@@ -726,10 +825,10 @@ void Ui::drawFriends(const Rect& b) {
     const gf::Species& sp = gf::species(sf->species);
     const gf::Stats st = gf::statsFor(sp, sf->level);
     card(dx, b.y, dw, b.h - 70);
-    gx_->sprite(gfx::SpriteKind::Species, sf->species, static_cast<int>(animT_ * 2) % 2, false, dx + 10, b.y + 10, 5);
-    gx_->text(sp.name, dx + 100, b.y + 10, dw - 110, 26, 18, kText, TF_BOLD);
-    gx_->text("Stage " + std::to_string(sp.stage) + (sp.rare ? " · Rare" : "") + " · Lv " + std::to_string(sf->level), dx + 100, b.y + 38, dw - 110, 18, 12, kDim);
-    if (sp.evolvesTo >= 0) gx_->text("Evolves at Lv " + std::to_string(sp.evolveLevel), dx + 100, b.y + 56, dw - 110, 18, 12, kAccent);
+    gx_->sprite(gfx::SpriteKind::Species, sf->species, static_cast<int>(animT_ * 2) % 2, false, dx + 8, b.y + 8, 96);
+    gx_->text(sp.name, dx + 112, b.y + 10, dw - 120, 26, 18, kText, TF_BOLD);
+    gx_->text("Stage " + std::to_string(sp.stage) + (sp.rare ? " · Rare" : "") + " · Lv " + std::to_string(sf->level), dx + 112, b.y + 38, dw - 120, 18, 12, kDim);
+    if (sp.evolvesTo >= 0) gx_->text("Evolves at Lv " + std::to_string(sp.evolveLevel), dx + 112, b.y + 56, dw - 120, 18, 12, kAccent);
     gx_->text("HP " + std::to_string(st.hp) + "  ATK " + std::to_string(st.atk) + "  DEF " + std::to_string(st.def) + "  SPD " + std::to_string(st.spd), dx + 10, b.y + 96, dw - 20, 18, 12, kText, TF_BOLD);
     float my = b.y + 120;
     for (const auto& m : sp.moves) {
@@ -756,7 +855,7 @@ void Ui::drawFriends(const Rect& b) {
     ex += 48;
     if (g_.eggs.empty()) gx_->text("none (buy one in the Shop)", ex, by + 36, 220, 24, 12, kDim, TF_VCENTER);
     for (const auto& e : g_.eggs) {
-        gx_->sprite(gfx::SpriteKind::Egg, 0, static_cast<int>(animT_ * 2) % 2, false, ex, by + 30, 1.5f);
+        gx_->sprite(gfx::SpriteKind::Egg, 0, static_cast<int>(animT_ * 2) % 2, false, ex, by + 30, 24);
         gx_->text(std::to_string(e.progress) + "/" + std::to_string(e.needed), ex + 26, by + 36, 40, 24, 12, kText, TF_VCENTER | TF_BOLD);
         ex += 74;
     }
@@ -778,7 +877,7 @@ void Ui::drawDex(const Rect& b) {
         const bool own = g_.dexOwned.count(i) > 0, seen = own || g_.dexSeen.count(i) > 0;
         card(x, y, cw, ch, i == selDex_ ? kCard2 : kCard);
         if (i == selDex_) gx_->strokeRect(x, y, cw, ch, kAccent, 2, 8);
-        gx_->sprite(seen ? gfx::SpriteKind::Species : gfx::SpriteKind::Silhouette, i, 0, false, x + (cw - 40) / 2, y + 6, 2.5f);
+        gx_->sprite(seen ? gfx::SpriteKind::Species : gfx::SpriteKind::Silhouette, i, 0, false, x + (cw - 48) / 2, y + 3, 48);
         gx_->text(seen ? gf::species(i).name : "???", x, y + 52, cw, 18, 11, own ? kText : kDim, TF_CENTER | TF_BOLD);
         gx_->text(own ? "owned" : seen ? "seen" : "", x, y + 66, cw, 16, 10, own ? kGreen : kDim, TF_CENTER);
         if (hover(x, y, cw, ch) && in_->pressed && !consumed_ && !blocked_) { consumed_ = true; selDex_ = i; }
@@ -788,17 +887,17 @@ void Ui::drawDex(const Rect& b) {
         const bool seen = g_.dexOwned.count(selDex_) || g_.dexSeen.count(selDex_);
         card(dx, b.y, dw, b.h);
         if (!seen) {
-            gx_->sprite(gfx::SpriteKind::Silhouette, selDex_, 0, false, dx + 12, b.y + 12, 5);
-            gx_->text("???", dx + 100, b.y + 24, dw - 110, 26, 18, kDim, TF_BOLD);
+            gx_->sprite(gfx::SpriteKind::Silhouette, selDex_, 0, false, dx + 10, b.y + 10, 96);
+            gx_->text("???", dx + 112, b.y + 24, dw - 110, 26, 18, kDim, TF_BOLD);
             gx_->text("Find this friend by hatching eggs, battling, or catching wild ones.", dx + 12, b.y + 110, dw - 24, 60, 12, kDim, TF_WRAP);
         } else {
             const gf::Species& sp = gf::species(selDex_);
-            gx_->sprite(gfx::SpriteKind::Species, selDex_, static_cast<int>(animT_ * 2) % 2, false, dx + 12, b.y + 12, 5);
-            gx_->text(sp.name, dx + 100, b.y + 14, dw - 110, 26, 18, kText, TF_BOLD);
-            gx_->text("Stage " + std::to_string(sp.stage) + (sp.rare ? " · Rare" : ""), dx + 100, b.y + 42, dw - 110, 18, 12, kDim);
-            gx_->text("Base  HP " + std::string(static_cast<size_t>(sp.hp), '|') + "  ATK " + std::string(static_cast<size_t>(sp.atk), '|'), dx + 12, b.y + 98, dw - 24, 16, 11, kText);
-            gx_->text("DEF " + std::string(static_cast<size_t>(sp.def), '|') + "  SPD " + std::string(static_cast<size_t>(sp.spd), '|'), dx + 12, b.y + 114, dw - 24, 16, 11, kText);
-            float my = b.y + 138;
+            gx_->sprite(gfx::SpriteKind::Species, selDex_, static_cast<int>(animT_ * 2) % 2, false, dx + 10, b.y + 10, 96);
+            gx_->text(sp.name, dx + 112, b.y + 14, dw - 120, 26, 18, kText, TF_BOLD);
+            gx_->text("Stage " + std::to_string(sp.stage) + (sp.rare ? " · Rare" : ""), dx + 112, b.y + 42, dw - 120, 18, 12, kDim);
+            gx_->text("Base  HP " + std::string(static_cast<size_t>(sp.hp), '|') + "  ATK " + std::string(static_cast<size_t>(sp.atk), '|'), dx + 12, b.y + 112, dw - 24, 16, 11, kText);
+            gx_->text("DEF " + std::string(static_cast<size_t>(sp.def), '|') + "  SPD " + std::string(static_cast<size_t>(sp.spd), '|'), dx + 12, b.y + 128, dw - 24, 16, 11, kText);
+            float my = b.y + 150;
             for (const auto& m : sp.moves) {
                 gx_->text(m.name, dx + 12, my, dw - 24, 18, 12, kAccent, TF_BOLD);
                 gx_->text(describeMove(m), dx + 12, my + 17, dw - 24, 30, 11, kDim, TF_WRAP);
@@ -820,7 +919,7 @@ void Ui::drawShop(const Rect& b) {
     const float x0 = b.x + (b.w - (cw * 2 + gap)) / 2, y0 = b.y + 44;
     // Egg
     card(x0, y0, cw, ch);
-    gx_->sprite(gfx::SpriteKind::Egg, 0, static_cast<int>(animT_ * 2) % 2, false, x0 + (cw - 96) / 2, y0 + 16, 6);
+    gx_->sprite(gfx::SpriteKind::Egg, 0, static_cast<int>(animT_ * 2) % 2, false, x0 + (cw - 96) / 2, y0 + 16, 96);
     gx_->text("Egg  -  " + std::to_string(gf::kEggCost) + " coins", x0, y0 + 124, cw, 26, 18, kText, TF_CENTER | TF_BOLD);
     gx_->text("Hatches into a new friend after 5 completed tasks. Rare friends are possible!", x0 + 20, y0 + 156, cw - 40, 54, 12, kDim, TF_CENTER | TF_WRAP);
     gx_->text("You have " + std::to_string(g_.eggs.size()) + " incubating", x0, y0 + 214, cw, 18, 12, kDim, TF_CENTER);
@@ -852,13 +951,14 @@ void Ui::drawShop(const Rect& b) {
 void Ui::drawFocus(const Rect& b) {
     const float cx = b.x + b.w / 2;
     gx_->text("Focus session", b.x, b.y, b.w, 30, 22, kAccent, TF_CENTER | TF_BOLD);
-    gx_->text("Work without distractions. When the timer ends you earn Energy, XP for your lead, and a chance to battle.", b.x + 100, b.y + 36, b.w - 200, 40, 13, kDim, TF_CENTER | TF_WRAP);
+    gx_->text("Work without distractions. While the timer runs the rest of the app is locked. When it ends you earn Energy and XP, and the Battle button lights up.", b.x + 100, b.y + 36, b.w - 200, 40, 13, kDim, TF_CENTER | TF_WRAP);
     if (focusRunning_) {
         const long long left = std::max(0LL, (focusEndMs_ - nowMs_) / 1000);
         const double frac = 1.0 - static_cast<double>(left) / (focusMinutes_ * 60.0);
         gx_->text(two(static_cast<int>(left / 60)) + ":" + two(static_cast<int>(left % 60)), b.x, b.y + 110, b.w, 90, 72, kText, TF_CENTER | TF_BOLD | TF_VCENTER);
         bar(cx - 250, b.y + 220, 500, 14, frac, kGreen);
         gx_->text("Stay focused. Your friends are cheering you on!", b.x, b.y + 244, b.w, 24, 13, kDim, TF_CENTER);
+        gx_->text("Tasks, friends, shop and battles are locked until the session ends (or you cancel).", b.x, b.y + 268, b.w, 24, 12, kAccent, TF_CENTER);
         if (button(cx - 70, b.y + 290, 140, 38, "Cancel session", rgba(130, 50, 50), true, 13)) {
             focusRunning_ = false;
             toast("Focus session cancelled (no reward).");
@@ -886,8 +986,9 @@ void Ui::drawFocus(const Rect& b) {
 void Ui::beginBattle(gf::BattleMode m) {
     std::string why;
     std::unique_ptr<gf::Battle> bt;
-    if (!gf::startBattle(g_, m, now_, bt, why)) { toast(why); return; }
+    if (!gf::startBattle(g_, m, g_.lastArea, now_, bt, why)) { toast(why); return; }
     battle_ = std::move(bt);
+    battle_->recordEvents = true;
     mode_ = m;
     phase_ = Phase::Choose;
     chosen_ = {{false, false, false}};
@@ -895,6 +996,12 @@ void Ui::beginBattle(gf::BattleMode m) {
     pendingMove_ = -1;
     resultLines_.clear();
     focusDone_ = 0;
+    battleReady_ = false;
+    playing_ = false;
+    fastPlay_ = false;
+    floats_.clear();
+    for (auto& row : hpAnim_) for (float& v : row) v = -1;
+    for (int sd = 0; sd < 2; ++sd) for (int k = 0; k < 3; ++k) flash_[sd][k] = flashGood_[sd][k] = glow_[sd][k] = 0;
     dirty_ = true;
     battleAdvance();
 }
@@ -916,8 +1023,24 @@ void Ui::battleAdvance() {
 }
 
 void Ui::battleResolve() {
+    prevSnap_ = battle_->snapshot();
+    playStart_ = battle_->events.size();
     battle_->resolveTurn(acts_);
     chosen_ = {{false, false, false}};
+    playEnd_ = battle_->events.size();
+    if (playEnd_ > playStart_) {
+        playing_ = true;
+        viewRel_ = -1;
+        playTimer_ = 99.f;  // show the first event immediately
+        floats_.clear();
+    } else {
+        battleAfterTurn();
+    }
+}
+
+void Ui::battleAfterTurn() {
+    playing_ = false;
+    viewRel_ = -1;
     if (battle_->over()) { battleFinish(false); return; }
     if (!battle_->emptyPlayerSlotsNeedingReplacement().empty()) { phase_ = Phase::Replace; return; }
     battleAdvance();
@@ -933,69 +1056,209 @@ void Ui::battleFinish(bool ran) {
     dirty_ = true;
 }
 
+Ui::Rect Ui::cardRect(int side, int slot) const {
+    const float cardW = (battleBody_.w - 20) / 3, cardH = 100, logH = 74;
+    const float x = battleBody_.x + static_cast<float>(slot) * (cardW + 10);
+    const float y = side == 1 ? battleBody_.y : battleBody_.y + cardH + 6 + logH + 6;
+    return {x, y, cardW, cardH};
+}
+
+const gf::Fighter* Ui::shownFighter(int side, int slot, int* teamIdx) const {
+    if (!battle_) return nullptr;
+    int idx = -1;
+    if (playing_) {
+        const gf::Snapshot& sn = viewRel_ < 0 ? prevSnap_ : battle_->events[playStart_ + static_cast<size_t>(viewRel_)].snap;
+        idx = sn.active[static_cast<size_t>(side)][static_cast<size_t>(slot)];
+        if (idx < 0) return nullptr;
+        if (teamIdx) *teamIdx = idx;
+        return &sn.team[static_cast<size_t>(side)][static_cast<size_t>(idx)];
+    }
+    if (!battle_->slotFilled(side, slot)) return nullptr;
+    idx = battle_->sides[static_cast<size_t>(side)].active[static_cast<size_t>(slot)];
+    if (teamIdx) *teamIdx = idx;
+    return &battle_->sides[static_cast<size_t>(side)].team[static_cast<size_t>(idx)];
+}
+
+int Ui::shownBench(int side) const {
+    if (!battle_) return 0;
+    if (!playing_) return static_cast<int>(battle_->benchAlive(side).size());
+    const gf::Snapshot& sn = viewRel_ < 0 ? prevSnap_ : battle_->events[playStart_ + static_cast<size_t>(viewRel_)].snap;
+    int n = 0;
+    for (size_t i = 0; i < sn.team[static_cast<size_t>(side)].size(); ++i) {
+        if (!sn.team[static_cast<size_t>(side)][i].alive()) continue;
+        bool active = false;
+        for (int a : sn.active[static_cast<size_t>(side)]) if (a == static_cast<int>(i)) active = true;
+        if (!active) ++n;
+    }
+    return n;
+}
+
+void Ui::spawnEffects(const gf::Snapshot& before, const gf::Snapshot& after, gf::Ref actor) {
+    auto slotOf = [](const gf::Snapshot& sn, int side, int idx) {
+        for (int k = 0; k < 3; ++k) if (sn.active[static_cast<size_t>(side)][static_cast<size_t>(k)] == idx) return k;
+        return -1;
+    };
+    for (int sd = 0; sd < 2; ++sd) {
+        const size_t n = std::min(before.team[static_cast<size_t>(sd)].size(), after.team[static_cast<size_t>(sd)].size());
+        for (size_t i = 0; i < n; ++i) {
+            const int d = after.team[static_cast<size_t>(sd)][i].hp - before.team[static_cast<size_t>(sd)][i].hp;
+            if (d == 0) continue;
+            int k = slotOf(after, sd, static_cast<int>(i));
+            if (k < 0) k = slotOf(before, sd, static_cast<int>(i));
+            if (k < 0) continue;
+            const Rect r = cardRect(sd, k);
+            floats_.push_back({r.x + r.w * 0.5f - 18.f + static_cast<float>((static_cast<int>(i) * 17) % 30 - 15), r.y + 26.f,
+                               (d < 0 ? "-" : "+") + std::to_string(std::abs(d)), d < 0 ? rgba(255, 110, 110) : rgba(120, 235, 140), 1.3f});
+            if (d < 0) flash_[sd][k] = 0.4f; else flashGood_[sd][k] = 0.4f;
+        }
+    }
+    if (actor.side >= 0 && actor.slot >= 0 && actor.slot < 3) glow_[actor.side][actor.slot] = 1.0f;
+}
+
+void Ui::stepPlayback() {
+    const gf::Snapshot& before = viewRel_ < 0 ? prevSnap_ : battle_->events[playStart_ + static_cast<size_t>(viewRel_)].snap;
+    const gf::Snapshot beforeCopy = before;  // viewRel_ is about to change
+    ++viewRel_;
+    const gf::Event& ev = battle_->events[playStart_ + static_cast<size_t>(viewRel_)];
+    spawnEffects(beforeCopy, ev.snap, ev.actor);
+}
+
 void Ui::fighterCard(float x, float y, float w, float h, int side, int slot, bool highlight, bool targetable, bool* clicked) {
     if (clicked) *clicked = false;
-    if (!battle_ || !battle_->slotFilled(side, slot)) {
+    int ti = -1;
+    const gf::Fighter* fp = shownFighter(side, slot, &ti);
+    if (!fp || ti < 0 || ti > 5) {
         card(x, y, w, h, rgba(26, 30, 42));
         gx_->text("-", x, y, w, h, 20, kDim, TF_CENTER | TF_VCENTER);
         return;
     }
-    const gf::Fighter& f = battle_->fighter(side, slot);
+    const gf::Fighter& f = *fp;
     const bool dead = !f.alive();
+    float& anim = hpAnim_[side][ti];
+    const float target = static_cast<float>(f.hpPct());
+    if (anim < 0) anim = target;
+    anim += (target - anim) * std::min(1.f, dt_ * 7.f);
+
     gx_->fillRect(x, y, w, h, side == 1 ? rgba(52, 34, 40) : rgba(30, 42, 60), 8);
+    if (flash_[side][slot] > 0) gx_->fillRect(x, y, w, h, rgba(255, 70, 70, static_cast<int>(170 * flash_[side][slot] / 0.4f)), 8);
+    if (flashGood_[side][slot] > 0) gx_->fillRect(x, y, w, h, rgba(80, 230, 130, static_cast<int>(150 * flashGood_[side][slot] / 0.4f)), 8);
+    if (glow_[side][slot] > 0) gx_->strokeRect(x, y, w, h, rgba(255, 220, 90, static_cast<int>(255 * std::min(1.f, glow_[side][slot]))), 3.f, 8);
     if (highlight) gx_->strokeRect(x, y, w, h, kAccent, 2.5f, 8);
     if (targetable) {
         const bool hv = hover(x, y, w, h);
         gx_->strokeRect(x, y, w, h, hv ? rgba(255, 255, 255) : kGreen, hv ? 3.f : 2.f, 8);
         if (hv && in_->pressed && !consumed_) { consumed_ = true; if (clicked) *clicked = true; }
     }
-    gx_->sprite(gfx::SpriteKind::Species, f.speciesId, static_cast<int>(animT_ * 2 + static_cast<float>(slot)) % 2, side == 1, x + 8, y + 18, 4, dead ? 0.25f : 1.f);
-    gx_->text(battle_->nameOf(side, slot) + "  Lv " + std::to_string(f.level), x + 80, y + 6, w - 86, 20, 13, kText, TF_BOLD);
-    bar(x + 80, y + 30, w - 92, 10, f.hpPct(), f.hpPct() > 0.5 ? kGreen : f.hpPct() > 0.2 ? rgba(220, 170, 40) : kRed);
-    gx_->text(std::to_string(f.hp) + " / " + std::to_string(f.maxHp), x + 80, y + 42, w - 92, 16, 11, kDim);
-    gx_->text(statusText(f), x + 80, y + 60, w - 90, 40, 10, rgba(255, 220, 140), TF_WRAP);
+    const float shake = flash_[side][slot] > 0 ? std::sin(animT_ * 70.f) * 3.f * flash_[side][slot] / 0.4f : 0.f;
+    const float lunge = glow_[side][slot] > 0.5f ? (side == 1 ? 6.f : -6.f) * (glow_[side][slot] - 0.5f) * 2.f : 0.f;
+    gx_->sprite(gfx::SpriteKind::Species, f.speciesId, static_cast<int>(animT_ * 2 + static_cast<float>(slot)) % 2, side == 1, x + 6 + shake, y + 14 + lunge, 72, dead ? 0.25f : 1.f);
+    gx_->text(std::string(side == 1 ? "Foe " : "") + f.sp().name + "  Lv " + std::to_string(f.level), x + 84, y + 6, w - 90, 20, 13, kText, TF_BOLD);
+    bar(x + 84, y + 30, w - 96, 10, anim, anim > 0.5 ? kGreen : anim > 0.2 ? rgba(220, 170, 40) : kRed);
+    gx_->text(std::to_string(f.hp) + " / " + std::to_string(f.maxHp), x + 84, y + 42, w - 96, 16, 11, kDim);
+    gx_->text(statusText(f), x + 84, y + 60, w - 92, 38, 10, rgba(255, 220, 140), TF_WRAP);
 }
 
 void Ui::drawBattle(const Rect& b) {
-    // ---- No battle running: mode selection ----
+    battleBody_ = b;
+    const gf::Area& ar = gf::area(std::clamp(g_.lastArea, 0, gf::kAreaCount - 1));
+    auto tint = [](unsigned rgbv, int a) { return rgba(static_cast<int>((rgbv >> 16) & 255), static_cast<int>((rgbv >> 8) & 255), static_cast<int>(rgbv & 255), a); };
+
+    // ---- No battle running: area and mode selection ----
     if (!battle_) {
-        if (focusDone_ > 0) {
-            card(b.x, b.y, b.w, 46, rgba(36, 60, 44));
-            gx_->text("Focus session complete! You earned Energy. Choose a battle below.", b.x, b.y, b.w, 46, 15, kGreen, TF_CENTER | TF_VCENTER | TF_BOLD);
+        const float lw = 250;
+        gx_->text("Choose an area", b.x, b.y - 4, lw, 22, 14, kAccent, TF_BOLD);
+        for (int i = 0; i < gf::kAreaCount; ++i) {
+            const gf::Area& a = gf::area(i);
+            const bool unlocked = gf::areaUnlocked(g_, i);
+            const float y = b.y + 22 + static_cast<float>(i) * 60;
+            const bool sel = g_.lastArea == i;
+            gx_->fillRect(b.x - 2, y - 2, lw + 4, 56, sel ? kAccent : rgba(0, 0, 0, 0), 9);
+            std::string label = a.name + "\n" + (unlocked ? "Lv +" + std::to_string(a.levelBonus) + "  ·  coins x" + std::to_string(a.coinMult).substr(0, 3)
+                                                          : "Locked: win " + std::to_string(a.unlockWins) + " battles");
+            if (button(b.x, y, lw, 52, label, unlocked ? tint(a.colorBottom, 255) : rgba(48, 52, 64), unlocked, 12) && unlocked) {
+                g_.lastArea = i;
+                dirty_ = true;
+            }
         }
-        gx_->text("Energy: " + std::to_string(g_.energy) + "     Party: " + std::to_string(g_.party.size()) + " friend(s)", b.x, b.y + 54, b.w, 24, 15, kAccent, TF_CENTER | TF_BOLD);
+        const float rx = b.x + lw + 20, rw = b.w - lw - 20;
+        float y0 = b.y;
+        if (focusDone_ > 0) {
+            card(rx, y0, rw, 38, rgba(36, 60, 44));
+            gx_->text("Focus session complete! Your friends are ready to battle.", rx, y0, rw, 38, 14, kGreen, TF_CENTER | TF_VCENTER | TF_BOLD);
+            y0 += 46;
+        }
+        gx_->fillRect(rx, y0, rw, 96, tint(ar.colorTop, 70), 10);
+        gx_->text(ar.name, rx + 14, y0 + 4, rw - 28, 26, 19, kText, TF_BOLD);
+        gx_->text(ar.desc, rx + 14, y0 + 30, rw - 28, 20, 12, kDim);
+        float sx = rx + 14;
+        gx_->text("Lives here:", sx, y0 + 56, 80, 28, 11, kDim, TF_VCENTER);
+        sx += 78;
+        for (int id : gf::baseSpecies()) {
+            const gf::Species& sp = gf::species(id);
+            if (!(sp.habitats & ar.habitat) || sp.rare) continue;
+            if (sx + 40 > rx + rw - 10) break;
+            gx_->sprite(gfx::SpriteKind::Species, id, 0, false, sx, y0 + 50, 40);
+            sx += 42;
+        }
+        const float cy = y0 + 106;
         struct Mode { gf::BattleMode m; const char* name; const char* desc; };
         const Mode modes[] = {
-            {gf::BattleMode::Wild, "Wild encounter", "1 to 3 wild friends. Use a Catch Charm to befriend one."},
+            {gf::BattleMode::Wild, "Wild encounter", "1 to 3 wild friends. A Catch Charm can befriend one."},
             {gf::BattleMode::Duel, "Trainer duel", "A full team of foes. Win coins and maybe an Egg."},
-            {gf::BattleMode::Boss, "Boss battle", "A powerful rare-friend team. Needs a 3-day streak. Guaranteed rare reward."}};
-        const float cw = 300, gap = 20, x0 = b.x + (b.w - (cw * 3 + gap * 2)) / 2, y0 = b.y + 94;
+            {gf::BattleMode::Boss, "Boss battle", "A powerful team. Needs a 3-day streak. Guaranteed rare friend."}};
+        const float gap = 12, cw = (rw - gap * 2) / 3;
+        const float chh = std::min(228.f, b.y + b.h - cy - 30);
         for (int i = 0; i < 3; ++i) {
-            const float x = x0 + static_cast<float>(i) * (cw + gap);
-            card(x, y0, cw, 250);
-            gx_->text(modes[i].name, x, y0 + 14, cw, 26, 18, kText, TF_CENTER | TF_BOLD);
-            gx_->text(std::to_string(gf::energyCost(modes[i].m)) + " Energy", x, y0 + 46, cw, 22, 15, kAccent, TF_CENTER | TF_BOLD);
-            gx_->text(modes[i].desc, x + 20, y0 + 84, cw - 40, 70, 13, kDim, TF_CENTER | TF_WRAP);
+            const float x = rx + static_cast<float>(i) * (cw + gap);
+            card(x, cy, cw, chh);
+            gx_->text(modes[i].name, x, cy + 12, cw, 24, 16, kText, TF_CENTER | TF_BOLD);
+            gx_->text(std::to_string(gf::energyCost(modes[i].m)) + " Energy", x, cy + 38, cw, 20, 14, kAccent, TF_CENTER | TF_BOLD);
+            gx_->text(modes[i].desc, x + 14, cy + 68, cw - 28, 60, 12, kDim, TF_CENTER | TF_WRAP);
             const bool locked = modes[i].m == gf::BattleMode::Boss && !gf::bossUnlocked(g_);
             const bool afford = g_.energy >= gf::energyCost(modes[i].m);
-            if (locked) gx_->text("Locked: streak " + std::to_string(g_.globalStreak) + " / 3 days", x, y0 + 170, cw, 20, 12, rgba(230, 140, 140), TF_CENTER);
-            else if (!afford) gx_->text("Not enough Energy", x, y0 + 170, cw, 20, 12, rgba(230, 140, 140), TF_CENTER);
-            if (button(x + 70, y0 + 196, cw - 140, 38, "Fight!", kRed, !locked && afford, 15)) beginBattle(modes[i].m);
+            if (locked) gx_->text("Locked: streak " + std::to_string(g_.globalStreak) + " / 3 days", x, cy + chh - 74, cw, 18, 11, rgba(230, 140, 140), TF_CENTER);
+            else if (!afford) gx_->text("Not enough Energy", x, cy + chh - 74, cw, 18, 11, rgba(230, 140, 140), TF_CENTER);
+            if (button(x + 36, cy + chh - 50, cw - 72, 36, "Fight!", kRed, !locked && afford, 14)) beginBattle(modes[i].m);
         }
-        gx_->text("Earn Energy by finishing tasks and focus sessions. Friends are fully healed after every battle.", b.x, b.y + b.h - 28, b.w, 22, 12, kDim, TF_CENTER);
+        gx_->text("Energy: " + std::to_string(g_.energy) + "   ·   Friends are fully healed after every battle.", rx, b.y + b.h - 24, rw, 20, 12, kDim, TF_CENTER);
         return;
     }
 
     // ---- Active battle ----
-    const float cardW = (b.w - 20) / 3, cardH = 104;
-    const float logY = b.y + cardH + 6, logH = 62, pY = logY + logH + 6, aY = pY + cardH + 6;
-    const bool modalActive = phase_ == Phase::SwitchPick || phase_ == Phase::Replace || phase_ == Phase::Done;
+    // advance the replay
+    if (playing_) {
+        playTimer_ += dt_ * (fastPlay_ ? 3.f : 1.f);
+        float stepLen = 0.8f;
+        if (viewRel_ >= 0) {
+            const std::string& t = battle_->events[playStart_ + static_cast<size_t>(viewRel_)].text;
+            stepLen = t.rfind("--", 0) == 0 ? 0.35f : t.find(" uses ") != std::string::npos ? 1.0f : 0.8f;
+        }
+        if (playTimer_ >= stepLen) {
+            playTimer_ = 0;
+            if (playStart_ + static_cast<size_t>(viewRel_ + 1) < playEnd_) stepPlayback();
+            else battleAfterTurn();
+        }
+    }
+    for (int sd = 0; sd < 2; ++sd)
+        for (int k = 0; k < 3; ++k) {
+            flash_[sd][k] = std::max(0.f, flash_[sd][k] - dt_);
+            flashGood_[sd][k] = std::max(0.f, flashGood_[sd][k] - dt_);
+            glow_[sd][k] = std::max(0.f, glow_[sd][k] - dt_ * 0.9f);
+        }
+
+    const float cardH = 100, logH = 74;
+    const float logY = b.y + cardH + 6, pY = logY + logH + 6, aY = pY + cardH + 6;
+    gx_->fillRect(b.x - 8, b.y - 6, b.w + 16, b.h + 8, tint(ar.colorTop, 55), 10);
+    gx_->fillRect(b.x - 8, b.y + (b.h) * 0.55f, b.w + 16, b.h * 0.45f + 2, tint(ar.colorBottom, 60), 10);
+
+    const bool modalActive = !playing_ && (phase_ == Phase::SwitchPick || phase_ == Phase::Replace || phase_ == Phase::Done);
     const bool prevBlocked = blocked_;
-    if (modalActive) blocked_ = true;
+    if (modalActive || playing_) blocked_ = true;
 
     std::vector<gf::Ref> targets;
-    if (phase_ == Phase::Target && battle_->slotFilled(0, curSlot_)) targets = battle_->validTargets(0, curSlot_, pendingMove_);
+    if (!playing_ && phase_ == Phase::Target && battle_->slotFilled(0, curSlot_)) targets = battle_->validTargets(0, curSlot_, pendingMove_);
     auto isTarget = [&](int side, int slot) {
+        if (playing_) return false;
         if (phase_ == Phase::CharmTarget) return side == 1 && battle_->slotFilled(1, slot) && battle_->fighter(1, slot).alive();
         for (const auto& t : targets) if (t.side == side && t.slot == slot) return true;
         return false;
@@ -1003,8 +1266,8 @@ void Ui::drawBattle(const Rect& b) {
 
     for (int k = 0; k < 3; ++k) {
         bool clicked = false;
-        const float x = b.x + static_cast<float>(k) * (cardW + 10);
-        fighterCard(x, b.y, cardW, cardH, 1, k, false, isTarget(1, k), &clicked);
+        const Rect r = cardRect(1, k);
+        fighterCard(r.x, r.y, r.w, r.h, 1, k, false, isTarget(1, k), &clicked);
         if (clicked) {
             if (phase_ == Phase::CharmTarget) {
                 const bool ok = gf::useCharm(g_, *battle_, k);
@@ -1018,30 +1281,60 @@ void Ui::drawBattle(const Rect& b) {
             }
         }
     }
-    gx_->text("Foes bench: " + std::to_string(battle_->benchAlive(1).size()), b.x + b.w - 150, b.y + cardH - 18, 146, 16, 10, kDim, TF_RIGHT);
+    gx_->text("Foes bench: " + std::to_string(shownBench(1)), b.x + b.w - 150, b.y + cardH - 18, 146, 16, 10, kDim, TF_RIGHT);
 
-    // Log
-    card(b.x, logY, b.w, logH, rgba(14, 17, 26));
-    const auto& lg = battle_->log;
-    const size_t start = lg.size() > 4 ? lg.size() - 4 : 0;
-    for (size_t i = start; i < lg.size(); ++i)
-        gx_->text(lg[i], b.x + 12, logY + 3 + static_cast<float>(i - start) * 14.5f, b.w - 24, 16, 11, i + 1 == lg.size() ? kText : kDim);
+    // Log: shows the line being played, plus the lines before it.
+    card(b.x, logY, b.w, logH, rgba(14, 17, 26, 235));
+    std::vector<std::string> lines;
+    if (playing_) {
+        const size_t upto = playStart_ + static_cast<size_t>(std::max(viewRel_, -1) + 1);
+        for (size_t i = playStart_; i < upto; ++i) lines.push_back(battle_->events[i].text);
+        if (lines.empty() && playStart_ > 0) lines.push_back(battle_->events[playStart_ - 1].text);
+    } else {
+        lines = battle_->log;
+    }
+    const size_t first = lines.size() > 4 ? lines.size() - 4 : 0;
+    for (size_t i = first; i < lines.size(); ++i) {
+        const bool last = i + 1 == lines.size();
+        const float ly = logY + 4 + static_cast<float>(i - first) * 16.f;
+        gx_->text(lines[i], b.x + 14, ly, b.w - 28, 18, last ? 13.5f : 11.5f, last ? rgba(255, 255, 255) : kDim, last ? TF_BOLD : 0);
+    }
 
     for (int k = 0; k < 3; ++k) {
         bool clicked = false;
-        const float x = b.x + static_cast<float>(k) * (cardW + 10);
-        const bool cur = phase_ != Phase::Done && k == curSlot_ && (phase_ == Phase::Choose || phase_ == Phase::Target || phase_ == Phase::SwitchPick);
-        fighterCard(x, pY, cardW, cardH, 0, k, cur, isTarget(0, k), &clicked);
+        const Rect r = cardRect(0, k);
+        const bool cur = !playing_ && phase_ != Phase::Done && k == curSlot_ && (phase_ == Phase::Choose || phase_ == Phase::Target || phase_ == Phase::SwitchPick);
+        fighterCard(r.x, r.y, r.w, r.h, 0, k, cur, isTarget(0, k), &clicked);
         if (clicked) {
             acts_[static_cast<size_t>(curSlot_)] = {gf::Action::UseMove, pendingMove_, {0, k}, -1};
             chosen_[static_cast<size_t>(curSlot_)] = true;
             battleAdvance();
         }
     }
-    gx_->text("Your bench: " + std::to_string(battle_->benchAlive(0).size()) + "   Turn " + std::to_string(battle_->turn + 1), b.x + b.w - 250, pY + cardH - 18, 246, 16, 10, kDim, TF_RIGHT);
+    gx_->text("Your bench: " + std::to_string(shownBench(0)) + "   Turn " + std::to_string(battle_->turn + (playing_ ? 0 : 1)) + "   " + ar.name, b.x + b.w - 330, pY + cardH - 18, 326, 16, 10, kDim, TF_RIGHT);
+
+    // Floating damage / heal numbers
+    for (auto& ft : floats_) {
+        ft.life -= dt_;
+        ft.y -= dt_ * 28.f;
+        const float a = std::clamp(ft.life / 0.5f, 0.f, 1.f);
+        gx_->text(ft.text, ft.x + 1.5f, ft.y + 1.5f, 80, 26, 20, rgba(0, 0, 0, static_cast<int>(200 * a)), TF_BOLD);
+        gx_->text(ft.text, ft.x, ft.y, 80, 26, 20, gfx::withAlpha(ft.col, a), TF_BOLD);
+    }
+    floats_.erase(std::remove_if(floats_.begin(), floats_.end(), [](const FloatText& f) { return f.life <= 0; }), floats_.end());
 
     // Action area
-    if ((phase_ == Phase::Choose || phase_ == Phase::Target || phase_ == Phase::CharmTarget) && battle_->slotFilled(0, curSlot_)) {
+    if (playing_) {
+        blocked_ = prevBlocked;
+        gx_->text("The turn is playing out...", b.x, aY + 2, 400, 22, 14, kAccent, TF_BOLD);
+        gx_->text("Watch the log and the health bars. Floating numbers show damage (red) and healing (green).", b.x, aY + 26, 700, 20, 12, kDim);
+        if (button(b.x, aY + 56, 140, 34, "Skip", kBtn)) {
+            playing_ = false;
+            floats_.clear();
+            battleAfterTurn();
+        }
+        if (button(b.x + 148, aY + 56, 170, 34, fastPlay_ ? "Speed: fast" : "Speed: normal", fastPlay_ ? rgba(120, 90, 30) : kBtn)) fastPlay_ = !fastPlay_;
+    } else if ((phase_ == Phase::Choose || phase_ == Phase::Target || phase_ == Phase::CharmTarget) && battle_->slotFilled(0, curSlot_)) {
         const gf::Fighter& f = battle_->fighter(0, curSlot_);
         const gf::Species& sp = f.sp();
         if (phase_ == Phase::Choose) {
@@ -1105,7 +1398,7 @@ void Ui::drawBattle(const Rect& b) {
     blocked_ = prevBlocked;
 
     // ---- Modals ----
-    if (phase_ == Phase::SwitchPick || phase_ == Phase::Replace || phase_ == Phase::Done) {
+    if (modalActive) {
         gx_->fillRect(b.x - 8, b.y - 8, b.w + 16, b.h + 16, rgba(0, 0, 0, 150), 8);
         const float mw = 460;
         std::vector<int> bench = battle_->benchAlive(0);
@@ -1147,6 +1440,158 @@ void Ui::drawBattle(const Rect& b) {
             if (phase_ == Phase::SwitchPick && button(mx + mw / 2 - 60, by + 8, 120, 32, "Cancel", rgba(90, 60, 60), true, 13, true)) phase_ = Phase::Choose;
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+// Guide
+// ---------------------------------------------------------------------------
+
+namespace {
+struct GuideSection { std::string title; std::vector<std::string> paras; };
+
+const std::vector<GuideSection>& guideSections() {
+    static const std::vector<GuideSection> g = [] {
+        std::vector<GuideSection> v;
+        v.push_back({"Welcome", {
+            "# What is Goal Friends?",
+            "Real-life tasks power your creature collection. Your friends can't level up by playing alone: finishing tasks and focus sessions is the only way to earn XP, Energy and Coins. You then spend that progress on levelling, hatching new friends and battling.",
+            "# The strip",
+            "Your friends wander along the bottom of the screen. The buttons on the right open the panels. Click a friend to open their page. A speech bubble over your lead friend shows how many tasks are due.",
+            "# Hiding the strip",
+            "Press Ctrl+Shift+Ô to hide or show the whole window (or click the tray icon). Reminders keep working while it's hidden. Right-click the tray icon to quit.",
+            "# First steps",
+            "- Open Tasks, type something you want to get done and press Add task.",
+            "- When you really did it, press Done. You get XP, Energy and Coins.",
+            "- Spend Energy on battles and Coins in the Shop. Check this guide whenever something is unclear."}});
+        v.push_back({"Tasks & rewards", {
+            "# Adding tasks",
+            "New tasks don't repeat by default. Use Repeat to make a task daily, on chosen weekdays, every N days, weekly or monthly. Use Time to give it a window (morning, afternoon, evening) or a specific time.",
+            "# Rewards",
+            "- Effort S / M / L / XL gives 10 / 25 / 60 / 120 XP, 1 / 2 / 4 / 8 Energy and 2 / 5 / 12 / 24 Coins.",
+            "- The XP goes to your lead friend (the first one in your party).",
+            "- Streak bonus: +5% XP per consecutive completion of a recurring task (up to +50%), plus +2% per day of your overall streak (up to +20%).",
+            "- Finish a timed task after its window has closed (within 2 hours) and you get half XP. Missing a recurring task completely resets its streak.",
+            "# Reminders",
+            "Tasks with a time or window send a notification when they start, nudges 30 minutes and 2 hours later, and one near the end of the window. Press Snooze on a task to be reminded in an hour. Between 22:00 and 08:00 reminders are held back.",
+            "# Sleepy friends",
+            "If a whole day passes with no tasks or focus sessions, your friends get sleepy. They nap on the strip and fight with -20% ATK and SPD until you finish something. Nothing is ever lost."}});
+        v.push_back({"Friends & eggs", {
+            "# Your team",
+            "You bring a party of 6 into battle; every other friend waits in the Box. Open a friend in the Friends tab to move them, or to make them the lead.",
+            "# Levels and evolution",
+            "Friends level up from 1 to 50. Three-stage lines evolve at levels 16 and 32, two-stage lines at level 20. Rare friends don't evolve. Each friend has exactly four unique moves, and an evolved form gets a new set.",
+            "# Getting new friends",
+            "- Eggs cost 40 coins in the Shop and hatch after you complete 5 tasks. Some trainers also give you eggs.",
+            "- Catch Charms (20 coins) can befriend a wild friend in battle. They work best when the foe is hurt.",
+            "- Winning a boss battle always gives you a rare friend.",
+            "- A friend you already own is turned into coins instead.",
+            "# The Dex",
+            "The Dex lists every friend. You can read the moves of every friend you have met or owned."}});
+        v.push_back({"Focus sessions", {
+            "# How it works",
+            "Pick a length (15, 25 or 45 minutes; a 1-minute test is there for trying things out) and start. When the timer ends you earn 1 Energy per 10 minutes, XP for your lead friend equal to the minutes, and it counts as activity for your streak.",
+            "# Staying focused",
+            "While a session runs the rest of the app is locked: only the Focus tab works. You can cancel, but you get no reward.",
+            "# Afterwards",
+            "No window pops up. Instead the Battle button on the strip pulses and your lead friend asks if it's battle time. Open Battle whenever you're ready."}});
+        v.push_back({"Battles", {
+            "# The basics",
+            "Each side brings a team of 6; 3 friends fight at once and 3 wait on the bench. Each turn you pick an action for every active friend: use a move, switch to a bench friend, and in wild battles use a Catch Charm or run away.",
+            "# How a turn plays out",
+            "When everyone has chosen, the turn is replayed step by step: the acting friend glows, health bars move, red numbers show damage and green numbers healing, and the log says what happened. Use Skip to jump to the end or Speed to make it faster.",
+            "# Turn order",
+            "Switching goes first. Then moves with Priority, then everyone else by speed (SPD). Ties are random.",
+            "# Moves",
+            "- Light, Medium and Heavy hits do damage. Utility moves do something else: heal, shield, buff, weaken, trap, and more. Hover over a move to read what it does.",
+            "- CD n means the move can't be used for n turns after you use it. If all four moves are cooling down, your friend uses Scuffle, a basic attack.",
+            "- Most moves hit one foe. Spread moves hit all foes at 75% damage. Some moves hit random foes, and some can target an ally or yourself.",
+            "# Winning",
+            "Knock out all of the other team to win. Your friends are fully healed afterwards, so losing costs you nothing but the Energy. After turn 30, fatigue drains everyone more each turn so battles always end.",
+            "# Costs",
+            "A wild encounter costs 1 Energy, a trainer duel 2, and a boss battle 5 (and needs a 3-day streak)."}});
+        v.push_back({"Status effects", {
+            "# Damage over time and recovery",
+            "- Wound: lose 6% of max HP at the end of each turn.",
+            "- Regen: heal 8% of max HP at the end of each turn.",
+            "- Doom: after a few turns, take a heavy hit (it never knocks the friend out by itself).",
+            "# Slowing and disabling",
+            "- Daze: attacks have a 30% chance to miss.",
+            "- Slow / Haste: speed down 30% / up 40%.",
+            "- Stun: skips its next action.",
+            "- Trap: can't be switched out or forced out.",
+            "- Seal: the last move it used can't be used for 2 turns.",
+            "- Taunt: can only use damaging moves.",
+            "# Defence",
+            "- Armor: takes 30% less damage.",
+            "- Shield: absorbs a set amount of damage.",
+            "- Thorns: attackers take 25% of the damage they deal.",
+            "- Evade: avoids the next attack this turn.",
+            "- Counter: if hit this turn, strikes back.",
+            "# Offence",
+            "- Focus: the next attack deals +50%.",
+            "- Mark: the next hit it receives deals +50%.",
+            "- Empower: the next attacks deal extra damage.",
+            "- Priority: acts before normal-speed actions.",
+            "- Charge: the move takes two turns; some charge moves dodge in between.",
+            "- Pivot: swaps out after hitting. Force-switch: pulls a random bench friend in.",
+            "- Cleanse: removes all negative effects."}});
+        std::vector<std::string> areas = {"# Where to fight", "Pick an area in the Battle tab. Each area has its own friends, a level bonus and a coin multiplier. New areas unlock as you win more battles."};
+        for (const auto& a : gf::allAreas())
+            areas.push_back("- " + a.name + ": " + a.desc + "  (foes +" + std::to_string(a.levelBonus) + " levels, coins x" + std::to_string(a.coinMult).substr(0, 3) + (a.unlockWins ? ", unlocks after " + std::to_string(a.unlockWins) + " wins)" : ", open from the start)"));
+        v.push_back({"Areas", areas});
+        v.push_back({"Tips", {
+            "# Doing well",
+            "- Switch out friends that are nearly knocked out; their statuses reset and the bench keeps its health.",
+            "- Use Cleanse moves against Wound, Daze and Doom, and Spread moves when several foes are weak.",
+            "- Stun and Trap are strong but have long cooldowns. Save them for the foe that worries you most.",
+            "- Healers and shielders can target allies. Put one on your team and aim their moves at whoever needs them.",
+            "- Short on Energy? Do a task or a focus session. Even a small S task gives you 1.",
+            "# Keeping the habit",
+            "- Add recurring tasks with a time window so reminders nudge you at the right moment.",
+            "- A streak is worth protecting: even one small task a day keeps your friends happy and your bonuses growing."}});
+        return v;
+    }();
+    return g;
+}
+}  // namespace
+
+void Ui::drawGuide(const Rect& b) {
+    const auto& secs = guideSections();
+    const float nw = 190;
+    for (size_t i = 0; i < secs.size(); ++i) {
+        if (button(b.x, b.y + static_cast<float>(i) * 40, nw, 34, secs[i].title, guideSection_ == static_cast<int>(i) ? kBlue : kBtn, true, 13)) {
+            guideSection_ = static_cast<int>(i);
+            scrollGuide_ = 0;
+        }
+    }
+    const float cx = b.x + nw + 14, cw = b.w - nw - 14;
+    card(cx, b.y, cw, b.h);
+    const GuideSection& sec = secs[static_cast<size_t>(std::clamp(guideSection_, 0, static_cast<int>(secs.size()) - 1))];
+    gx_->pushClip(cx, b.y, cw, b.h);
+    if (hover(cx, b.y, cw, b.h)) scrollGuide_ -= in_->wheel * 48;
+    float y = b.y + 12 - scrollGuide_;
+    gx_->text(sec.title, cx + 18, y, cw - 36, 28, 20, kAccent, TF_BOLD);
+    y += 38;
+    for (const auto& para : sec.paras) {
+        if (para.rfind("# ", 0) == 0) {
+            y += 6;
+            gx_->text(para.substr(2), cx + 18, y, cw - 36, 22, 15, kText, TF_BOLD);
+            y += 26;
+        } else if (para.rfind("- ", 0) == 0) {
+            const std::string t = para.substr(2);
+            const float h = gx_->textHeight(t, cw - 64, 13);
+            gx_->fillEllipse(cx + 26, y + 9, 2.5f, 2.5f, kAccent);
+            gx_->text(t, cx + 38, y, cw - 64, h + 4, 13, rgba(214, 220, 232), TF_WRAP);
+            y += h + 6;
+        } else {
+            const float h = gx_->textHeight(para, cw - 36, 13);
+            gx_->text(para, cx + 18, y, cw - 36, h + 4, 13, rgba(214, 220, 232), TF_WRAP);
+            y += h + 8;
+        }
+    }
+    const float contentH = y + scrollGuide_ - b.y + 12;
+    scrollGuide_ = std::clamp(scrollGuide_, 0.f, std::max(0.f, contentH - b.h));
+    gx_->popClip();
 }
 
 }  // namespace ui

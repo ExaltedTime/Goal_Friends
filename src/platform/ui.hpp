@@ -18,7 +18,7 @@ struct Input {
     bool backspace = false, enter = false, escape = false;
 };
 
-enum class Tab { None, Start, Tasks, Friends, Dex, Shop, Focus, Battle };
+enum class Tab { None, Start, Tasks, Friends, Dex, Shop, Focus, Battle, Guide };
 
 struct Walker {
     int friendId = 0;
@@ -42,6 +42,7 @@ public:
     void openTab(Tab t) { tab_ = t; }
     // Called by the host when new reminders fire so the strip can nag too.
     void reminderFired() { nagSeconds_ = 20; }
+    bool locked() const { return focusRunning_; }  // during a focus session everything except the Focus tab is off limits
 
     static constexpr float kStrip = 150.f;
     static constexpr float kPanelH = 520.f;
@@ -68,6 +69,8 @@ private:
     void drawShop(const Rect& b);
     void drawFocus(const Rect& b);
     void drawBattle(const Rect& b);
+    void drawGuide(const Rect& b);
+    void drawGround(float gy, float gh);
 
     // task helpers
     void submitTaskForm();
@@ -81,6 +84,12 @@ private:
     void battleResolve();
     void battleFinish(bool ran);
     void fighterCard(float x, float y, float w, float h, int side, int slot, bool highlight, bool targetable, bool* clicked);
+    void battleAfterTurn();
+    void stepPlayback();
+    void spawnEffects(const gf::Snapshot& before, const gf::Snapshot& after, gf::Ref actor);
+    const gf::Fighter* shownFighter(int side, int slot, int* teamIdx) const;
+    int shownBench(int side) const;
+    Rect cardRect(int side, int slot) const;
     void showResultLines(const std::vector<std::string>& lines);
 
     gf::GameState& g_;
@@ -101,6 +110,7 @@ private:
     std::vector<std::string> balloons_;
     std::vector<Walker> walkers_;
     float animT_ = 0;
+    float dt_ = 0;
     float nagSeconds_ = 0;
 
     // tasks tab
@@ -108,7 +118,7 @@ private:
     float scrollToday_ = 0, scrollAll_ = 0;
     int confirmTask_ = -1;
     std::string formTitle_;
-    int formEffort_ = 1, formRepeat_ = 1, formWindow_ = 0, formHour_ = 9, formMin_ = 0, formN_ = 2;
+    int formEffort_ = 1, formRepeat_ = 0, formWindow_ = 0, formHour_ = 9, formMin_ = 0, formN_ = 2;
     int formDays_ = 0b0111110;
     bool formRemind_ = true;
 
@@ -121,6 +131,11 @@ private:
     long long focusEndMs_ = 0;
     int focusMinutes_ = 25;
     int focusDone_ = 0;  // minutes of the session that just finished (0 = none)
+    bool battleReady_ = false;  // a focus session ended: the Battle button pulses until you open it
+
+    // guide
+    int guideSection_ = 0;
+    float scrollGuide_ = 0;
 
     // battle
     std::unique_ptr<gf::Battle> battle_;
@@ -133,6 +148,21 @@ private:
     size_t logShown_ = 0;
     std::vector<std::string> resultLines_;
     std::string battleNote_;
+
+    // turn playback: the engine resolves a whole turn at once, the UI replays its events one at a time
+    struct FloatText { float x, y; std::string text; gfx::Color col; float life; };
+    std::vector<FloatText> floats_;
+    bool playing_ = false;
+    bool fastPlay_ = false;
+    size_t playStart_ = 0, playEnd_ = 0;
+    int viewRel_ = -1;       // -1 = the state before the turn, else index into this turn's events
+    float playTimer_ = 0;
+    gf::Snapshot prevSnap_;
+    float hpAnim_[2][6] = {{-1, -1, -1, -1, -1, -1}, {-1, -1, -1, -1, -1, -1}};
+    float flash_[2][3] = {{0, 0, 0}, {0, 0, 0}};
+    float glow_[2][3] = {{0, 0, 0}, {0, 0, 0}};
+    float flashGood_[2][3] = {{0, 0, 0}, {0, 0, 0}};
+    Rect battleBody_{};
 };
 
 }  // namespace ui

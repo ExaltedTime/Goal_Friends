@@ -214,10 +214,23 @@ ID2D1Bitmap* Gfx::bitmapFor(SpriteKind kind, int id, int frame, bool flip) {
     return bmp;
 }
 
-void Gfx::sprite(SpriteKind kind, int id, int frame, bool flip, float x, float y, float sc, float opacity) {
+void Gfx::sprite(SpriteKind kind, int id, int frame, bool flip, float x, float y, float size, float opacity) {
     ID2D1Bitmap* b = bitmapFor(kind, id, frame, flip);
     if (!b) return;
-    rt_->DrawBitmap(b, rect(x, y, 16 * sc, 16 * sc), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, nullptr);
+    rt_->DrawBitmap(b, rect(x, y, size, size), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, nullptr);
+}
+
+float Gfx::textHeight(const std::string& s, float w, float size, bool bold) {
+    IDWriteTextFormat* f = format(size, (bold ? TF_BOLD : 0) | TF_WRAP);
+    if (!f || s.empty()) return 0;
+    const std::wstring ws = widen(s);
+    IDWriteTextLayout* layout = nullptr;
+    dwrite_->CreateTextLayout(ws.c_str(), static_cast<UINT32>(ws.size()), f, std::max(1.f, w), 10000.f, &layout);
+    if (!layout) return 0;
+    DWRITE_TEXT_METRICS m = {};
+    layout->GetMetrics(&m);
+    layout->Release();
+    return m.height;
 }
 
 void Gfx::pushClip(float x, float y, float w, float h) { rt_->PushAxisAlignedClip(rect(x, y, w, h), D2D1_ANTIALIAS_MODE_ALIASED); }

@@ -68,6 +68,18 @@ struct Side {
     bool isPlayer = false;
 };
 
+// A frozen copy of the battlefield, used to replay a turn step by step.
+struct Snapshot {
+    std::array<std::vector<Fighter>, 2> team;
+    std::array<std::array<int, kActiveSlots>, 2> active{};
+};
+
+struct Event {
+    std::string text;
+    Ref actor{-1, -1};  // who is acting, when this line announces a move
+    Snapshot snap;      // state right after this event
+};
+
 class Battle {
 public:
     Battle(std::vector<Fighter> player, std::vector<Fighter> enemy, uint32_t seed, bool wild = false, bool smartAi = false);
@@ -79,6 +91,10 @@ public:
     bool wild = false;
     bool smartAi = false;           // bosses: no randomness in move choice
     bool autoReplacePlayer = false; // simulations: pick bench replacements automatically
+    bool recordEvents = false;      // UI: keep a snapshot after every log line so a turn can be replayed
+    std::vector<Event> events;
+    int areaId = 0;
+    Snapshot snapshot() const;
 
     // Accessors
     bool slotFilled(int side, int slot) const { return sides[side].active[slot] >= 0; }
@@ -132,6 +148,7 @@ private:
     void pivot(Ref who);
     void endOfTurn();
     void checkWinner();
+    void say(const std::string& text, Ref actor = Ref{-1, -1});
     int countBuffs(const Fighter& f) const;
     void clearBuffs(Fighter& f);
     Ref randomEnemy(int side);

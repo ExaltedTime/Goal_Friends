@@ -106,16 +106,32 @@ struct Species {
     int evolveLevel = 0;
     bool rare = false;
     bool starter = false;
+    int habitats = 0;   // bitmask of areas where this friend can be found
     int hp = 3, atk = 3, def = 3, spd = 3;  // pips 1..5
     std::array<Move, 4> moves;
 };
 
 struct Stats { int hp, atk, def, spd; };
 
-constexpr int kSpeciesCount = 31;
+constexpr int kSpeciesCount = 48;
 constexpr int kMaxLevel = 50;
 constexpr int kPartySize = 6;
 constexpr int kActiveSlots = 3;
+
+// Battle areas. Each one has a theme (which friends live there), a level bonus and a coin multiplier.
+struct Area {
+    int id = 0;
+    std::string name;
+    std::string desc;
+    int habitat = 0;       // bit mask value for this area
+    int levelBonus = 0;
+    double coinMult = 1.0;
+    int unlockWins = 0;    // battles won needed to unlock
+    unsigned colorTop = 0, colorBottom = 0;  // 0xRRGGBB background tint for the battle screen
+};
+constexpr int kAreaCount = 6;
+const std::vector<Area>& allAreas();
+const Area& area(int id);
 
 const std::vector<Species>& allSpecies();
 const Species& species(int id);

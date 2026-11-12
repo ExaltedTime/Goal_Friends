@@ -223,6 +223,116 @@ std::vector<Species> build() {
         util("Wild Card").CD(3).T(Tgt::Self).Special(Sp::WildCard),
         mv("Prismatic Shatter", M).CD(3).Special(Sp::PrismaticShatter),
         util("Anarchy").CD(5).T(Tgt::Self).Special(Sp::Anarchy)}, true);
+
+    // ======================= Expansion (ids 31..47) =======================
+    // ---- L9 Sporeling line (fungus: wounds and spread control) ----
+    add("Sporeling", 17, 1, 3, 2, 3, 2, {
+        mv("Cap Bonk", L),
+        util("Spore Puff").CD(3).T(Tgt::Spread).Fx(EK::Daze, 1),
+        util("Rot Touch").CD(3).Fx(EK::Wound, 3),
+        util("Mulch Meal").CD(4).T(Tgt::Self).Me(EK::Heal, 20).Me(EK::Regen, 2)});
+    add("Mycelord", 17, 2, 4, 3, 3, 2, {
+        mv("Toadstool Slam", M).Fx(EK::Wound, 2, 0, 30),
+        util("Choking Cloud").CD(4).T(Tgt::Spread).Fx(EK::Wound, 2),
+        util("Fungal Network").CD(4).T(Tgt::Ally).Fx(EK::Regen, 3).Fx(EK::Shield, 10),
+        util("Parasite Bloom").CD(3).Fx(EK::Wound, 3).Me(EK::Leech, 3)});
+    evo(31, 32, 20);
+
+    // ---- L10 Sandpup line (desert: evasion and slowing) ----
+    add("Sandpup", 18, 1, 3, 3, 2, 3, {
+        mv("Sand Kick", L).Fx(EK::Daze, 1, 0, 40),
+        util("Dust Devil").CD(3).T(Tgt::Self).Me(EK::Evade).Me(EK::Haste, 1),
+        mv("Quicksand Snap", M).CD(3).Fx(EK::Slow, 2),
+        mv("Sinkhole Ambush", M).CD(3).Charge(true)});
+    add("Dunewyrm", 18, 2, 4, 3, 3, 3, {
+        mv("Sandstorm", L).CD(3).T(Tgt::Spread).Fx(EK::Daze, 2),
+        util("Mirage Coil").CD(4).T(Tgt::Self).Me(EK::Evade).Me(EK::Armor, 2),
+        mv("Constrict", M).CD(3).Fx(EK::Trap, 2),
+        util("Serpent Dance").CD(4).T(Tgt::Ally).Fx(EK::Haste, 2).Fx(EK::Focus)});
+    evo(33, 34, 20);
+
+    // ---- L11 Cogpup line (clockwork: tempo and empowerment) ----
+    add("Cogpup", 19, 1, 3, 3, 3, 3, {
+        mv("Wrench Whack", L),
+        util("Oil Slick").CD(3).Fx(EK::Slow, 2).Me(EK::Haste, 1),
+        util("Tighten Bolts").CD(3).T(Tgt::Self).Me(EK::Armor, 2).Me(EK::Focus),
+        mv("Spring Dash", M).CD(2).Prio()});
+    add("Gearhound", 19, 2, 4, 4, 3, 3, {
+        mv("Piston Punch", H).CD(2).IgnoreDef(20),
+        util("Overclock").CD(4).T(Tgt::Self).Me(EK::AtkMod, 40, 3).Me(EK::SpdMod, 20, 3),
+        mv("Gear Grind", M).Fx(EK::DefMod, -20, 2),
+        util("Safety Shell").CD(4).T(Tgt::Self).Me(EK::Shield, 25).Me(EK::Cleanse)});
+    evo(35, 36, 20);
+
+    // ---- L12 Pearlclam line (shore: shells, thorns and support) ----
+    add("Pearlclam", 20, 1, 4, 1, 4, 1, {
+        mv("Shell Tap", L),
+        util("Clam Up").CD(3).T(Tgt::Self).Me(EK::Armor, 2).Me(EK::Shield, 10),
+        mv("Pearl Shot", M).CD(2).Fx(EK::Daze, 1),
+        util("Tide Pool").CD(4).T(Tgt::Ally).Fx(EK::Heal, 15).Fx(EK::Regen, 2)});
+    add("Pearlarch", 20, 2, 5, 2, 5, 1, {
+        mv("Pearl Barrage", 0).CD(2).H({L, L, L}).Rand(),
+        util("Iron Shell").CD(4).T(Tgt::Self).Me(EK::Armor, 3).Me(EK::Thorns, 3),
+        mv("Riptide Slam", M).CD(3).Fx(EK::ForceSwitch),
+        util("Lustrous Veil").CD(4).T(Tgt::Ally).Fx(EK::Shield, 30).Fx(EK::Cleanse)});
+    evo(37, 38, 20);
+
+    // ---- L13 Cragoat line (peaks: rams and traps) ----
+    add("Cragoat", 21, 1, 3, 4, 2, 3, {
+        mv("Head Butt", M).Recoil(5),
+        mv("Mountain Leap", M).CD(3).Charge(true).Fx(EK::Daze, 1),
+        mv("Horn Lock", M).CD(3).Fx(EK::Trap, 2),
+        util("Steady Footing").CD(3).T(Tgt::Self).Me(EK::Armor, 2).Me(EK::Cleanse)});
+    add("Summitaur", 21, 2, 4, 5, 3, 3, {
+        mv("Avalanche Charge", H).CD(2).Recoil(8).Fx(EK::Slow, 1),
+        mv("Thunderhoof", M).CD(3).T(Tgt::Spread).Fx(EK::Daze, 1),
+        util("Cliffside Stance").CD(3).T(Tgt::Self).Me(EK::Counter, 25),
+        util("Summit Roar").CD(4).T(Tgt::Spread).Fx(EK::Slow, 1).Me(EK::AtkMod, 25, 3)});
+    evo(39, 40, 20);
+
+    // ---- L14 Finlet line (sea: three stages, tempo into control) ----
+    add("Finlet", 22, 1, 2, 2, 2, 4, {
+        mv("Flick Splash", L),
+        mv("Tidal Dart", L).CD(3).Prio(),
+        util("Bubble Net").CD(3).Fx(EK::Trap, 2),
+        util("Schooling").CD(4).T(Tgt::Ally).Fx(EK::Haste, 2).Fx(EK::Regen, 2)});
+    add("Reefray", 22, 2, 3, 3, 3, 4, {
+        mv("Stingray Lash", M).Fx(EK::Wound, 2, 0, 35),
+        util("Glide Away").CD(3).T(Tgt::Self).Me(EK::Evade).Me(EK::Haste, 2),
+        mv("Electro Pulse", M).CD(3).T(Tgt::Spread).Fx(EK::Daze, 1),
+        util("Coral Wall").CD(4).T(Tgt::Ally).Fx(EK::Armor, 3).Fx(EK::Shield, 15)});
+    add("Leviathor", 22, 3, 5, 4, 4, 3, {
+        mv("Abyssal Crush", H).CD(2).Fx(EK::Slow, 2),
+        mv("Maelstrom", M).CD(4).T(Tgt::Spread).Fx(EK::ForceSwitch),
+        util("Deep Current").CD(4).T(Tgt::Ally).Fx(EK::Regen, 4).Fx(EK::Cleanse),
+        mv("Kraken's Grasp", M).CD(3).Fx(EK::Trap, 3).Fx(EK::Wound, 2)});
+    evo(41, 42, 16); evo(42, 43, 32);
+
+    // ---- Four more rares ----
+    add("Eclipsa", 23, 1, 3, 3, 2, 4, {
+        mv("Crescent Slash", M).Fx(EK::Mark),
+        util("Lunar Eclipse").CD(5).T(Tgt::Spread).Fx(EK::Daze, 2).Fx(EK::Slow, 1),
+        util("Dusk Step").CD(3).T(Tgt::Self).Me(EK::Evade).Me(EK::Haste, 1).Me(EK::PrioNext),
+        util("Starlit Hex").CD(4).Fx(EK::Doom, 2).Fx(EK::Mark)}, true);
+    add("Mossback", 24, 1, 5, 2, 5, 1, {
+        mv("Shell Bash", M),
+        util("Garden Grows").CD(4).T(Tgt::Ally).Fx(EK::Regen, 4).Fx(EK::Shield, 15),
+        util("Root Snare").CD(3).Fx(EK::Trap, 2).Fx(EK::Slow, 1),
+        util("Sunbaked Rest").CD(5).T(Tgt::Self).Me(EK::Heal, 40).Me(EK::Slow, 1)}, true);
+    add("Hailwing", 25, 1, 3, 4, 2, 5, {
+        mv("Frost Gust", L).CD(2).T(Tgt::Spread).Fx(EK::Slow, 1),
+        mv("Hailstorm", 0).CD(3).H({35, 35, 35}).Rand().PerHit().Fx(EK::Slow, 1, 0, 30),
+        mv("Wind Chill Dive", H).CD(3).Charge(true),
+        util("Jet Stream").CD(4).T(Tgt::Ally).Fx(EK::Haste, 3).Fx(EK::Focus)}, true);
+    add("Magmaroth", 26, 1, 5, 4, 4, 1, {
+        mv("Magma Fist", M).Fx(EK::Wound, 2, 0, 30),
+        util("Molten Carapace").CD(4).T(Tgt::Self).Me(EK::Armor, 3).Me(EK::Thorns, 3),
+        mv("Eruption", M).CD(3).T(Tgt::Spread).Fx(EK::Wound, 2),
+        util("Obsidian Rage").CD(5).T(Tgt::Self).Me(EK::SelfDamage, 15).Me(EK::AtkMod, 50, 3).Me(EK::Empower, 40, 1)}, true);
+
+    // Habitats: where each line can be found (bit 0 Meadow, 1 Woods, 2 Caverns, 3 Shore, 4 Peaks, 5 Ruins).
+    const int hab[27] = {3, 17, 33, 20, 9, 34, 17, 36, 5, 16, 40, 32, 4, 6, 40, 48, 32, 2, 5, 36, 8, 16, 8, 34, 10, 16, 36};
+    for (auto& sp : v) sp.habitats = hab[sp.line];
     return v;
 }
 
@@ -232,6 +342,19 @@ const std::vector<Species>& allSpecies() {
     static const std::vector<Species> s = build();
     return s;
 }
+
+const std::vector<Area>& allAreas() {
+    static const std::vector<Area> a = {
+        {0, "Sunny Meadow", "Gentle fields where most friends start out.", 1, 0, 1.0, 0, 0x6EC27A, 0x2E7D4F},
+        {1, "Whispering Woods", "Damp, shady trees full of fungus and moths.", 2, 1, 1.2, 3, 0x3F8F5A, 0x16402C},
+        {2, "Echo Caverns", "Dark tunnels with crystals, claws and metal.", 4, 2, 1.4, 8, 0x6A6F86, 0x23263A},
+        {3, "Sapphire Shore", "Tidepools and reefs, calm until it isn't.", 8, 3, 1.6, 14, 0x58B4D8, 0x1E5E8C},
+        {4, "Stormcrest Peaks", "Freezing winds and sure-footed climbers.", 16, 4, 1.8, 22, 0xA9C6E8, 0x4A5F86},
+        {5, "Ember Ruins", "Ancient halls where time and fire misbehave.", 32, 6, 2.2, 32, 0xC8684A, 0x4A2230}};
+    return a;
+}
+
+const Area& area(int id) { return allAreas().at(static_cast<size_t>(id)); }
 
 const Species& species(int id) { return allSpecies().at(static_cast<size_t>(id)); }
 

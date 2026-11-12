@@ -1,7 +1,7 @@
-# Goal Friends — Design Doc (draft v0.6)
+# Goal Friends — Design Doc (draft v0.7)
 
 _Status: working prototype built (see section 11). Personal use, Windows laptop, native C++.
-Companion file: [ROSTER.md](ROSTER.md) (31 creatures and their moves)._
+Companion file: [ROSTER.md](ROSTER.md) (48 creatures and their moves)._
 
 A creature-collector that lives as a slim strip along the bottom of your screen. **Real-life tasks are the
 only way to progress.** You can't grind in-game: tasks give you XP, Energy and Coins, and you spend
@@ -84,7 +84,7 @@ Rewards and streaks:
 - Each friend has: **base stats** (HP, ATK, DEF, SPD), **level** (1 to 50) and **exactly 4 unique moves**.
 - Moves are unique to each creature, including between evolution stages (an evolved form has its own 4 moves).
 - **Evolution:** 3-stage lines at levels 16 and 32, 2-stage lines at level 20. Six single-stage rares.
-- **Roster:** 31 friends. Drafted in [ROSTER.md](ROSTER.md): 3 starter lines (9) + 8 two-stage lines (16) + 6 rares (6).
+- **Roster:** 48 friends, listed in [ROSTER.md](ROSTER.md): 3 starter lines, 13 two-stage lines, one extra three-stage line and 10 rares.
 - **Stat growth:** `stat = base * (1 + 0.06 * (level - 1))` plus a small flat bonus (tuned in balancing).
 
 **Getting friends:**
@@ -289,3 +289,23 @@ per-pixel alpha and click-through on the desktop, tray icon and balloon notifica
 - Reminders need the app running (tray). Missed reminders collapse into one balloon.
 - Boss unlock is a 3-day streak; reward is a random unowned rare.
 - Balance is rough: simulated AI-vs-AI win rates range from about 47% to 73% per friend, average battle about 13 turns.
+
+## 12. Changes in v0.7 (from your prototype feedback)
+
+- **Combat is no longer instant.** The engine still resolves a turn at once, but it records an event and a snapshot of
+  the battlefield after every log line. The UI replays them one at a time: the acting friend glows and lunges,
+  health bars slide, red and green floating numbers show damage and healing, the log highlights the current line,
+  and Skip / Speed buttons let you jump ahead.
+- **Guide tab:** how tasks, friends, focus sessions, battles, status effects and areas work.
+- **Battle areas:** six areas with their own friends, level bonus, coin multiplier and unlock (battles won).
+- **New tasks don't repeat by default.**
+- **Roster expanded to 48** (17 new friends with 68 new unique moves).
+- **Sprites are tied to abilities:** 24x24 pixel art with a motif per line (sprout and thorns for the regrowing tank,
+  lightning tail for the speed fox, flame crest for the burst hound, clock face on the owl, gear on the clockwork dog,
+  shell and pearl on the clam, curled horns on the goat, and so on). Evolutions grow visibly.
+- **Ground:** more translucent and detailed (layered soil, grass tufts, flowers, bushes, pebbles, fireflies at night).
+- **Hotkey Ctrl+Shift+Ô** hides and shows the window. Hiding draws a fully transparent, click-through frame, so the
+  hotkey, reminders and timers keep working. If the layout has no Ô key the hotkey falls back to the Slovak position.
+- **Focus sessions:** no popup at the end (a notification, and the Battle button pulses). While a session runs, every
+  other tab and strip button is locked.
+- Wild encounters and bosses scale with your team size, so a lone early friend isn't swamped.

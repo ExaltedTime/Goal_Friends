@@ -428,6 +428,9 @@ void dismissReminder(GameState& g, int taskId, int day) { reminderFor(g, taskId,
 
 int energyCost(BattleMode m) { return m == BattleMode::Wild ? 1 : m == BattleMode::Duel ? 2 : 5; }
 bool bossUnlocked(const GameState& g) { return g.globalStreak >= 3; }
+bool areaUnlocked(const GameState& g, int areaId) {
+    return areaId >= 0 && areaId < kAreaCount && g.battlesWon >= area(areaId).unlockWins;
+}
 
 namespace {
 int entryLevel(const Species& s) {
@@ -438,9 +441,10 @@ int entryLevel(const Species& s) {
 }
 
 // One species per line that is valid at this level (its current evolution form), plus optionally rares.
-std::vector<int> candidatesFor(int level, bool rares, bool finalsOnly) {
+std::vector<int> candidatesFor(int level, bool rares, bool finalsOnly, int habitat) {
     std::vector<int> out;
     for (const auto& s : allSpecies()) {
+        if ((s.habitats & habitat) == 0) continue;
         if (s.rare) { if (rares && level >= 5) out.push_back(s.id); continue; }
         if (finalsOnly) { if (s.evolvesTo < 0) out.push_back(s.id); continue; }
         if (entryLevel(s) <= level && (s.evolvesTo < 0 || level < s.evolveLevel)) out.push_back(s.id);
@@ -449,7 +453,7 @@ std::vector<int> candidatesFor(int level, bool rares, bool finalsOnly) {
 }
 }  // namespace
 
-bool startBattle(GameState& g, BattleMode mode, tu::Time now, std::unique_ptr<Battle>& out, std::string& why) {
+bool startBattle(GameState& g, BattleMode mode, int areaId, tu::Time now, std::unique_ptr<Battle>& out, std::string& why) {
     std::vector<Fighter> mine;
     int levelSum = 0;
     const bool sleepy = isSleepy(g, now.day);
@@ -460,37 +464,43 @@ bool startBattle(GameState& g, BattleMode mode, tu::Time now, std::unique_ptr<Ba
         levelSum += f->level;
     }
     if (mine.empty()) { why = "You need at least one friend first."; return false; }
+    if (!areaUnlocked(g, areaId)) { why = "That area isn't unlocked yet."; return false; }
     if (mode == BattleMode::Boss && !bossUnlocked(g)) { why = "Bosses unlock with a 3-day streak."; return false; }
     const int cost = energyCost(mode);
     if (g.energy < cost) { why = "Need " + std::to_string(cost) + " Energy (you have " + std::to_string(g.energy) + ")."; return false; }
     g.energy -= cost;
+    g.lastArea = areaId;
+    const Area& ar = area(areaId);
 
     auto rng = makeRng(g);
     const int avg = std::max(1, static_cast<int>(std::lround(static_cast<double>(levelSum) / static_cast<double>(mine.size()))));
     std::vector<Fighter> foes;
     int count = 1;
     switch (mode) {
-        case BattleMode::Wild: count = 1 + pick(rng, 3); break;
+        // Foes scale with your team so a lone early friend isn't thrown at three wild friends at once.
+        case BattleMode::Wild: count = std::min(1 + pick(rng, 3), static_cast<int>(mine.size())); break;
         case BattleMode::Duel: count = static_cast<int>(mine.size()); break;
-        case BattleMode::Boss: count = std::max(3, static_cast<int>(mine.size())); break;
+        case BattleMode::Boss: count = static_cast<int>(mine.size()) + 1; break;
     }
     count = std::min(count, kPartySize);
     for (int i = 0; i < count; ++i) {
         int level;
         std::vector<int> pool;
         if (mode == BattleMode::Boss) {
-            level = std::min(kMaxLevel, avg + 4);
-            pool = candidatesFor(std::max(level, 33), true, true);
+            level = std::min(kMaxLevel, avg + 4 + ar.levelBonus);
+            pool = candidatesFor(std::max(level, 33), true, true, ar.habitat);
         } else {
-            level = std::max(1, avg + (mode == BattleMode::Wild ? pick(rng, 3) - 1 : pick(rng, 3)));
-            pool = candidatesFor(level, pick(rng, 100) < 8, false);
+            level = std::min(kMaxLevel, std::max(1, avg + ar.levelBonus + (mode == BattleMode::Wild ? pick(rng, 3) - 1 : pick(rng, 3))));
+            pool = candidatesFor(level, pick(rng, 100) < 8, false, ar.habitat);
         }
+        if (pool.empty()) pool = candidatesFor(level, true, false, 63);
         const int sid = pool[static_cast<size_t>(pick(rng, static_cast<int>(pool.size())))];
         foes.push_back(makeFighter(sid, level));
         g.dexSeen.insert(sid);
     }
     out = std::make_unique<Battle>(std::move(mine), std::move(foes), static_cast<uint32_t>(rng()), mode == BattleMode::Wild, mode == BattleMode::Boss);
     out->autoReplacePlayer = false;
+    out->areaId = areaId;
     return true;
 }
 
@@ -527,6 +537,7 @@ Result finishBattle(GameState& g, const Battle& b, BattleMode mode) {
         case BattleMode::Duel: coins = 20 + 2 * avg; break;
         case BattleMode::Boss: coins = 60 + 3 * avg; break;
     }
+    coins = static_cast<int>(coins * area(b.areaId).coinMult);
     g.coins += coins;
     r.messages.push_back("Victory! +" + std::to_string(coins) + " coins.");
     auto rng = makeRng(g);
@@ -573,6 +584,7 @@ json::Value toJson(const GameState& g) {
     o["bossesWon"] = g.bossesWon;
     o["battlesWon"] = g.battlesWon;
     o["battlesPlayed"] = g.battlesPlayed;
+    o["lastArea"] = g.lastArea;
     o["rngSeed"] = static_cast<long long>(g.rngSeed);
 
     Value st = Value::object();
@@ -669,6 +681,7 @@ bool fromJson(const json::Value& o, GameState& g) {
     n.bossesWon = o.at("bossesWon").asInt();
     n.battlesWon = o.at("battlesWon").asInt();
     n.battlesPlayed = o.at("battlesPlayed").asInt();
+    n.lastArea = std::clamp(o.at("lastArea").asInt(), 0, kAreaCount - 1);
     n.rngSeed = static_cast<uint32_t>(o.at("rngSeed").asInt64(12345));
     n.settings.confirmDone = o.at("settings").at("confirmDone").asBool(true);
     n.settings.quietStart = o.at("settings").at("quietStart").asInt(22 * 60);

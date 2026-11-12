@@ -39,7 +39,9 @@ public:
     void line(float x1, float y1, float x2, float y2, Color c, float thickness = 1);
     void text(const std::string& s, float x, float y, float w, float h, float size, Color c, int flags = 0);
     float textWidth(const std::string& s, float size, bool bold = false);
-    void sprite(SpriteKind kind, int id, int frame, bool flip, float x, float y, float scale, float opacity = 1.f);
+    // Draws a sprite scaled to `size` x `size` logical pixels (use multiples of 24 for crisp pixels).
+    void sprite(SpriteKind kind, int id, int frame, bool flip, float x, float y, float size, float opacity = 1.f);
+    float textHeight(const std::string& s, float w, float size, bool bold = false);
     void pushClip(float x, float y, float w, float h);
     void popClip();
 

@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <vector>
 
 #include "game.hpp"
 #include "gfx.hpp"
@@ -21,6 +22,7 @@ constexpr UINT_PTR TIMER_FRAME = 1;
 constexpr UINT_PTR TIMER_SLOW = 2;
 constexpr UINT CMD_TOGGLE = 100;
 constexpr UINT CMD_QUIT = 101;
+constexpr int HOTKEY_ID = 1;
 
 struct App {
     HWND hwnd = nullptr;
@@ -43,6 +45,8 @@ struct App {
     UINT frameInterval = 66;
     int lastDay = -1;
     int slowCount = 0;
+    bool hotkeyOk = false;
+    bool hintShown = false;
 };
 
 App* g_app = nullptr;
@@ -75,7 +79,7 @@ void saveNow(App& a) {
 
 HICON makeTrayIcon(int speciesId) {
     const gf::Sprite s = gf::makeSprite(speciesId, 0);
-    const int scale = 2, n = 16 * scale;
+    const int scale = 2, n = gf::kSpriteSize * scale;
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = n;
@@ -187,6 +191,24 @@ void renderFrame(App& a) {
     setFrameInterval(a, active ? 33 : 66);
 }
 
+// "Hidden" means a fully transparent, click-through frame. The window itself stays alive, so the global hotkey and
+// timers keep working exactly as when it is visible.
+void presentBlank(App& a) {
+    const int pw = a.work.right - a.work.left;
+    const int ph = static_cast<int>(ui::Ui::kStrip * a.scale);
+    if (!a.gx.resize(pw, ph)) return;
+    a.gx.setScale(a.scale);
+    if (!a.gx.begin()) return;
+    a.gx.end();
+    HDC screen = GetDC(nullptr);
+    POINT dst = {a.work.left, a.work.bottom - ph};
+    SIZE size = {pw, ph};
+    POINT src = {0, 0};
+    BLENDFUNCTION bf = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
+    UpdateLayeredWindow(a.hwnd, screen, &dst, &size, a.gx.dc(), &src, 0, &bf, ULW_ALPHA);
+    ReleaseDC(nullptr, screen);
+}
+
 void slowTick(App& a) {
     const tu::Time now = localNow();
     if (now.day != a.lastDay) {
@@ -215,8 +237,52 @@ void slowTick(App& a) {
 
 void toggleVisible(App& a) {
     a.visible = !a.visible;
-    ShowWindow(a.hwnd, a.visible ? SW_SHOWNA : SW_HIDE);
-    if (a.visible) renderFrame(a);
+    a.in = ui::Input{};  // drop any held input
+    if (a.visible) {
+        a.lastTick = 0;
+        renderFrame(a);
+    } else {
+        presentBlank(a);
+        if (!a.hintShown && !std::getenv("GF_NOHINT")) {
+            a.hintShown = true;
+            balloon(a, a.hotkeyOk ? "Hidden. Press Ctrl+Shift+\u00d4 (or click the tray icon) to show it again." : "Hidden. Click the tray icon to show it again.");
+        }
+    }
+}
+
+// Ctrl+Shift+O-circumflex toggles the window. The key is found from the installed keyboard layouts, so it lands on
+// the right physical key (the key next to L on a Slovak keyboard); if no layout has the character we fall back to
+// the key that holds it on a Slovak layout (VK_OEM_1).
+void registerHotkey(App& a) {
+    UINT vk = VK_OEM_1;  // the Slovak key for the o-circumflex
+    const int n = GetKeyboardLayoutList(0, nullptr);
+    std::vector<HKL> layouts(static_cast<size_t>(std::max(n, 0)));
+    if (n > 0) GetKeyboardLayoutList(n, layouts.data());
+    // Use the character's key from an installed layout, but only a direct, non-letter key. Dead-key or AltGr
+    // combinations, and plain letters, would make a clumsy or colliding global shortcut.
+    auto direct = [](HKL l, UINT& out) {
+        const SHORT r = VkKeyScanExW(L'\u00f4', l);
+        if (r == -1) return false;
+        const UINT v = static_cast<UINT>(LOBYTE(r));
+        const int mods = HIBYTE(r);
+        if ((mods & ~1) != 0 || (v >= 0x30 && v <= 0x5A) || v == 0) return false;
+        out = v;
+        return true;
+    };
+    bool found = false;
+    for (HKL l : layouts)
+        if (LOWORD(reinterpret_cast<UINT_PTR>(l)) == 0x041B && direct(l, vk)) { found = true; break; }  // Slovak first
+    for (HKL l : layouts) {
+        if (found) break;
+        found = direct(l, vk);
+    }
+    a.hotkeyOk = RegisterHotKey(a.hwnd, HOTKEY_ID, MOD_CONTROL | MOD_SHIFT | MOD_NOREPEAT, vk) != 0;
+    if (const char* path = std::getenv("GF_TRACE")) {  // optional diagnostics
+        if (FILE* f = std::fopen(path, "a")) {
+            std::fprintf(f, "hotkey vk=0x%02x ok=%d err=%lu layouts=%d\n", vk, a.hotkeyOk ? 1 : 0, static_cast<unsigned long>(GetLastError()), n);
+            std::fclose(f);
+        }
+    }
 }
 
 void pasteClipboard(App& a) {
@@ -239,6 +305,7 @@ LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     if (msg == a->taskbarCreated && a->taskbarCreated) { addTray(*a); return 0; }
     switch (msg) {
         case WM_MOUSEMOVE: {
+            if (!a->visible) return 0;
             a->in.mx = static_cast<float>(static_cast<short>(LOWORD(lp))) / a->scale;
             a->in.my = static_cast<float>(static_cast<short>(HIWORD(lp))) / a->scale;
             a->lastActivity = GetTickCount64();
@@ -254,6 +321,7 @@ LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             a->tracking = false;
             return 0;
         case WM_LBUTTONDOWN:
+            if (!a->visible) return 0;
             a->in.mx = static_cast<float>(static_cast<short>(LOWORD(lp))) / a->scale;
             a->in.my = static_cast<float>(static_cast<short>(HIWORD(lp))) / a->scale;
             a->in.down = a->in.pressed = true;
@@ -271,6 +339,7 @@ LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         case WM_MOUSEACTIVATE:
             return a->panelWasOpen ? MA_ACTIVATE : MA_NOACTIVATE;
         case WM_CHAR: {
+            if (!a->visible) return 0;
             const wchar_t c = static_cast<wchar_t>(wp);
             if (c == 8) a->in.backspace = true;
             else if (c == 13) a->in.enter = true;
@@ -289,13 +358,17 @@ LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         case WM_SETTINGCHANGE:
             refreshWorkArea(*a);
             return 0;
+        case WM_HOTKEY:
+            if (const char* path = std::getenv("GF_TRACE")) { if (FILE* f = std::fopen(path, "a")) { std::fprintf(f, "WM_HOTKEY received\n"); std::fclose(f); } }
+            if (wp == static_cast<WPARAM>(HOTKEY_ID) && !std::getenv("GF_HOTKEY_NOHIDE")) toggleVisible(*a);
+            return 0;
         case WM_TRAY:
             if (lp == WM_LBUTTONUP) toggleVisible(*a);
             else if (lp == WM_RBUTTONUP) {
                 POINT pt;
                 GetCursorPos(&pt);
                 HMENU menu = CreatePopupMenu();
-                AppendMenuW(menu, MF_STRING, CMD_TOGGLE, a->visible ? L"Hide Goal Friends" : L"Show Goal Friends");
+                AppendMenuW(menu, MF_STRING, CMD_TOGGLE, a->visible ? L"Hide Goal Friends (Ctrl+Shift+\u00f4)" : L"Show Goal Friends (Ctrl+Shift+\u00f4)");
                 AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
                 AppendMenuW(menu, MF_STRING, CMD_QUIT, L"Quit");
                 SetForegroundWindow(hwnd);
@@ -314,6 +387,7 @@ LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             saveNow(*a);
             return 0;
         case WM_DESTROY:
+            UnregisterHotKey(hwnd, HOTKEY_ID);
             saveNow(*a);
             Shell_NotifyIconW(NIM_DELETE, &a->nid);
             PostQuitMessage(0);
@@ -382,6 +456,8 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE, LPSTR, int) {
     app.taskbarCreated = RegisterWindowMessageW(L"TaskbarCreated");
     addTray(app);
 
+    registerHotkey(app);
+    if (!app.hotkeyOk) balloon(app, "Couldn't register Ctrl+Shift+\u00d4 (another app may be using it). Use the tray icon to hide or show the window.");
     ShowWindow(app.hwnd, SW_SHOWNA);
     SetTimer(app.hwnd, TIMER_FRAME, app.frameInterval, nullptr);
     SetTimer(app.hwnd, TIMER_SLOW, 1000, nullptr);

@@ -77,8 +77,22 @@ Battle::Battle(std::vector<Fighter> player, std::vector<Fighter> enemy, uint32_t
         for (size_t i = 0; i < side.team.size() && slot < kActiveSlots; ++i)
             if (side.team[i].alive()) side.active[static_cast<size_t>(slot++)] = static_cast<int>(i);
     }
-    log.push_back(wild ? "A wild encounter!" : "Battle start!");
+    say(wild ? "A wild encounter!" : "Battle start!");
     checkWinner();
+}
+
+Snapshot Battle::snapshot() const {
+    Snapshot sn;
+    for (int i = 0; i < 2; ++i) {
+        sn.team[static_cast<size_t>(i)] = sides[static_cast<size_t>(i)].team;
+        sn.active[static_cast<size_t>(i)] = sides[static_cast<size_t>(i)].active;
+    }
+    return sn;
+}
+
+void Battle::say(const std::string& text, Ref actor) {
+    log.push_back(text);
+    if (recordEvents) events.push_back(Event{text, actor, snapshot()});
 }
 
 int Battle::rnd(int n) {
@@ -202,11 +216,11 @@ void Battle::faintCheck(Ref t) {
     if (f.rebirth) {
         f.rebirth = false;
         f.hp = std::max(1, f.maxHp * 40 / 100);
-        log.push_back(nameOf(t.side, t.slot) + " rises from the ashes!");
+        say(nameOf(t.side, t.slot) + " rises from the ashes!");
         return;
     }
     f.hp = 0;
-    log.push_back(nameOf(t.side, t.slot) + " fainted!");
+    say(nameOf(t.side, t.slot) + " fainted!");
 }
 
 void Battle::hurt(Ref t, int amount, bool bypassShield) {
@@ -235,12 +249,12 @@ int Battle::dealHit(Ref u, Ref t, double power, const Move& m, double mult, int 
     if (d.evade) {
         d.evade = false;
         if (rnd(100) < d.evadeChance) {
-            log.push_back(nameOf(t.side, t.slot) + " evades!");
+            say(nameOf(t.side, t.slot) + " evades!");
             return -1;
         }
     }
     if (a.daze > 0 && !a.noMiss && rnd(100) < 30) {
-        log.push_back(nameOf(u.side, u.slot) + "'s attack misses!");
+        say(nameOf(u.side, u.slot) + "'s attack misses!");
         return -1;
     }
     double dmg;
@@ -259,45 +273,51 @@ int Battle::dealHit(Ref u, Ref t, double power, const Move& m, double mult, int 
     dmg *= 1.0 - 0.06 * d.plates;
     if (m.crit > 0 && rnd(100) < m.crit) {
         dmg *= 1.5;
-        log.push_back("A critical hit!");
+        say("A critical hit!");
     }
     const int dm = std::max(1, static_cast<int>(dmg));
 
     if (d.reflectDamage) {
         d.reflectDamage = false;
-        log.push_back(nameOf(t.side, t.slot) + " reflects the attack!");
+        say(nameOf(t.side, t.slot) + " reflects the attack!");
         hurt(u, dm, false);
         return 0;
     }
     if (d.counterAbsorb) {
         d.counterAbsorb = false;
         heal(t, dm / 2);
-        log.push_back(nameOf(t.side, t.slot) + " absorbs the hit!");
+        say(nameOf(t.side, t.slot) + " absorbs the hit!");
         return 0;
     }
 
     hurt(t, dm, m.ignoreDefenses);
-    log.push_back(nameOf(t.side, t.slot) + " takes " + std::to_string(dm) + " damage.");
+    say(nameOf(t.side, t.slot) + " takes " + std::to_string(dm) + " damage.");
 
     if (d.alive()) {
         if (d.counterMult > 0) {
             const int r = std::max(1, dm * d.counterMult / 10);
             d.counterMult = 0;
-            log.push_back(nameOf(t.side, t.slot) + " strikes back for " + std::to_string(r) + "!");
             hurt(u, r, false);
+            say(nameOf(t.side, t.slot) + " strikes back for " + std::to_string(r) + "!");
         }
         if (d.counterHitPower > 0) {
             const int r = std::max(1, static_cast<int>(estimateDamage(d, a, d.counterHitPower)));
             const int w = d.counterWound;
             d.counterHitPower = d.counterWound = 0;
-            log.push_back(nameOf(t.side, t.slot) + " retaliates for " + std::to_string(r) + "!");
             hurt(u, r, false);
+            say(nameOf(t.side, t.slot) + " retaliates for " + std::to_string(r) + "!");
             if (a.alive() && w > 0) a.wound = std::max(a.wound, w);
         }
     }
-    if (d.thorns > 0 && a.alive()) hurt(u, std::max(1, dm * 25 / 100), false);
+    if (d.thorns > 0 && a.alive()) {
+        hurt(u, std::max(1, dm * 25 / 100), false);
+        say(nameOf(u.side, u.slot) + " is pricked by thorns.");
+    }
     if (d.slowAttackers > 0) a.slow = std::max(a.slow, 1);
-    if (m.drain > 0) heal(u, dm * m.drain / 100);
+    if (m.drain > 0 && a.alive()) {
+        heal(u, dm * m.drain / 100);
+        say(nameOf(u.side, u.slot) + " drains some HP.");
+    }
     return dm;
 }
 
@@ -308,39 +328,39 @@ void Battle::applyEffect(const Effect& e, Ref target, Ref source) {
 
     if (isDebuff(e) && target.side != source.side && t->reflectDebuff) {
         t->reflectDebuff = false;
-        log.push_back(nameOf(target.side, target.slot) + " reflects the effect!");
+        say(nameOf(target.side, target.slot) + " reflects the effect!");
         target = source;
         t = &at(target);
     }
     const std::string who = nameOf(target.side, target.slot);
     switch (e.k) {
-        case EK::Wound: t->wound = std::max(t->wound, e.a); log.push_back(who + " is wounded."); break;
-        case EK::Daze: t->daze = std::max(t->daze, e.a); log.push_back(who + " is dazed."); break;
-        case EK::Slow: t->slow = std::max(t->slow, e.a); log.push_back(who + " is slowed."); break;
-        case EK::Haste: t->haste = std::max(t->haste, e.a); log.push_back(who + " speeds up!"); break;
-        case EK::Armor: t->armor = std::max(t->armor, e.a); log.push_back(who + " is armored."); break;
-        case EK::Thorns: t->thorns = std::max(t->thorns, e.a); log.push_back(who + " grows thorns."); break;
-        case EK::Regen: t->regen = std::max(t->regen, e.a); log.push_back(who + " starts regenerating."); break;
-        case EK::Focus: t->focus = true; log.push_back(who + " focuses."); break;
-        case EK::Mark: t->mark = true; log.push_back(who + " is marked."); break;
-        case EK::Trap: t->trap = std::max(t->trap, e.a); log.push_back(who + " is trapped."); break;
-        case EK::Stun: t->stun = 1; log.push_back(who + " is stunned!"); break;
+        case EK::Wound: t->wound = std::max(t->wound, e.a); say(who + " is wounded."); break;
+        case EK::Daze: t->daze = std::max(t->daze, e.a); say(who + " is dazed."); break;
+        case EK::Slow: t->slow = std::max(t->slow, e.a); say(who + " is slowed."); break;
+        case EK::Haste: t->haste = std::max(t->haste, e.a); say(who + " speeds up!"); break;
+        case EK::Armor: t->armor = std::max(t->armor, e.a); say(who + " is armored."); break;
+        case EK::Thorns: t->thorns = std::max(t->thorns, e.a); say(who + " grows thorns."); break;
+        case EK::Regen: t->regen = std::max(t->regen, e.a); say(who + " starts regenerating."); break;
+        case EK::Focus: t->focus = true; say(who + " focuses."); break;
+        case EK::Mark: t->mark = true; say(who + " is marked."); break;
+        case EK::Trap: t->trap = std::max(t->trap, e.a); say(who + " is trapped."); break;
+        case EK::Stun: t->stun = 1; say(who + " is stunned!"); break;
         case EK::Taunt: t->taunt = std::max(t->taunt, e.a); break;
-        case EK::Doom: t->doom = e.a; log.push_back(who + " is doomed."); break;
+        case EK::Doom: t->doom = e.a; say(who + " is doomed."); break;
         case EK::Seal:
             if (t->lastMove >= 0) {
                 t->sealMove = t->lastMove;
                 t->seal = 2;
-                log.push_back(who + "'s last move is sealed.");
+                say(who + "'s last move is sealed.");
             }
             break;
         case EK::Shield:
             t->shield = std::max(t->shield, t->maxHp * e.a / 100);
-            log.push_back(who + " gains a shield.");
+            say(who + " gains a shield.");
             break;
         case EK::Heal:
             heal(target, t->maxHp * e.a / 100);
-            log.push_back(who + " recovers HP.");
+            say(who + " recovers HP.");
             break;
         case EK::Cleanse:
             t->wound = t->daze = t->slow = t->trap = t->stun = t->taunt = t->doom = t->seal = 0;
@@ -368,7 +388,7 @@ void Battle::applyEffect(const Effect& e, Ref target, Ref source) {
         case EK::SelfDamage:
             t->hp = std::max(1, t->hp - std::max(1, t->maxHp * e.a / 100));
             break;
-        case EK::Plate: t->plates = std::min(5, t->plates + 1); log.push_back(who + " adds a plate."); break;
+        case EK::Plate: t->plates = std::min(5, t->plates + 1); say(who + " adds a plate."); break;
         case EK::Leech:
             t->leechTurns = e.a;
             t->leechSrcSide = source.side;
@@ -388,23 +408,23 @@ void Battle::doSwitch(Ref who, int benchIdx) {
         if (a == benchIdx) return;
     Fighter& old = at(who);
     if (old.alive() && old.trap > 0) {
-        log.push_back(nameOf(who.side, who.slot) + " is trapped and can't leave!");
+        say(nameOf(who.side, who.slot) + " is trapped and can't leave!");
         return;
     }
     const std::string oldName = nameOf(who.side, who.slot);
     old.clearStatuses();
     s.active[static_cast<size_t>(who.slot)] = benchIdx;
-    log.push_back(oldName + " swaps out for " + nameOf(who.side, who.slot) + ".");
+    say(oldName + " swaps out for " + nameOf(who.side, who.slot) + ".");
 }
 
 bool Battle::forceSwitch(Ref t) {
     if (at(t).trap > 0) {
-        log.push_back(nameOf(t.side, t.slot) + " can't be moved!");
+        say(nameOf(t.side, t.slot) + " can't be moved!");
         return false;
     }
     auto bench = benchAlive(t.side);
     if (bench.empty()) {
-        log.push_back("But there was nobody to swap in.");
+        say("But there was nobody to swap in.");
         return false;
     }
     const int pick = bench[static_cast<size_t>(rnd(static_cast<int>(bench.size())))];
@@ -428,7 +448,7 @@ void Battle::pivot(Ref who) {
 void Battle::useMove(Ref user, const Move& m, int /*moveIdx*/, Ref primary, double scale) {
     Fighter& f = at(user);
     const bool hadNoMiss = f.noMiss;
-    log.push_back(nameOf(user.side, user.slot) + " uses " + m.name + "!");
+    say(nameOf(user.side, user.slot) + " uses " + m.name + "!", user);
     if ((m.tgt == Tgt::Enemy || m.tgt == Tgt::Spread) && livingEnemies(user.side).empty()) return;  // nobody left to target
 
     // Mimic: borrow the target's last-used move.
@@ -437,7 +457,7 @@ void Battle::useMove(Ref user, const Move& m, int /*moveIdx*/, Ref primary, doub
         if (t.side == user.side || !slotFilled(t.side, t.slot) || !at(t).alive()) t = randomEnemy(user.side);
         const Fighter& tf = at(t);
         if (tf.lastMove < 0 || tf.lastMove > 3 || tf.sp().moves[static_cast<size_t>(tf.lastMove)].sp == Sp::Mimic) {
-            log.push_back("But it failed.");
+            say("But it failed.");
             return;
         }
         Move c = tf.sp().moves[static_cast<size_t>(tf.lastMove)];
@@ -508,7 +528,7 @@ void Battle::useMove(Ref user, const Move& m, int /*moveIdx*/, Ref primary, doub
                     if (n > 0) {
                         mult *= 1.0 + 0.2 * n;
                         clearBuffs(at(t));
-                        log.push_back(nameOf(t.side, t.slot) + " loses its buffs!");
+                        say(nameOf(t.side, t.slot) + " loses its buffs!");
                     }
                     break;
                 }
@@ -549,13 +569,16 @@ void Battle::useMove(Ref user, const Move& m, int /*moveIdx*/, Ref primary, doub
             f.focus = false;
             if (f.empowerN > 0 && --f.empowerN == 0) f.empowerPct = 0;
         }
-        if (m.recoil > 0 && anyHit && f.alive()) f.hp = std::max(1, f.hp - std::max(1, f.maxHp * m.recoil / 100));
+        if (m.recoil > 0 && anyHit && f.alive()) {
+            f.hp = std::max(1, f.hp - std::max(1, f.maxHp * m.recoil / 100));
+            say(nameOf(user.side, user.slot) + " is hurt by recoil.");
+        }
     } else {
         // Utility moves
         switch (m.sp) {
             case Sp::ResetCooldowns:
                 for (int& c : f.cd) c = 0;
-                log.push_back(nameOf(user.side, user.slot) + " rewinds time.");
+                say(nameOf(user.side, user.slot) + " rewinds time.");
                 break;
             case Sp::Anarchy:
                 for (int s = 0; s < 2; ++s)
@@ -569,16 +592,16 @@ void Battle::useMove(Ref user, const Move& m, int /*moveIdx*/, Ref primary, doub
                             x.hp = hp;
                             for (int& c : x.cd) c = 0;
                         }
-                log.push_back("Chaos! Every status and cooldown is wiped.");
+                say("Chaos! Every status and cooldown is wiped.");
                 break;
             case Sp::RebirthPyre:
                 f.rebirth = true;
-                log.push_back(nameOf(user.side, user.slot) + " is wreathed in flame.");
+                say(nameOf(user.side, user.slot) + " is wreathed in flame.");
                 break;
             case Sp::WildCard: {
                 const Ref any = randomEnemy(user.side);  // safe: the guard above ensures a living foe exists
                 switch (rnd(4)) {
-                    case 0: heal(user, f.maxHp * 25 / 100); log.push_back("Wild Card: a healing glow!"); break;
+                    case 0: heal(user, f.maxHp * 25 / 100); say("Wild Card: a healing glow!"); break;
                     case 1: {
                         bool fu = false;
                         Move heavy("Wild Strike", 110);
@@ -603,7 +626,7 @@ void Battle::useMove(Ref user, const Move& m, int /*moveIdx*/, Ref primary, doub
                     else if (tf.thorns > 0) { f.thorns = tf.thorns; tf.thorns = 0; }
                     else if (tf.shield > 0) { f.shield = tf.shield; tf.shield = 0; }
                     else if (tf.atkMod > 0 && tf.atkModT > 0) { f.atkMod = tf.atkMod; f.atkModT = tf.atkModT; tf.atkModT = 0; }
-                    else { log.push_back("But there was nothing to steal."); }
+                    else { say("But there was nothing to steal."); }
                 } else if (m.sp == Sp::InvertBuffs) {
                     if (tf.haste > 0) { tf.slow = std::max(tf.slow, tf.haste); tf.haste = 0; }
                     if (tf.regen > 0) { tf.wound = std::max(tf.wound, tf.regen); tf.regen = 0; }
@@ -612,13 +635,13 @@ void Battle::useMove(Ref user, const Move& m, int /*moveIdx*/, Ref primary, doub
                     if (tf.defMod > 0 && tf.defModT > 0) tf.defMod = -tf.defMod;
                     if (tf.spdMod > 0 && tf.spdModT > 0) tf.spdMod = -tf.spdMod;
                     tf.shield = 0; tf.focus = false; tf.empowerN = tf.empowerPct = 0; tf.thorns = 0;
-                    log.push_back(nameOf(t.side, t.slot) + "'s buffs turn against it!");
+                    say(nameOf(t.side, t.slot) + "'s buffs turn against it!");
                 } else {
                     f.atkMod = tf.atkMod; f.atkModT = tf.atkModT;
                     f.defMod = tf.defMod; f.defModT = tf.defModT;
                     f.spdMod = tf.spdMod; f.spdModT = tf.spdModT;
                     f.haste = tf.haste; f.slow = tf.slow;
-                    log.push_back(nameOf(user.side, user.slot) + " copies the target's stat changes.");
+                    say(nameOf(user.side, user.slot) + " copies the target's stat changes.");
                 }
                 break;
             }
@@ -656,7 +679,7 @@ void Battle::execute(const Entry& e) {
     f.actedThisTurn = true;
     if (f.stun > 0) {
         f.stun--;
-        log.push_back(nameOf(e.who.side, e.who.slot) + " is stunned and can't move!");
+        say(nameOf(e.who.side, e.who.slot) + " is stunned and can't move!");
         return;
     }
 
@@ -685,7 +708,7 @@ void Battle::execute(const Entry& e) {
         f.chargeTarget = target;
         f.lastMove = mi;
         if (m.chargeEvade) { f.evade = true; f.evadeChance = 100; }
-        log.push_back(nameOf(e.who.side, e.who.slot) + " prepares " + m.name + "...");
+        say(nameOf(e.who.side, e.who.slot) + " prepares " + m.name + "...");
         return;
     }
     useMove(e.who, m, mi, target, 1.0);
@@ -705,11 +728,14 @@ void Battle::endOfTurn() {
             const std::string n = nameOf(s, k);
             if (f.wound > 0) {
                 const int d = std::max(1, f.maxHp * 6 / 100);
-                log.push_back(n + " suffers " + std::to_string(d) + " from its wound.");
                 hurt(r, d, true);
+                say(n + " suffers " + std::to_string(d) + " from its wound.");
                 if (!f.alive()) continue;
             }
-            if (f.regen > 0) heal(r, std::max(1, f.maxHp * 8 / 100));
+            if (f.regen > 0) {
+                heal(r, std::max(1, f.maxHp * 8 / 100));
+                say(n + " regenerates.");
+            }
             if (f.leechTurns > 0) {
                 if (f.wound > 0 && f.leechSrcSide >= 0) {
                     Fighter& src = sides[f.leechSrcSide].team[static_cast<size_t>(f.leechSrcIdx)];
@@ -719,8 +745,8 @@ void Battle::endOfTurn() {
             }
             if (f.doom > 0 && --f.doom == 0) {
                 const int d = std::min(f.hp - 1, f.maxHp * 40 / 100);
-                log.push_back(n + " is struck by doom!");
                 if (d > 0) hurt(r, d, true);
+                say(n + " is struck by doom!");
             }
             if (f.daze > 0) f.daze--;
             if (f.slow > 0) f.slow--;
@@ -748,7 +774,8 @@ void Battle::endOfTurn() {
             for (int k = 0; k < kActiveSlots; ++k)
                 if (slotFilled(s, k) && fighter(s, k).alive())
                     hurt({s, k}, std::max(1, fighter(s, k).maxHp * pct / 100), true);
-        if (turn == 31) log.push_back("Fatigue sets in! Everyone grows weary.");
+        if (turn == 31) say("Fatigue sets in! Everyone grows weary.");
+        else say("Fatigue drains everyone.");
     }
     for (auto& side : sides)
         for (auto& f : side.team)
@@ -792,7 +819,7 @@ void Battle::replace(int side, int slot, int benchIdx) {
     auto bench = benchAlive(side);
     if (std::find(bench.begin(), bench.end(), benchIdx) == bench.end()) return;
     s.active[static_cast<size_t>(slot)] = benchIdx;
-    log.push_back(nameOf(side, slot) + " joins the battle!");
+    say(nameOf(side, slot) + " joins the battle!");
 }
 
 void Battle::autoReplace(int side) {
@@ -808,10 +835,10 @@ bool Battle::tryCatch(int slot, double chance) {
     if (!wild || !slotFilled(1, slot) || !fighter(1, slot).alive()) return false;
     Fighter& f = fighter(1, slot);
     if (rnd(1000) / 1000.0 >= chance) {
-        log.push_back("The charm fizzles. " + nameOf(1, slot) + " broke free!");
+        say("The charm fizzles. " + nameOf(1, slot) + " broke free!");
         return false;
     }
-    log.push_back(nameOf(1, slot) + " became your friend!");
+    say(nameOf(1, slot) + " became your friend!");
     caught.push_back({f.speciesId, f.level});
     f.hp = 0;
     f.clearStatuses();
@@ -828,7 +855,7 @@ bool Battle::tryCatch(int slot, double chance) {
 void Battle::resolveTurn(const std::array<Action, 3>& playerActions) {
     if (over()) return;
     ++turn;
-    log.push_back("-- Turn " + std::to_string(turn) + " --");
+    say("-- Turn " + std::to_string(turn) + " --");
 
     std::vector<Entry> entries;
     for (int s = 0; s < 2; ++s) {

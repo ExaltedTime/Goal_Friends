@@ -83,7 +83,7 @@ struct GameState {
     int lastSweepDay = -1000000;
     int totalTasksDone = 0;
     int bossesWon = 0, battlesWon = 0, battlesPlayed = 0;
-    int bossUnlockedUntilWins = 0;
+    int lastArea = 0;
     std::vector<ReminderState> reminders;
     Settings settings;
     uint32_t rngSeed = 12345;
@@ -145,8 +145,9 @@ bool inQuietHours(const Settings& s, int minute);
 enum class BattleMode { Wild, Duel, Boss };
 int energyCost(BattleMode m);
 bool bossUnlocked(const GameState& g);
+bool areaUnlocked(const GameState& g, int areaId);
 // Returns false (with a message) if the player can't afford it or has no friends. Spends the Energy.
-bool startBattle(GameState& g, BattleMode mode, tu::Time now, std::unique_ptr<Battle>& out, std::string& why);
+bool startBattle(GameState& g, BattleMode mode, int areaId, tu::Time now, std::unique_ptr<Battle>& out, std::string& why);
 // Apply rewards after a finished battle. Caught friends in `b.caught` are added too.
 Result finishBattle(GameState& g, const Battle& b, BattleMode mode);
 bool useCharm(GameState& g, Battle& b, int foeSlot);
