@@ -113,7 +113,7 @@ std::vector<std::string> Ui::takeBalloons() {
     return out;
 }
 
-float Ui::desiredHeight() const { return tab_ == Tab::None ? kStrip : kStrip + kPanelH + 8; }
+float Ui::desiredHeight() const { return tab_ == Tab::None ? kStrip : kStrip + kPanelH + 8 + panelLift_; }
 
 bool Ui::hover(float x, float y, float w, float h) const {
     return in_->mx >= x && in_->my >= y && in_->mx < x + w && in_->my < y + h;
@@ -552,8 +552,19 @@ void Ui::drawWorld(float dt) {
 
 void Ui::drawPanel() {
     const float pw = std::min(1000.f, W_ - 24.f);
-    const float ph = H_ - kStrip - 8.f;
-    panel_ = {(W_ - pw) / 2, 0, pw, ph};
+    const float ph = std::min(kPanelH, H_ - kStrip - 8.f);
+    // The panel can be dragged by its top bar: sideways freely, and upwards by growing the (bottom-anchored) window.
+    panelLift_ = std::clamp(panelLift_, 0.f, std::max(0.f, H_ - (kStrip + kPanelH + 8.f)));
+    if (panelX_ < 0) panelX_ = (W_ - pw) / 2;
+    panelX_ = std::clamp(panelX_, 0.f, std::max(0.f, W_ - pw));
+    if (panelDrag_) {
+        if (!in_->down) panelDrag_ = false;
+        else if (in_->mx >= 0) {
+            panelX_ = std::clamp(in_->mx - dragGrabX_, 0.f, std::max(0.f, W_ - pw));
+            panelLift_ = std::max(0.f, panelLift_ - (in_->my - dragGrabY_));   // keeps the grabbed point under the cursor
+        }
+    }
+    panel_ = {panelX_, 0, pw, ph};
     card(panel_.x, panel_.y, pw, ph, kBg);
     gx_->strokeRect(panel_.x, panel_.y, pw, ph, rgba(80, 92, 130), 1.5f, 10);
 
@@ -572,6 +583,13 @@ void Ui::drawPanel() {
         gx_->text("Energy " + std::to_string(g_.energy) + "   Coins " + std::to_string(g_.coins), x + 10, 10, 300, 30, 13, kAccent, TF_VCENTER | TF_BOLD);
         if (button(panel_.x + pw - 44, 10, 32, 30, "X", rgba(120, 50, 50), true, 13)) tab_ = Tab::None;
     }
+    if (!panelDrag_ && in_->pressed && !consumed_ && !blocked_ && hover(panel_.x, 0, pw, 48)) {
+        panelDrag_ = true;
+        dragGrabX_ = in_->mx - panel_.x;
+        dragGrabY_ = in_->my;
+        consumed_ = true;
+    }
+    if (hover(panel_.x, 0, pw, 48) && !blocked_) gx_->fillRect(panel_.x + pw / 2 - 20, 4, 40, 3, rgba(120, 135, 175, 160), 1);   // grip hint
     const Rect body{panel_.x + 16, 54, pw - 32, ph - 70};
     switch (tab_) {
         case Tab::Start: drawStart(body); break;
@@ -842,7 +860,7 @@ void Ui::drawFriends(const Rect& b) {
         gx_->text(sp.name, x + 82, y + 6, cw - 84, 20, 13, kText, TF_BOLD);
         gx_->text("Lv " + std::to_string(f.level), x + 82, y + 28, 80, 18, 12, kAccent, TF_BOLD);
         if (f.level < gf::kMaxLevel) bar(x + 82, y + 52, cw - 94, 8, static_cast<double>(f.xp) / gf::xpToNext(f.level), kBlue);
-        gx_->text(inParty ? (g_.party[0] == f.id ? "Party (lead)" : "Party") : "Box", x + 82, y + 66, cw - 86, 18, 11, inParty ? kGreen : kDim);
+        gx_->text(inParty ? "Party #" + std::to_string(std::find(g_.party.begin(), g_.party.end(), f.id) - g_.party.begin() + 1) + (g_.party[0] == f.id ? " (lead)" : "") : "Box", x + 82, y + 66, cw - 86, 18, 11, inParty ? kGreen : kDim);
         if (hover(x, y, cw, ch) && in_->pressed && !consumed_ && !blocked_ && in_->my >= b.y && in_->my < b.y + b.h) { consumed_ = true; selFriend_ = f.id; itemPicker_ = false; }
     }
     gx_->popClip();
@@ -874,18 +892,18 @@ void Ui::drawFriends(const Rect& b) {
     // Buttons
     const bool inParty = std::find(g_.party.begin(), g_.party.end(), sf->id) != g_.party.end();
     const float by = b.y + b.h - 62;
-    if (button(dx, by, 118, 30, inParty ? "Move to box" : "Add to party", kBtn, true, 12)) {
+    const int pi = inParty ? static_cast<int>(std::find(g_.party.begin(), g_.party.end(), sf->id) - g_.party.begin()) : -1;
+    const int pn = static_cast<int>(g_.party.size());
+    if (button(dx, by, 96, 30, inParty ? "To box" : "To party", kBtn, true, 12)) {
         const gf::Result r = gf::setPartyMember(g_, sf->id, !inParty);
         for (const auto& m : r.messages) toast(m);
         dirty_ = true;
     }
-    if (button(dx + 124, by, 90, 30, "Make lead", kBtn, inParty && g_.party[0] != sf->id, 12)) {
-        g_.party.erase(std::find(g_.party.begin(), g_.party.end(), sf->id));
-        g_.party.insert(g_.party.begin(), sf->id);
-        dirty_ = true;
-    }
+    // Party order: the first friend is the lead, and the first three go into battle first.
+    if (button(dx + 102, by, 34, 30, "<", kBtn, pi > 0, 14) && pi > 0 && pi < static_cast<int>(g_.party.size())) { std::swap(g_.party[static_cast<size_t>(pi)], g_.party[static_cast<size_t>(pi - 1)]); dirty_ = true; }
+    if (button(dx + 140, by, 34, 30, ">", kBtn, pi >= 0 && pi + 1 < pn, 14) && pi >= 0 && pi + 1 < static_cast<int>(g_.party.size())) { std::swap(g_.party[static_cast<size_t>(pi)], g_.party[static_cast<size_t>(pi + 1)]); dirty_ = true; }
     const std::string itemLabel = sf->item >= 0 ? gf::itemInfo(sf->item).name : "No item";
-    if (button(dx + 220, by, dw - 220, 30, itemLabel, sf->item >= 0 ? rgba(120, 90, 40) : kBtn, true, 12)) itemPicker_ = !itemPicker_;
+    if (button(dx + 180, by, dw - 180, 30, itemLabel, sf->item >= 0 ? rgba(120, 90, 40) : kBtn, true, 12)) itemPicker_ = !itemPicker_;
     if (itemPicker_) {
         // Item list drawn over the moves: owned items, plus "No item" to take the current one off.
         const float py = b.y + 108, ph = by - 8 - py;
@@ -1609,7 +1627,7 @@ const std::vector<GuideSection>& guideSections() {
             "# What is Goal Friends?",
             "Real-life tasks power your creature collection. Your friends can't level up by playing alone: finishing tasks and focus sessions is the only way to earn XP, Energy and Coins. You then spend that progress on levelling, hatching new friends and battling.",
             "# The strip",
-            "Your friends wander along the bottom of the screen. The buttons on the right open the panels. Click a friend to open their page. A speech bubble over your lead friend shows how many tasks are due.",
+            "Your friends wander along the bottom of the screen. The buttons on the right open the panels; drag an open panel by its top bar to move it. Click a friend to open their page. A speech bubble over your lead friend shows how many tasks are due.",
             "# Hiding the strip",
             "Press Ctrl+Shift+Ô to hide or show the whole window (or click the tray icon). Reminders keep working while it's hidden. Right-click the tray icon to quit.",
             "# First steps",
@@ -1630,7 +1648,7 @@ const std::vector<GuideSection>& guideSections() {
             "If a whole day passes with no tasks or focus sessions, your friends get sleepy. They nap on the strip and fight with -20% ATK and SPD until you finish something. Nothing is ever lost."}});
         v.push_back({"Friends & eggs", {
             "# Your team",
-            "You bring a party of 6 into battle; every other friend waits in the Box. Open a friend in the Friends tab to move them, or to make them the lead.",
+            "You bring a party of 6 into battle; every other friend waits in the Box. Open a friend in the Friends tab to move them in or out. The < and > buttons change their place in the party: the first friend is the lead, and the first three start every battle.",
             "# Levels and evolution",
             "Friends level up from 1 to 50. Three-stage lines evolve at levels 16 and 32, two-stage lines at level 20. Rare friends don't evolve. Each friend has exactly four unique moves, and an evolved form gets a new set.",
             "# Stats",

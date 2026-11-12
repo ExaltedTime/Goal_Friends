@@ -179,10 +179,11 @@ void renderFrame(App& a) {
     QueryPerformanceFrequency(&qf);
     QueryPerformanceCounter(&q0);
     int ph = 0;
+    float logicalH = 0;
     // A click can open or close a panel in the middle of a frame, which changes the window height. Draw that frame again
     // at the new height right away instead of presenting a stale one and resizing on the next timer tick (that was the jitter).
     for (int pass = 0; pass < 2; ++pass) {
-        const float logicalH = std::min(a.ui->desiredHeight(), maxH);
+        logicalH = std::min(a.ui->desiredHeight(), maxH);
         ph = static_cast<int>(logicalH * a.scale + 0.5f);
         if (!a.gx.resize(pw, ph)) return;
         a.gx.setScale(a.scale);
@@ -191,6 +192,7 @@ void renderFrame(App& a) {
         a.gx.end();
         const float after = std::min(a.ui->desiredHeight(), maxH);
         if (pass == 1 || static_cast<int>(after * a.scale + 0.5f) == ph) break;
+        if (a.in.my >= 0) a.in.my += after - logicalH;   // the window grew or shrank at its top edge: keep the cursor where it was on screen
         clearInput();   // the click was already used by the first pass
     }
     QueryPerformanceCounter(&q1);
@@ -378,12 +380,14 @@ LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             a->in.mx = static_cast<float>(static_cast<short>(LOWORD(lp))) / a->scale;
             a->in.my = static_cast<float>(static_cast<short>(HIWORD(lp))) / a->scale;
             a->in.down = a->in.pressed = true;
+            SetCapture(hwnd);   // keep receiving mouse moves while dragging the panel outside the window
             a->lastActivity = GetTickCount64();
             if (a->panelWasOpen) SetFocus(hwnd);
             renderFrame(*a);  // respond immediately
             return 0;
         case WM_LBUTTONUP:
             a->in.down = false;
+            if (GetCapture() == hwnd) ReleaseCapture();
             return 0;
         case WM_MOUSEWHEEL:
             a->in.wheel += static_cast<float>(GET_WHEEL_DELTA_WPARAM(wp)) / WHEEL_DELTA;

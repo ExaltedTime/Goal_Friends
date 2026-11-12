@@ -176,6 +176,9 @@ private:
     gf::DungeonRun dungeon_;
     std::unique_ptr<gf::Battle> dungeonNext_;
     bool itemPicker_ = false;
+    float panelX_ = -1, panelLift_ = 0;   // dragged panel position (x in the window, lift above its default spot)
+    bool panelDrag_ = false;
+    float dragGrabX_ = 0, dragGrabY_ = 0;
     enum class Phase { Choose, Target, CharmTarget, SwitchPick, Replace, Done } phase_ = Phase::Choose;
     std::array<gf::Action, 3> acts_{};
     std::array<bool, 3> chosen_{{false, false, false}};

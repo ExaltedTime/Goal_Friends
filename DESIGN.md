@@ -388,3 +388,12 @@ What mattered:
   in the bag. Saved in `save.json` (`bag`, per-friend `item`).
 - Walking friends now start spread along the strip, each at a random point in its own walk/rest cycle. The 1-minute test focus
   option was removed.
+
+## 19. Movable panel and party order (v1.4)
+
+- The expanded panel can be dragged by its top bar. Sideways it moves freely inside the screen; upwards it works by growing the
+  bottom-anchored window (`panelLift_`), so the transparent gap above the strip stays click-through and costs nothing until used.
+  When a frame changes the window height, `renderFrame` redraws it at the new height straight away and corrects the cursor
+  position for the moved window edge. The mouse is captured while a button is held so a drag can leave the window.
+- Party order is set in the Friends tab with the < and > buttons (the first friend is the lead; the first three start battles).
+  Cards show their place ("Party #2"). "Make lead" was replaced by these buttons.
