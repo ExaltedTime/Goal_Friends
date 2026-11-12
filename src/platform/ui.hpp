@@ -42,6 +42,12 @@ public:
     void openTab(Tab t) { tab_ = t; }
     // Called by the host when new reminders fire so the strip can nag too.
     void reminderFired() { nagSeconds_ = 20; }
+    // True while something on screen is moving (friends walking, toasts, battle effects); lets the host pick a frame rate.
+    bool animating() const { return animating_; }
+    // True during battle replays, floating numbers and toasts: things that need smoother frames than walking friends.
+    bool effectsActive() const { return playing_ || !floats_.empty() || !toasts_.empty(); }
+    // Cheap work that must keep running while the window is hidden (a focus session ending).
+    void backgroundTick(long long nowMs, tu::Time now);
     bool locked() const { return focusRunning_; }  // during a focus session everything except the Focus tab is off limits
 
     static constexpr float kStrip = 150.f;
@@ -71,6 +77,8 @@ private:
     void drawBattle(const Rect& b);
     void drawGuide(const Rect& b);
     void drawGround(float gy, float gh);
+    void paintGround(float gy, float gh);
+    void refreshDue();
 
     // task helpers
     void submitTaskForm();
@@ -111,6 +119,9 @@ private:
     std::vector<Walker> walkers_;
     float animT_ = 0;
     float dt_ = 0;
+    bool animating_ = false;
+    int dueTab_ = 0, dueNow_ = 0;   // cached once a second: tasks still to do today / already due
+    float dueTimer_ = 0;
     float nagSeconds_ = 0;
 
     // tasks tab

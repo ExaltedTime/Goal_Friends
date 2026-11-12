@@ -55,6 +55,21 @@ cmake -S . -B build -G Ninja && cmake --build build && ./build/gf_tests
 That runs unit tests (recurrence, streaks, rewards, reminders, saving) and 1500 simulated AI-vs-AI battles across
 the whole roster to catch crashes and degenerate loops.
 
+## Performance
+
+The strip is meant to sit on screen all day, so it is built to cost almost nothing:
+- the ground (thousands of tiny rectangles) is drawn once into a bitmap and re-blitted, rebuilt only once a minute
+- text layouts are cached, and bookkeeping that doesn't change every frame (tasks due) is refreshed once a second
+- the frame rate follows need: about 30 fps for a couple of seconds after you touch it, 8 fps while friends walk,
+  2 fps when everything is still, 10 fps for a static panel, and 1 check per second while hidden
+- the slow timer (reminders, saving) fires every 5 seconds, and idle memory is handed back to Windows after the panel
+  has been closed for 15 seconds
+- windows only grow to panel size while a panel is open
+
+`tools/measure.sh` measures CPU and per-frame cost under Wine (relative numbers only):
+`EXE=build-win/GoalFriends.exe SECS=20 bash tools/measure.sh`. Setting `GF_TRACE=<file>` makes the app log its average
+draw and present time per frame every 10 seconds.
+
 ## Roster generator
 
 Friends 49 to 150 come from `tools/gen_roster.py` (Python 3, no dependencies). Edit the tables in that file and run

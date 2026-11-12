@@ -271,6 +271,31 @@ void Ui::bar(float x, float y, float w, float h, double frac, gfx::Color c) {
 // Frame
 // ---------------------------------------------------------------------------
 
+void Ui::backgroundTick(long long nowMs, tu::Time now) {
+    nowMs_ = nowMs;
+    now_ = now;
+    // Focus timer completion: the Battle button lights up and a notification is sent (no popup).
+    if (focusRunning_ && nowMs_ >= focusEndMs_) {
+        focusRunning_ = false;
+        const gf::Result r = gf::completeFocus(g_, focusMinutes_, now_);
+        for (const auto& m : r.messages) toast(m);
+        balloon("Focus session complete! Your friends are ready for a battle whenever you are.");
+        focusDone_ = focusMinutes_;
+        battleReady_ = true;
+        dirty_ = true;
+    }
+}
+
+void Ui::refreshDue() {
+    dueTimer_ = 1.0f;
+    dueTab_ = dueNow_ = 0;
+    for (const auto& o : gf::occurrencesOn(g_, now_.day, now_.minute)) {
+        if (o.done || o.missed) continue;
+        ++dueTab_;
+        if (now_.minute >= o.win.start) ++dueNow_;
+    }
+}
+
 void Ui::frame(gfx::Gfx& gx, float W, float H, Input& in, double dt, long long nowMs, tu::Time now) {
     gx_ = &gx; in_ = &in; W_ = W; H_ = H; nowMs_ = nowMs; now_ = now;
     consumed_ = false; blocked_ = false; fieldClicked_ = false;
@@ -280,18 +305,13 @@ void Ui::frame(gfx::Gfx& gx, float W, float H, Input& in, double dt, long long n
 
     if (!g_.started && tab_ == Tab::None) tab_ = Tab::Start;
 
-    // Focus timer completion: battles open at the end of a focus session.
-    if (focusRunning_ && nowMs_ >= focusEndMs_) {
-        focusRunning_ = false;
-        const gf::Result r = gf::completeFocus(g_, focusMinutes_, now_);
-        for (const auto& m : r.messages) toast(m);
-        balloon("Focus session complete! Your friends are ready for a battle whenever you are.");
-        focusDone_ = focusMinutes_;
-        battleReady_ = true;  // no popup: the Battle button pulses instead
-        dirty_ = true;
-    }
+    animating_ = false;
+    backgroundTick(nowMs, now);
+    dueTimer_ -= static_cast<float>(dt);
+    if (dueTimer_ <= 0 || dirty_) refreshDue();
     // During a focus session only the Focus tab is reachable.
     if (focusRunning_ && tab_ != Tab::None && tab_ != Tab::Focus) tab_ = Tab::Focus;
+    if (!toasts_.empty()) animating_ = true;
     for (auto& t : toasts_) t.life -= static_cast<float>(dt);
     toasts_.erase(std::remove_if(toasts_.begin(), toasts_.end(), [](const Toast& t) { return t.life <= 0; }), toasts_.end());
 
@@ -355,6 +375,20 @@ float groundCell(const gfx::Gfx& g) {
 }  // namespace
 
 void Ui::drawGround(float gy, float gh) {
+    // The ground is thousands of tiny rectangles, so it is drawn once into a bitmap and re-drawn only when its colours
+    // change (once a minute), the window size changes or the display scale changes.
+    constexpr int kGroundCache = 1;
+    const float cell = groundCell(*gx_);
+    const float top = 6.f * cell;  // room above the grass line for blades and flowers
+    const long long key = (static_cast<long long>(W_ * 4) << 24) ^ (static_cast<long long>(cell * 64) << 12) ^ static_cast<long long>(now_.minute) ^ (static_cast<long long>(gh) << 44);
+    if (!gx_->hasCache(kGroundCache, key) && gx_->beginCache(kGroundCache, key, W_, gh + top)) {
+        paintGround(top, gh);
+        gx_->endCache();
+    }
+    if (!gx_->drawCache(kGroundCache, 0, gy - top)) paintGround(gy, gh);  // fallback if caching is unavailable
+}
+
+void Ui::paintGround(float gy, float gh) {
     const float cell = groundCell(*gx_);
     const double hour = now_.minute / 60.0;
     const GrassPal P = grassAt(hour);
@@ -449,6 +483,7 @@ void Ui::drawWorld(float dt) {
         if (!sleepy) {
             if (w.pause > 0) w.pause -= dt;
             else {
+                animating_ = true;
                 w.x += w.dir * w.speed * dt;
                 if (w.x < 30) { w.x = 30; w.dir = 1; }
                 if (w.x > W_ - 40) { w.x = W_ - 40; w.dir = -1; }
@@ -457,6 +492,7 @@ void Ui::drawWorld(float dt) {
             }
         }
         if (w.hop > 0 || w.hopV != 0) {
+            animating_ = true;
             w.hopV -= 600 * dt;
             w.hop += w.hopV * dt;
             if (w.hop <= 0) { w.hop = 0; w.hopV = 0; }
@@ -478,15 +514,14 @@ void Ui::drawWorld(float dt) {
         }
         // Nag bubble on the lead friend.
         if (w.friendId == lead && tab_ == Tab::None) {
-            int due = 0;
-            for (const auto& o : gf::occurrencesOn(g_, now_.day, now_.minute))
-                if (!o.done && !o.missed && now_.minute >= o.win.start) ++due;
+            const int due = dueNow_;
             std::string t;
             if (focusRunning_) t = "Stay focused!";
             else if (battleReady_) t = "Battle time?";
             else if (due > 0) t = std::to_string(due) + " to do!";
             else if (nagSeconds_ > 0) t = "Hey!";
             if (!t.empty()) {
+                animating_ = true;  // the bubble bobs
                 const float bw = gx_->textWidth(t, 12, true) + 18;
                 const float by = sy - 26 + (std::sin(animT_ * 4) * 2);
                 gx_->fillRect(w.x - bw / 2, by, bw, 22, rgba(255, 255, 255, 235), 11);
@@ -523,9 +558,7 @@ void Ui::drawWorld(float dt) {
     for (const auto& tb : tabs) {
         std::string label = tb.label;
         if (tb.t == Tab::Tasks) {
-            int due = 0;
-            for (const auto& o : gf::occurrencesOn(g_, now_.day, now_.minute)) if (!o.done && !o.missed) ++due;
-            if (due > 0) label += " (" + std::to_string(due) + ")";
+            if (dueTab_ > 0) label += " (" + std::to_string(dueTab_) + ")";
         }
         const bool active = tab_ == tb.t;
         const bool enabled = g_.started && (!lock || tb.t == Tab::Focus);
@@ -1257,6 +1290,7 @@ void Ui::drawBattle(const Rect& b) {
     }
 
     // ---- Active battle ----
+    if (playing_ || !floats_.empty()) animating_ = true;
     // advance the replay
     if (playing_) {
         playTimer_ += dt_ * (fastPlay_ ? 3.f : 1.f);

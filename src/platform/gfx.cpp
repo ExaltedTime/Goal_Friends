@@ -1,6 +1,7 @@
 #include "gfx.hpp"
 
 #include <algorithm>
+#include <cmath>
 
 #include <cstdio>
 #include <cstdlib>
@@ -40,6 +41,12 @@ Gfx::~Gfx() {
 void Gfx::releaseTarget() {
     for (auto& kv : bitmaps_) kv.second->Release();
     bitmaps_.clear();
+    for (auto& kv : caches_) if (kv.second.bmp) kv.second.bmp->Release();
+    caches_.clear();
+    for (auto& kv : layouts_) kv.second->Release();
+    layouts_.clear();
+    if (cacheRt_) { cacheRt_->Release(); cacheRt_ = nullptr; }
+    r_ = nullptr;
     if (brush_) { brush_->Release(); brush_ = nullptr; }
     if (rt_) { rt_->Release(); rt_ = nullptr; }
     if (memDc_) {
@@ -93,6 +100,7 @@ bool Gfx::resize(int pixelW, int pixelH) {
     props.minLevel = D2D1_FEATURE_LEVEL_DEFAULT;
     if (FAILED(factory_->CreateDCRenderTarget(&props, &rt_))) return false;
     rt_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
+    r_ = rt_;
     if (FAILED(rt_->CreateSolidColorBrush(D2D1_COLOR_F{1, 1, 1, 1}, &brush_))) return false;
     return true;
 }
@@ -125,25 +133,25 @@ bool Gfx::end() {
 
 void Gfx::fillRect(float x, float y, float w, float h, Color c, float radius) {
     brush_->SetColor(d2d(c));
-    if (radius > 0) rt_->FillRoundedRectangle(D2D1_ROUNDED_RECT{rect(x, y, w, h), radius, radius}, brush_);
-    else rt_->FillRectangle(rect(x, y, w, h), brush_);
+    if (radius > 0) r_->FillRoundedRectangle(D2D1_ROUNDED_RECT{rect(x, y, w, h), radius, radius}, brush_);
+    else r_->FillRectangle(rect(x, y, w, h), brush_);
 }
 
 void Gfx::strokeRect(float x, float y, float w, float h, Color c, float t, float radius) {
     brush_->SetColor(d2d(c));
     const D2D1_RECT_F r = rect(x + t / 2, y + t / 2, w - t, h - t);
-    if (radius > 0) rt_->DrawRoundedRectangle(D2D1_ROUNDED_RECT{r, radius, radius}, brush_, t);
-    else rt_->DrawRectangle(r, brush_, t);
+    if (radius > 0) r_->DrawRoundedRectangle(D2D1_ROUNDED_RECT{r, radius, radius}, brush_, t);
+    else r_->DrawRectangle(r, brush_, t);
 }
 
 void Gfx::fillEllipse(float cx, float cy, float rx, float ry, Color c) {
     brush_->SetColor(d2d(c));
-    rt_->FillEllipse(D2D1_ELLIPSE{D2D1_POINT_2F{cx, cy}, rx, ry}, brush_);
+    r_->FillEllipse(D2D1_ELLIPSE{D2D1_POINT_2F{cx, cy}, rx, ry}, brush_);
 }
 
 void Gfx::line(float x1, float y1, float x2, float y2, Color c, float t) {
     brush_->SetColor(d2d(c));
-    rt_->DrawLine(D2D1_POINT_2F{x1, y1}, D2D1_POINT_2F{x2, y2}, brush_, t);
+    r_->DrawLine(D2D1_POINT_2F{x1, y1}, D2D1_POINT_2F{x2, y2}, brush_, t);
 }
 
 IDWriteTextFormat* Gfx::format(float size, int flags) {
@@ -172,16 +180,30 @@ void Gfx::text(const std::string& s, float x, float y, float w, float h, float s
     if (!f) return;
     const std::wstring ws = widen(s);
     brush_->SetColor(d2d(c));
+    // Layouts are expensive to build; the same strings are drawn every frame, so keep them.
+    char tag[64];
+    std::snprintf(tag, sizeof tag, "\x1f%d|%d|%d|%d", static_cast<int>(size * 10), flags & 0x1F, static_cast<int>(w), static_cast<int>(h));
+    const std::string key = s + tag;
     IDWriteTextLayout* layout = nullptr;
-    const HRESULT hr = dwrite_->CreateTextLayout(ws.c_str(), static_cast<UINT32>(ws.size()), f, std::max(1.f, w), std::max(1.f, h), &layout);
-    if (FAILED(hr) || !layout) { trace("CreateTextLayout failed", hr); return; }
-    rt_->DrawTextLayout(D2D1_POINT_2F{x, y}, layout, brush_, D2D1_DRAW_TEXT_OPTIONS_CLIP);
-    layout->Release();
+    auto it = layouts_.find(key);
+    if (it != layouts_.end()) {
+        layout = it->second;
+    } else {
+        if (layouts_.size() > 600) { for (auto& kv : layouts_) kv.second->Release(); layouts_.clear(); }
+        const HRESULT hr = dwrite_->CreateTextLayout(ws.c_str(), static_cast<UINT32>(ws.size()), f, std::max(1.f, w), std::max(1.f, h), &layout);
+        if (FAILED(hr) || !layout) { trace("CreateTextLayout failed", hr); return; }
+        layouts_[key] = layout;
+    }
+    r_->DrawTextLayout(D2D1_POINT_2F{x, y}, layout, brush_, D2D1_DRAW_TEXT_OPTIONS_CLIP);
 }
 
 float Gfx::textWidth(const std::string& s, float size, bool bold) {
+    if (s.empty()) return 0;
+    const std::string key = s + (bold ? "\x1f" "B" : "\x1f" "N") + std::to_string(static_cast<int>(size * 10));
+    auto it = widths_.find(key);
+    if (it != widths_.end()) return it->second;
     IDWriteTextFormat* f = format(size, bold ? TF_BOLD : 0);
-    if (!f || s.empty()) return 0;
+    if (!f) return 0;
     const std::wstring ws = widen(s);
     IDWriteTextLayout* layout = nullptr;
     dwrite_->CreateTextLayout(ws.c_str(), static_cast<UINT32>(ws.size()), f, 10000.f, 100.f, &layout);
@@ -189,6 +211,8 @@ float Gfx::textWidth(const std::string& s, float size, bool bold) {
     DWRITE_TEXT_METRICS m = {};
     layout->GetMetrics(&m);
     layout->Release();
+    if (widths_.size() > 800) widths_.clear();
+    widths_[key] = m.widthIncludingTrailingWhitespace;
     return m.widthIncludingTrailingWhitespace;
 }
 
@@ -217,7 +241,7 @@ ID2D1Bitmap* Gfx::bitmapFor(SpriteKind kind, int id, int frame, bool flip) {
 void Gfx::sprite(SpriteKind kind, int id, int frame, bool flip, float x, float y, float size, float opacity) {
     ID2D1Bitmap* b = bitmapFor(kind, id, frame, flip);
     if (!b) return;
-    rt_->DrawBitmap(b, rect(x, y, size, size), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, nullptr);
+    r_->DrawBitmap(b, rect(x, y, size, size), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, nullptr);
 }
 
 float Gfx::textHeight(const std::string& s, float w, float size, bool bold) {
@@ -233,7 +257,47 @@ float Gfx::textHeight(const std::string& s, float w, float size, bool bold) {
     return m.height;
 }
 
-void Gfx::pushClip(float x, float y, float w, float h) { rt_->PushAxisAlignedClip(rect(x, y, w, h), D2D1_ANTIALIAS_MODE_ALIASED); }
-void Gfx::popClip() { rt_->PopAxisAlignedClip(); }
+bool Gfx::hasCache(int id, long long key) const {
+    auto it = caches_.find(id);
+    return it != caches_.end() && it->second.bmp && it->second.key == key;
+}
+
+bool Gfx::beginCache(int id, long long key, float w, float h) {
+    if (!rt_ || cacheRt_) return false;
+    auto it = caches_.find(id);
+    if (it != caches_.end() && it->second.bmp) { it->second.bmp->Release(); it->second.bmp = nullptr; }
+    D2D1_SIZE_F dips = {w, h};
+    D2D1_SIZE_U px = {static_cast<UINT32>(std::ceil(w * scale_)), static_cast<UINT32>(std::ceil(h * scale_))};
+    if (FAILED(rt_->CreateCompatibleRenderTarget(&dips, &px, nullptr, D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE, &cacheRt_)) || !cacheRt_) { cacheRt_ = nullptr; return false; }
+    cacheRt_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
+    cacheRt_->BeginDraw();
+    cacheRt_->Clear(D2D1_COLOR_F{0, 0, 0, 0});
+    r_ = cacheRt_;
+    cacheId_ = id; cacheKey_ = key; cacheW_ = w; cacheH_ = h;
+    return true;
+}
+
+void Gfx::endCache() {
+    if (!cacheRt_) return;
+    cacheRt_->EndDraw();
+    r_ = rt_;
+    ID2D1Bitmap* bmp = nullptr;
+    cacheRt_->GetBitmap(&bmp);
+    cacheRt_->Release();
+    cacheRt_ = nullptr;
+    CacheEntry e;
+    e.bmp = bmp; e.key = cacheKey_; e.w = cacheW_; e.h = cacheH_;
+    caches_[cacheId_] = e;
+}
+
+bool Gfx::drawCache(int id, float x, float y) {
+    auto it = caches_.find(id);
+    if (it == caches_.end() || !it->second.bmp) return false;
+    r_->DrawBitmap(it->second.bmp, rect(x, y, it->second.w, it->second.h), 1.f, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, nullptr);
+    return true;
+}
+
+void Gfx::pushClip(float x, float y, float w, float h) { r_->PushAxisAlignedClip(rect(x, y, w, h), D2D1_ANTIALIAS_MODE_ALIASED); }
+void Gfx::popClip() { r_->PopAxisAlignedClip(); }
 
 }  // namespace gfx

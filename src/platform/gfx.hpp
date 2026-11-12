@@ -45,6 +45,12 @@ public:
     void pushClip(float x, float y, float w, float h);
     void popClip();
 
+    // Cached drawing: render something expensive once into a bitmap, then blit it every frame.
+    bool hasCache(int id, long long key) const;
+    bool beginCache(int id, long long key, float w, float h);  // subsequent draw calls go into the bitmap; false on failure
+    void endCache();
+    bool drawCache(int id, float x, float y);                  // blits the bitmap at logical (x, y)
+
 private:
     IDWriteTextFormat* format(float size, int flags);
     ID2D1Bitmap* bitmapFor(SpriteKind kind, int id, int frame, bool flip);
@@ -53,6 +59,15 @@ private:
     ID2D1Factory* factory_ = nullptr;
     IDWriteFactory* dwrite_ = nullptr;
     ID2D1DCRenderTarget* rt_ = nullptr;
+    ID2D1RenderTarget* r_ = nullptr;             // where draw calls go: rt_, or a cache bitmap target while caching
+    ID2D1BitmapRenderTarget* cacheRt_ = nullptr;
+    int cacheId_ = -1;
+    long long cacheKey_ = 0;
+    float cacheW_ = 0, cacheH_ = 0;
+    struct CacheEntry { ID2D1Bitmap* bmp = nullptr; long long key = 0; float w = 0, h = 0; };
+    std::map<int, CacheEntry> caches_;
+    std::map<std::string, IDWriteTextLayout*> layouts_;
+    std::map<std::string, float> widths_;
     ID2D1SolidColorBrush* brush_ = nullptr;
     HDC memDc_ = nullptr;
     HBITMAP dib_ = nullptr;

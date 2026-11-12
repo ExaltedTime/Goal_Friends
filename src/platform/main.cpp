@@ -47,6 +47,12 @@ struct App {
     int slowCount = 0;
     bool hotkeyOk = false;
     bool hintShown = false;
+    ULONGLONG panelClosedSince = 0;
+    bool trimmed = false;
+    // diagnostics (GF_TRACE): average cost of drawing and of presenting a frame
+    long long perfFrames = 0;
+    double perfRenderMs = 0, perfPresentMs = 0;
+    ULONGLONG perfStart = 0;
 };
 
 App* g_app = nullptr;
@@ -148,7 +154,12 @@ void setFrameInterval(App& a, UINT ms) {
 }
 
 void renderFrame(App& a) {
-    if (!a.visible) return;
+    if (!a.visible) {
+        a.ui->backgroundTick(static_cast<long long>(GetTickCount64()), localNow());
+        if (a.ui->takeDirty()) a.needSave = true;
+        for (const auto& b : a.ui->takeBalloons()) balloon(a, b);
+        return;
+    }
     const ULONGLONG nowMs = GetTickCount64();
     double dt = a.lastTick ? static_cast<double>(nowMs - a.lastTick) / 1000.0 : 0.0;
     a.lastTick = nowMs;
@@ -162,9 +173,13 @@ void renderFrame(App& a) {
     if (!a.gx.resize(pw, ph)) return;
     a.gx.setScale(a.scale);
 
+    LARGE_INTEGER q0, q1, q2, qf;
+    QueryPerformanceFrequency(&qf);
+    QueryPerformanceCounter(&q0);
     if (!a.gx.begin()) return;
     a.ui->frame(a.gx, logicalW, logicalH, a.in, dt, static_cast<long long>(nowMs), localNow());
     a.gx.end();
+    QueryPerformanceCounter(&q1);
 
     HDC screen = GetDC(nullptr);
     POINT dst = {a.work.left, a.work.bottom - ph};
@@ -173,6 +188,22 @@ void renderFrame(App& a) {
     BLENDFUNCTION bf = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
     UpdateLayeredWindow(a.hwnd, screen, &dst, &size, a.gx.dc(), &src, 0, &bf, ULW_ALPHA);
     ReleaseDC(nullptr, screen);
+    QueryPerformanceCounter(&q2);
+    a.perfFrames++;
+    a.perfRenderMs += 1000.0 * static_cast<double>(q1.QuadPart - q0.QuadPart) / static_cast<double>(qf.QuadPart);
+    a.perfPresentMs += 1000.0 * static_cast<double>(q2.QuadPart - q1.QuadPart) / static_cast<double>(qf.QuadPart);
+    if (const char* path = std::getenv("GF_TRACE")) {
+        const ULONGLONG now2 = GetTickCount64();
+        if (!a.perfStart) a.perfStart = now2;
+        if (now2 - a.perfStart >= 10000 && a.perfFrames > 0) {
+            if (FILE* f = std::fopen(path, "a")) {
+                std::fprintf(f, "perf: %.1f fps, draw %.2f ms/frame, present %.2f ms/frame (%dx%d px)\n", a.perfFrames * 1000.0 / static_cast<double>(now2 - a.perfStart),
+                             a.perfRenderMs / static_cast<double>(a.perfFrames), a.perfPresentMs / static_cast<double>(a.perfFrames), pw, ph);
+                std::fclose(f);
+            }
+            a.perfFrames = 0; a.perfRenderMs = a.perfPresentMs = 0; a.perfStart = now2;
+        }
+    }
 
     a.in.pressed = false;
     a.in.wheel = 0;
@@ -189,8 +220,14 @@ void renderFrame(App& a) {
     if (a.ui->takeDirty()) a.needSave = true;
     for (const auto& b : a.ui->takeBalloons()) balloon(a, b);
 
-    const bool active = open || (nowMs - a.lastActivity) < 2500;
-    setFrameInterval(a, active ? 33 : 66);
+    // Frame rate follows need: fast right after input, medium while something moves or a panel is open, slow when the
+    // strip is just sitting there.
+    const bool recent = (nowMs - a.lastActivity) < 2500;
+    UINT want;
+    if (recent) want = 33;
+    else if (open) want = a.ui->effectsActive() ? 50 : 100;       // static panels barely need redrawing
+    else want = a.ui->animating() ? 125 : 500;                    // walking friends: 8 fps; sitting still: 2 fps
+    setFrameInterval(a, want);
 }
 
 // "Hidden" means a fully transparent, click-through frame. The window itself stays alive, so the global hotkey and
@@ -218,7 +255,7 @@ void slowTick(App& a) {
         a.lastDay = now.day;
         a.needSave = true;
     }
-    if (++a.slowCount % 5 == 0) {
+    {
         const auto msgs = gf::pollReminders(a.game, now);
         if (!msgs.empty()) {
             std::string text;
@@ -235,6 +272,13 @@ void slowTick(App& a) {
         SetWindowPos(a.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
     if (a.needSave && GetTickCount64() - a.lastSave > 3000) saveNow(a);
+    // Hand idle memory back to Windows a while after the panel closes.
+    if (a.ui->panelOpen()) { a.panelClosedSince = 0; a.trimmed = false; }
+    else if (!a.panelClosedSince) a.panelClosedSince = GetTickCount64();
+    else if (!a.trimmed && GetTickCount64() - a.panelClosedSince > 15000) {
+        SetProcessWorkingSetSize(GetCurrentProcess(), static_cast<SIZE_T>(-1), static_cast<SIZE_T>(-1));
+        a.trimmed = true;
+    }
 }
 
 void toggleVisible(App& a) {
@@ -245,6 +289,7 @@ void toggleVisible(App& a) {
         renderFrame(a);
     } else {
         presentBlank(a);
+        setFrameInterval(a, 1000);  // only a once-a-second check for a finishing focus session
         if (!a.hintShown && !std::getenv("GF_NOHINT")) {
             a.hintShown = true;
             balloon(a, a.hotkeyOk ? "Hidden. Press Ctrl+Shift+\u00d4 (or click the tray icon) to show it again." : "Hidden. Click the tray icon to show it again.");
@@ -462,7 +507,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE, LPSTR, int) {
     if (!app.hotkeyOk) balloon(app, "Couldn't register Ctrl+Shift+\u00d4 (another app may be using it). Use the tray icon to hide or show the window.");
     ShowWindow(app.hwnd, SW_SHOWNA);
     SetTimer(app.hwnd, TIMER_FRAME, app.frameInterval, nullptr);
-    SetTimer(app.hwnd, TIMER_SLOW, 1000, nullptr);
+    SetTimer(app.hwnd, TIMER_SLOW, 5000, nullptr);
     app.lastSave = GetTickCount64();
     renderFrame(app);
 

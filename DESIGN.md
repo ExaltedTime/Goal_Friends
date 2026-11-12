@@ -1,4 +1,4 @@
-# Goal Friends — Design Doc (draft v0.9)
+# Goal Friends — Design Doc (draft v1.0)
 
 _Status: working prototype built (see section 11). Personal use, Windows laptop, native C++.
 Companion file: [ROSTER.md](ROSTER.md) (150 creatures and their moves)._
@@ -330,3 +330,23 @@ pixel = 2 logical px, snapped to whole device pixels so it stays crisp at 125% a
 - Balance check over 6000 simulated battles: mean 50%, standard deviation about 10 points, strongest friend at 76%. Win
   rate rises with evolution stage, as intended.
 - The Dex scrolls.
+
+## 15. Resource usage (v1.0)
+
+Measured under Wine on a 1400-pixel-wide virtual screen (relative numbers: Wine's Direct2D is much slower than Windows').
+
+| | before | after |
+|---|---|---|
+| draw time per frame, strip only | 145 ms | 4 ms |
+| draw time per frame, panel open | 140 ms | 11 ms |
+| frame rate, strip (walking / still) | 6.6 fps (always) | 8 fps / 2 fps |
+| CPU, strip only | 194% of a core | 13% |
+| CPU, panel open | 191% | 45% |
+| CPU, hidden | 1.1% | 0.5% |
+
+What mattered:
+1. The ground's ~2,500 rectangle draws per frame were 98% of the cost. It is now cached in a bitmap.
+2. Frames are only drawn as often as something needs: input, movement, battle effects, or a clock tick.
+3. Text layouts are cached; task counts are computed once a second instead of several times per frame.
+4. Hidden mode draws nothing and only checks once a second whether a focus session finished.
+5. Memory is trimmed 15 seconds after the panel closes, and the window shrinks back to strip size.
