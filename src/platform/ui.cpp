@@ -320,80 +320,90 @@ void Ui::frame(gfx::Gfx& gx, float W, float H, Input& in, double dt, long long n
 // World strip
 // ---------------------------------------------------------------------------
 
-void Ui::drawGround(float gy, float gh) {
-    auto hsh = [](unsigned x) { x ^= x >> 16; x *= 0x7feb352du; x ^= x >> 15; x *= 0x846ca68bu; x ^= x >> 16; return x; };
-    const double hour = now_.minute / 60.0;
-    const bool night = hour < 6 || hour >= 20, dusk = !night && (hour < 8 || hour >= 18);
-    gfx::Color soilTop, soilBot, gA, gB, gC;
-    if (night) { soilTop = rgba(40, 52, 78); soilBot = rgba(20, 24, 42); gA = rgba(52, 96, 96); gB = rgba(66, 116, 108); gC = rgba(38, 74, 84); }
-    else if (dusk) { soilTop = rgba(128, 108, 84); soilBot = rgba(82, 62, 56); gA = rgba(160, 156, 88); gB = rgba(188, 170, 98); gC = rgba(130, 134, 78); }
-    else { soilTop = rgba(104, 158, 88); soilBot = rgba(112, 84, 60); gA = rgba(88, 172, 84); gB = rgba(124, 200, 102); gC = rgba(62, 140, 72); }
-    auto lerp = [](gfx::Color a, gfx::Color b, float t) { return gfx::Color{a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1.f}; };
+namespace {
+// Grass palette keyframes by hour; colours blend smoothly between them.
+struct GrassPal { gfx::Color g1, g2, g3, g4; };
+struct GrassKey { float hour; GrassPal pal; };
+gfx::Color rgbf(int r, int g, int b) { return gfx::Color{r / 255.f, g / 255.f, b / 255.f, 1.f}; }
+const GrassPal kNight{rgbf(76, 142, 140), rgbf(52, 104, 112), rgbf(38, 76, 92), rgbf(30, 58, 78)};
+const GrassPal kDawn{rgbf(190, 214, 128), rgbf(150, 186, 112), rgbf(112, 150, 98), rgbf(92, 126, 88)};
+const GrassPal kDay{rgbf(132, 210, 104), rgbf(88, 172, 84), rgbf(62, 136, 72), rgbf(50, 112, 62)};
+const GrassPal kNoon{rgbf(146, 220, 112), rgbf(98, 184, 88), rgbf(68, 146, 76), rgbf(54, 120, 64)};
+const GrassPal kDusk{rgbf(214, 190, 104), rgbf(170, 156, 86), rgbf(126, 118, 76), rgbf(98, 92, 64)};
 
-    // translucent layered soil
-    const int bands = 7;
-    const float bh = (gh - 3) / bands;
-    for (int i = 0; i < bands; ++i) {
-        const float t = static_cast<float>(i) / (bands - 1);
-        gx_->fillRect(0, gy + 3 + static_cast<float>(i) * bh, W_, bh + 1, gfx::withAlpha(lerp(soilTop, soilBot, t), 0.36f + 0.22f * t));
-    }
-    // dirt speckles and pebbles
-    for (float x = 0; x < W_; x += 9) {
-        const unsigned h = hsh(static_cast<unsigned>(x) * 7 + 3);
-        const float y = gy + 12 + static_cast<float>(h % static_cast<unsigned>(gh - 16));
-        const bool light = (h >> 8) & 1;
-        gx_->fillRect(x + static_cast<float>((h >> 4) % 6), y, 2, 2, light ? rgba(255, 255, 255, 40) : rgba(0, 0, 0, 55));
-    }
-    for (float x = 20; x < W_; x += 83) {
-        const unsigned h = hsh(static_cast<unsigned>(x) * 13 + 5);
-        const float px = x + static_cast<float>(h % 40), py = gy + 16 + static_cast<float>((h >> 6) % static_cast<unsigned>(gh - 24));
-        gx_->fillEllipse(px, py, 3.f + static_cast<float>(h % 3), 2.f, rgba(150, 150, 160, 120));
-        gx_->fillEllipse(px - 1, py - 1, 1.5f, 1.f, rgba(220, 220, 230, 110));
-    }
-    // soft shadow under the grass line
-    gx_->fillRect(0, gy + 3, W_, 5, rgba(0, 0, 0, 38));
+gfx::Color mixc(gfx::Color a, gfx::Color b, float t) { return gfx::Color{a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1.f}; }
 
-    // bushes
-    for (float x = 140; x < W_; x += 263) {
-        const unsigned h = hsh(static_cast<unsigned>(x) * 31 + 9);
-        const float bx = x + static_cast<float>(h % 80);
-        const gfx::Color bc = night ? rgba(34, 64, 66, 215) : rgba(52, 126, 66, 215);
-        gx_->fillEllipse(bx, gy + 1, 15, 9, bc);
-        gx_->fillEllipse(bx - 9, gy + 3, 9, 6, gfx::withAlpha(lerp(bc, gB, 0.2f), 0.85f));
-        gx_->fillEllipse(bx + 10, gy + 3, 9, 6, bc);
-        gx_->fillEllipse(bx - 3, gy - 3, 5, 3, rgba(255, 255, 255, 40));
-    }
-    // grass tufts along the edge
-    for (float x = -2; x < W_; x += 4) {
-        const unsigned h = hsh(static_cast<unsigned>(x + 5) * 17);
-        const float height = 4.f + static_cast<float>(h % 7);
-        const gfx::Color c = (h >> 5) % 3 == 0 ? gA : (h >> 5) % 3 == 1 ? gB : gC;
-        const float lean = static_cast<float>(static_cast<int>((h >> 9) % 3) - 1);
-        gx_->fillRect(x, gy - height + 4, 2, height, gfx::withAlpha(c, 0.92f));
-        gx_->fillRect(x + lean, gy - height + 2, 2, 3, gfx::withAlpha(c, 0.92f));
-        if ((h >> 12) % 5 == 0) gx_->fillRect(x + 2, gy - height + 6, 1, height - 3, gfx::withAlpha(gB, 0.8f));
-    }
-    // flowers by day
-    if (!night) {
-        const gfx::Color petals[] = {rgba(255, 120, 150), rgba(255, 226, 90), rgba(255, 255, 255), rgba(170, 140, 255)};
-        for (float x = 30; x < W_; x += 97) {
-            const unsigned h = hsh(static_cast<unsigned>(x) * 23 + 1);
-            const float fx = x + static_cast<float>(h % 60);
-            gx_->fillRect(fx, gy - 7, 1, 8, rgba(60, 130, 60, 230));
-            const gfx::Color pc = petals[(h >> 4) % 4];
-            gx_->fillRect(fx - 2, gy - 10, 2, 2, pc); gx_->fillRect(fx + 1, gy - 10, 2, 2, pc);
-            gx_->fillRect(fx - 1, gy - 12, 2, 2, pc); gx_->fillRect(fx - 1, gy - 8, 2, 2, pc);
-            gx_->fillRect(fx - 1, gy - 10, 2, 2, rgba(255, 210, 80));
+GrassPal grassAt(double hour) {
+    static const GrassKey keys[] = {{0.f, kNight}, {5.5f, kNight}, {6.5f, kDawn}, {9.f, kDay}, {13.f, kNoon}, {17.f, kDay}, {18.5f, kDusk}, {20.5f, kNight}, {24.f, kNight}};
+    const int n = static_cast<int>(sizeof(keys) / sizeof(keys[0]));
+    for (int i = 0; i + 1 < n; ++i) {
+        if (hour >= keys[i].hour && hour <= keys[i + 1].hour) {
+            const float t = (static_cast<float>(hour) - keys[i].hour) / (keys[i + 1].hour - keys[i].hour);
+            return {mixc(keys[i].pal.g1, keys[i + 1].pal.g1, t), mixc(keys[i].pal.g2, keys[i + 1].pal.g2, t),
+                    mixc(keys[i].pal.g3, keys[i + 1].pal.g3, t), mixc(keys[i].pal.g4, keys[i + 1].pal.g4, t)};
         }
-    } else {
-        // fireflies
-        for (int i = 0; i < 10; ++i) {
-            const unsigned h = hsh(static_cast<unsigned>(i) * 977 + 11);
-            const float fx = static_cast<float>(h % static_cast<unsigned>(std::max(1.f, W_)));
-            const float fy = gy - 10.f - static_cast<float>((h >> 10) % 50) + std::sin(animT_ * 1.3f + static_cast<float>(i)) * 4.f;
-            const float a = 0.35f + 0.65f * std::max(0.f, std::sin(animT_ * 2.f + static_cast<float>(i) * 1.7f));
-            gx_->fillEllipse(fx, fy, 5, 5, rgba(255, 240, 120, static_cast<int>(40 * a)));
-            gx_->fillEllipse(fx, fy, 1.6f, 1.6f, rgba(255, 250, 170, static_cast<int>(255 * a)));
+    }
+    return kNight;
+}
+
+// One ground cell is one art pixel: the same size as a sprite pixel (2 logical px at 100% scale), snapped to whole
+// device pixels so nothing blurs at 125% or 150% display scaling.
+float groundCell(const gfx::Gfx& g) {
+    const float scale = g.scale();
+    return std::max(1.f, std::round(2.f * scale)) / scale;
+}
+}  // namespace
+
+void Ui::drawGround(float gy, float gh) {
+    const float cell = groundCell(*gx_);
+    const double hour = now_.minute / 60.0;
+    const GrassPal P = grassAt(hour);
+    const int cols = static_cast<int>(std::ceil(W_ / cell)) + 1;
+    const int rows = std::max(4, static_cast<int>(gh / cell));
+    static const int kBlade[8] = {2, 3, 2, 1, 3, 2, 1, 2};
+    auto cellRect = [&](int c, int r, int w, int h, gfx::Color col, float a) { gx_->fillRect(static_cast<float>(c) * cell, gy + static_cast<float>(r) * cell, static_cast<float>(w) * cell, static_cast<float>(h) * cell, gfx::withAlpha(col, a)); };
+
+    // Body: three flat layers, each a little darker and more see-through, with a checker dither where they meet.
+    auto bandOf = [&](int r) { return r <= 2 ? 0 : r <= 10 ? 1 : 2; };
+    const gfx::Color bandCol[3] = {P.g2, P.g3, P.g4};
+    const float bandAlpha[3] = {0.80f, 0.66f, 0.52f};
+    int r = 1;
+    while (r <= rows) {
+        const int b = bandOf(r);
+        int r2 = r;
+        while (r2 + 1 <= rows && bandOf(r2 + 1) == b) ++r2;
+        cellRect(0, r, cols, r2 - r + 1, bandCol[b], bandAlpha[b]);
+        r = r2 + 1;
+    }
+    // the highlight row under the blades, then dithered seams between layers
+    cellRect(0, 0, cols, 1, P.g2, 0.80f);
+    for (int c = 0; c < cols; c += 2) {
+        cellRect(c, 3, 1, 1, P.g3, 0.80f);          // seam into layer 2
+        cellRect(c + 1, 11, 1, 1, P.g4, 0.66f);     // seam into layer 3
+    }
+    // Tufts: a tiny repeating "^" motif on a diagonal lattice, lighter than the layer it sits on.
+    for (int row = 2; row + 1 <= rows; row += 3) {
+        const gfx::Color base = bandCol[bandOf(row)];
+        const gfx::Color light = mixc(base, P.g1, 0.24f);
+        for (int c = (row * 5) % 14; c < cols; c += 14) {
+            cellRect(c, row, 1, 1, light, 0.9f);
+            cellRect(c - 1, row + 1, 1, 1, light, 0.8f);
+            cellRect(c + 1, row + 1, 1, 1, light, 0.8f);
+        }
+    }
+    // Blades along the top edge: a repeating 8-column pattern, lightest tip.
+    for (int c = 0; c < cols; ++c) {
+        const int h = kBlade[c % 8];
+        for (int k = 0; k < h; ++k) cellRect(c, -k, 1, 1, k == h - 1 ? P.g1 : P.g2, k == h - 1 ? 0.92f : 0.80f);
+    }
+    // Sparse flowers by day (every 24 cells), in four colours.
+    if (hour >= 6.0 && hour < 20.0) {
+        const gfx::Color petals[4] = {rgbf(255, 110, 150), rgbf(255, 226, 90), rgbf(255, 255, 255), rgbf(150, 190, 255)};
+        for (int c = 10, i = 0; c < cols - 1; c += 24, ++i) {
+            for (int k = 1; k <= 3; ++k) cellRect(c, -k, 1, 1, P.g3, 0.95f);
+            const gfx::Color pc = petals[i % 4];
+            cellRect(c - 1, -4, 1, 1, pc, 1.f); cellRect(c + 1, -4, 1, 1, pc, 1.f); cellRect(c, -5, 1, 1, pc, 1.f);
+            cellRect(c, -4, 1, 1, i % 3 ? rgbf(255, 214, 90) : rgbf(255, 255, 255), 1.f);
         }
     }
 }
@@ -422,7 +432,9 @@ void Ui::drawWorld(float dt) {
         const gf::Friend* f = gf::findFriend(g_, w.friendId);
         if (!f) continue;
         const gf::Species& sp = gf::species(f->species);
-        const float size = sp.stage == 3 ? 72.f : 48.f;
+        const float cell = groundCell(*gx_);
+        const float size = 24.f * cell;  // every friend uses the same sprite-pixel size as the ground
+        (void)sp;
         if (!sleepy) {
             if (w.pause > 0) w.pause -= dt;
             else {
@@ -439,9 +451,11 @@ void Ui::drawWorld(float dt) {
             if (w.hop <= 0) { w.hop = 0; w.hopV = 0; }
         }
         const int frame = sleepy ? 1 : static_cast<int>(animT_ * 2.5f + static_cast<float>(w.friendId)) % 2;
-        const float bob = sleepy ? 0.f : (frame ? 1.5f : 0.f);
-        const float sx = w.x - size / 2, sy = gy + 12 - size - bob - w.hop;
-        gx_->fillEllipse(w.x, gy + 11, size * 0.36f, 3.5f, rgba(0, 0, 0, 70));
+        const float bob = sleepy ? 0.f : (frame ? cell : 0.f);
+        const float sx = std::round((w.x - size / 2) / cell) * cell, sy = gy - 20.f * cell - bob - w.hop;
+        // small oval shadow on the ground grid
+        gx_->fillRect(sx + 5.f * cell, gy + 2.f * cell, 14.f * cell, cell, rgba(0, 0, 0, 52));
+        gx_->fillRect(sx + 7.f * cell, gy + 3.f * cell, 10.f * cell, cell, rgba(0, 0, 0, 38));
         gx_->sprite(gfx::SpriteKind::Species, f->species, frame, w.dir < 0, sx, sy, size);
         if (sleepy) gx_->text("z z", w.x - 10, sy - 6, 40, 16, 12, kText, TF_BOLD);
         if (!lock && !blocked_ && !consumed_ && in_->pressed && hover(sx, sy, size, size) && !(panel_.w > 0 && tab_ != Tab::None && hover(panel_.x, panel_.y, panel_.w, panel_.h))) {

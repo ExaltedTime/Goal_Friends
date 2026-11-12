@@ -67,7 +67,9 @@ std::string toUtf8(const std::wstring& w) {
 tu::Time localNow() {
     SYSTEMTIME st;
     GetLocalTime(&st);
-    return tu::Time{tu::daysFromCivil(st.wYear, st.wMonth, st.wDay), st.wHour * 60 + st.wMinute};
+    int minute = st.wHour * 60 + st.wMinute;
+    if (const char* h = std::getenv("GF_HOUR")) minute = static_cast<int>(std::atof(h) * 60.0) % 1440;  // test override: fake the hour of day
+    return tu::Time{tu::daysFromCivil(st.wYear, st.wMonth, st.wDay), minute};
 }
 
 void saveNow(App& a) {

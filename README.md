@@ -59,6 +59,7 @@ the whole roster to catch crashes and degenerate loops.
 
 - `GF_TRACE=<file>`: log renderer errors to a file.
 - `GF_FONT=<family>`: override the UI font (default Segoe UI).
+- `GF_HOUR=<hours>`: pretend it is this hour of the day (e.g. `GF_HOUR=18.5`) to preview the ground's day/night colours.
 
 ## Prebuilt exe
 
