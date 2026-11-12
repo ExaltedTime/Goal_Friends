@@ -115,7 +115,16 @@ void setNoActivate(App& a, bool noActivate) {
     }
 }
 
-void refreshWorkArea(App& a) { SystemParametersInfoW(SPI_GETWORKAREA, 0, &a.work, 0); }
+// The area the strip lives in. With an auto-hiding taskbar the work area reaches the very bottom of the screen, and a window
+// that covers the last pixel row stops the mouse from touching the edge, so the taskbar can never slide up. In that case we
+// stop one pixel short of the screen edge.
+void refreshWorkArea(App& a) {
+    SystemParametersInfoW(SPI_GETWORKAREA, 0, &a.work, 0);
+    APPBARDATA abd = {};
+    abd.cbSize = sizeof(abd);
+    const bool autoHide = (SHAppBarMessage(ABM_GETSTATE, &abd) & ABS_AUTOHIDE) != 0;
+    if (autoHide && a.work.bottom >= GetSystemMetrics(SM_CYSCREEN)) a.work.bottom = GetSystemMetrics(SM_CYSCREEN) - 1;
+}
 
 void setFrameInterval(App& a, UINT ms) {
     if (a.frameInterval == ms) return;
@@ -232,6 +241,7 @@ void presentBlank(App& a) {
 }
 
 void slowTick(App& a) {
+    refreshWorkArea(a);   // picks up taskbar auto-hide being switched on or off
     const tu::Time now = localNow();
     if (now.day != a.lastDay) {
         gf::sweep(a.game, now);
